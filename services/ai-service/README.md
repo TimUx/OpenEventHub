@@ -1,4 +1,9 @@
-# OpenEventHub service placeholder — ai-service
+# ai-service
 
-Owned by: AI Engine milestone (M2, M4)
-See docs/EVENT_INTELLIGENCE_ENGINE.md and docs/AI_CONFIGURATION.md
+OpenEventHub `ai-service` service container.
+
+- Runtime: NestJS + `@openeventhub/service-runtime`
+- Probes: `/health`, `/ready`, `/metrics`
+- Default port: `3004`
+
+Domain features arrive in later milestones.

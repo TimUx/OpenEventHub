@@ -1,6 +1,6 @@
 {
   "name": "openeventhub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "AI-powered open-source Event Intelligence Platform",
   "license": "Apache-2.0",
@@ -8,7 +8,8 @@
     "node": ">=20.11.0"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "services/*"
   ],
   "scripts": {
     "lint": "eslint . --max-warnings=0",
@@ -18,14 +19,17 @@
     "typecheck": "tsc -b --pretty false",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "validate:compose": "docker compose -f docker/compose/docker-compose.yml --env-file .env.example config --quiet",
+    "validate:compose": "docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env.example config --quiet",
     "validate:stack": "docker compose -f docker/stack/docker-stack.yml --env-file .env.example config --quiet",
     "infra:up": "docker compose -f docker/compose/docker-compose.yml --env-file .env up -d",
-    "infra:down": "docker compose -f docker/compose/docker-compose.yml --env-file .env down",
-    "infra:ps": "docker compose -f docker/compose/docker-compose.yml --env-file .env ps",
-    "infra:logs": "docker compose -f docker/compose/docker-compose.yml --env-file .env logs -f --tail=200",
+    "infra:down": "docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env down",
+    "infra:ps": "docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env ps",
+    "infra:logs": "docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env logs -f --tail=200",
     "infra:health": "bash scripts/check-infra-health.sh",
     "infra:bootstrap": "bash scripts/bootstrap-infra.sh",
+    "apps:up": "docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env up -d --build",
+    "apps:health": "bash scripts/check-apps-health.sh",
+    "stack:up": "npm run apps:up && npm run apps:health",
     "tools:lint": "bash scripts/run-in-node.sh 'npm ci && npm run lint'",
     "tools:test": "bash scripts/run-in-node.sh 'npm ci && npm run build && npm test'",
     "tools:check": "bash scripts/run-in-node.sh 'npm ci && npm run format:check && npm run lint && npm run typecheck && npm test'"

@@ -41,8 +41,8 @@ jobs:
       - name: Shared package tests
         run: npm run test --workspace=@openeventhub/shared
 
-      - name: Validate Docker Compose file
+      - name: Validate Docker Compose files
         run: npm run validate:compose
 
       - name: Validate Docker Stack file
-        run: docker compose -f docker/stack/docker-stack.yml --env-file .env.example config --quiet
+        run: npm run validate:stack

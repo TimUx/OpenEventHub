@@ -12,64 +12,55 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 1 — Foundation (`v0.1.0`)** is in place:
+**Milestone 2 — Architecture Skeleton (`v0.2.0`)**
 
-- Documentation-complete platform specification in `docs/`
-- Container-first infrastructure via Docker Compose (Traefik, PostgreSQL, Redis, MinIO)
-- Docker Stack skeleton for Swarm
-- Shared TypeScript contracts (`@openeventhub/shared`)
-- CI, coding standards, Cursor rules, ADR process
+- Infrastructure: Traefik, PostgreSQL, Redis, MinIO
+- All application containers running with `/health`, `/ready`, `/metrics`
+- Shared runtime (`@openeventhub/service-runtime`) and contracts (`@openeventhub/shared`)
 
-Application services (API, crawler, AI, frontend, admin) start in **Milestone 2**.
-See the full plan in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Domain features (data model, AI, crawler plugins, full API) start in **Milestone 3+**.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-## Quick start (infrastructure)
+## Quick start
 
 Requirements: Docker Engine + Docker Compose v2.
 
 ```bash
 cp .env.example .env
+npm run stack:up
+```
+
+Or step by step:
+
+```bash
 npm run infra:bootstrap
-# or: bash scripts/bootstrap-infra.sh
+npm run apps:up
+npm run apps:health
 ```
 
-Check status:
+| Entry               | URL (defaults)                                  |
+| ------------------- | ----------------------------------------------- |
+| Frontend            | http://localhost:8088                           |
+| API                 | http://api.localhost:8088                       |
+| Admin               | http://admin.localhost:8088                     |
+| Traefik dashboard   | http://localhost:18080                          |
+| PostgreSQL (host)   | `localhost:15432`                               |
+| Redis (host)        | `localhost:16379`                               |
+| MinIO API / Console | http://localhost:19000 / http://localhost:19001 |
 
-```bash
-npm run infra:ps
-npm run infra:health
-```
-
-Stop:
-
-```bash
-npm run infra:down
-```
-
-| Service      | Default host endpoint (see `.env`) |
-| ------------ | ---------------------------------- |
-| Traefik      | http://localhost:18080 (dashboard) |
-| Traefik HTTP | http://localhost:8088              |
-| PostgreSQL   | `localhost:15432`                  |
-| Redis        | `localhost:16379`                  |
-| MinIO API    | http://localhost:19000             |
-| MinIO UI     | http://localhost:19001             |
-
-Containers reach each other via Docker DNS (`postgres`, `redis`, `minio`, …), not these host ports.
-
-Change credentials in `.env` before any shared or production use.
+Containers reach each other via Docker DNS (`postgres`, `redis`, `minio`, `api`, …).
 
 ## Repository layout
 
 ```
-architecture/     ADRs
+architecture/     ADRs + milestone reviews
 docker/           Compose + Stack + DB init
 docs/             Binding product & engineering docs
 packages/         Shared libraries
-services/         Deployable service containers (placeholders until M2)
+services/         Deployable service containers
 plugins/          Source connector plugins (from M5)
 prompts/          Central LLM prompts (from M4)
-scripts/          Operational helpers
+scripts/          Bootstrap and ops helpers
 ```
 
 ## Core principles
@@ -79,8 +70,6 @@ scripts/          Operational helpers
 - Documentation is the source of truth
 
 ## Documentation
-
-Start here:
 
 - [Vision](docs/VISION.md)
 - [Architecture](docs/ARCHITECTURE.md)

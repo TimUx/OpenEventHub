@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/coverage/**',
       'docker/data/**',
       '**/.next/**',
+      '**/next-env.d.ts',
     ],
   },
   eslint.configs.recommended,
@@ -18,7 +19,7 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        project: ['./tsconfig.eslint.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -42,13 +43,6 @@ export default tseslint.config(
   },
   {
     files: ['**/*.test.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./packages/*/tsconfig.eslint.json'],
-        projectService: false,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     rules: {
       '@typescript-eslint/no-floating-promises': 'off',
     },

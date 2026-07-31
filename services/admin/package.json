@@ -1,0 +1,24 @@
+{
+  "name": "@openeventhub/admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenEventHub admin center shell",
+  "scripts": {
+    "dev": "next dev -p 3101",
+    "build": "next build",
+    "start": "next start -p 3101",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test src/probes.test.ts"
+  },
+  "dependencies": {
+    "@openeventhub/shared": "0.1.0",
+    "next": "^15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.11",
+    "@types/react-dom": "^19.0.4",
+    "tsx": "^4.19.3"
+  }
+}

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-07-31
+
+### Added
+
+- `@openeventhub/service-runtime` NestJS module for `/health`, `/ready`, `/metrics`
+- Backend service shells: api, scheduler, worker, crawler, ai-service, ocr-service, search
+- Frontend and admin Next.js shells with the same probe contracts
+- Docker Compose apps overlay and Traefik routes for api/frontend/admin
+- ADR 0002: service shell pattern
+- Application health script (`npm run apps:health`)
+
 ## [0.1.0] - 2026-07-31
 
 ### Added

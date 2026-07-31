@@ -1,4 +1,9 @@
-# OpenEventHub service placeholder — crawler
+# crawler
 
-Owned by: Crawler Framework milestone (M2, M5)
-Runtime for Playwright / Cheerio based plugins.
+OpenEventHub `crawler` service container.
+
+- Runtime: NestJS + `@openeventhub/service-runtime`
+- Probes: `/health`, `/ready`, `/metrics`
+- Default port: `3003`
+
+Domain features arrive in later milestones.

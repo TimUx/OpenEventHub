@@ -1,0 +1,176 @@
+# Application services (Milestone 2+)
+# Usage:
+#   docker compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose.apps.yml --env-file .env up -d --build
+
+x-nestjs-service: &nestjs-service
+  restart: unless-stopped
+  networks:
+    - edge
+    - internal
+  environment: &nestjs-env
+    NODE_ENV: ${NODE_ENV:-development}
+    SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT_INTERNAL: 5432
+    REDIS_HOST: redis
+    REDIS_PORT_INTERNAL: 6379
+    MINIO_HOST: minio
+    MINIO_PORT_INTERNAL: 9000
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  api:
+    <<: *nestjs-service
+    image: openeventhub/api:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    container_name: oeh-api
+    environment:
+      <<: *nestjs-env
+      PORT: 3000
+      SERVICE_NAME: api
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.${DOMAIN:-localhost}`)
+      - traefik.http.routers.api.entrypoints=web
+      - traefik.http.services.api.loadbalancer.server.port=3000
+
+  scheduler:
+    <<: *nestjs-service
+    image: openeventhub/scheduler:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/scheduler/Dockerfile
+    container_name: oeh-scheduler
+    environment:
+      <<: *nestjs-env
+      PORT: 3001
+      SERVICE_NAME: scheduler
+
+  worker:
+    <<: *nestjs-service
+    image: openeventhub/worker:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/worker/Dockerfile
+    container_name: oeh-worker
+    environment:
+      <<: *nestjs-env
+      PORT: 3002
+      SERVICE_NAME: worker
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  crawler:
+    <<: *nestjs-service
+    image: openeventhub/crawler:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/crawler/Dockerfile
+    container_name: oeh-crawler
+    environment:
+      <<: *nestjs-env
+      PORT: 3003
+      SERVICE_NAME: crawler
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  ai-service:
+    <<: *nestjs-service
+    image: openeventhub/ai-service:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/ai-service/Dockerfile
+    container_name: oeh-ai-service
+    environment:
+      <<: *nestjs-env
+      PORT: 3004
+      SERVICE_NAME: ai-service
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  ocr-service:
+    <<: *nestjs-service
+    image: openeventhub/ocr-service:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/ocr-service/Dockerfile
+    container_name: oeh-ocr-service
+    environment:
+      <<: *nestjs-env
+      PORT: 3005
+      SERVICE_NAME: ocr-service
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  search:
+    <<: *nestjs-service
+    image: openeventhub/search:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/search/Dockerfile
+    container_name: oeh-search
+    environment:
+      <<: *nestjs-env
+      PORT: 3006
+      SERVICE_NAME: search
+
+  frontend:
+    image: openeventhub/frontend:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/frontend/Dockerfile
+    container_name: oeh-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+      PORT: 3100
+      HOSTNAME: 0.0.0.0
+    networks:
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`) || Host(`www.${DOMAIN:-localhost}`)
+      - traefik.http.routers.frontend.entrypoints=web
+      - traefik.http.services.frontend.loadbalancer.server.port=3100
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    image: openeventhub/admin:${SERVICE_VERSION:-0.1.0}
+    build:
+      context: ../..
+      dockerfile: services/admin/Dockerfile
+    container_name: oeh-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+      PORT: 3101
+      HOSTNAME: 0.0.0.0
+    networks:
+      - edge
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.admin.rule=Host(`admin.${DOMAIN:-localhost}`)
+      - traefik.http.routers.admin.entrypoints=web
+      - traefik.http.services.admin.loadbalancer.server.port=3101
+    depends_on:
+      api:
+        condition: service_healthy

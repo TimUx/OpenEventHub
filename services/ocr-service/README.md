@@ -1,4 +1,9 @@
-# OpenEventHub service placeholder — ocr-service
+# ocr-service
 
-Owned by: Crawler Framework milestone (M2, M5)
-See docs/OCR_PIPELINE.md
+OpenEventHub `ocr-service` service container.
+
+- Runtime: NestJS + `@openeventhub/service-runtime`
+- Probes: `/health`, `/ready`, `/metrics`
+- Default port: `3005`
+
+Domain features arrive in later milestones.

@@ -1,4 +1,4 @@
-# OpenEventHub service placeholder — admin
+# OpenEventHub admin center
 
-Owned by: Administration milestone (M2, M8)
-Container: Next.js admin center
+Milestone 2 provides the container shell with `/health`, `/ready`, `/metrics`.
+Full admin features arrive in Milestone 8.

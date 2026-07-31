@@ -1,16 +1,17 @@
 # Docker Compose
 
-OpenEventHub runs infrastructure and (from M2) application services with Docker Compose.
+OpenEventHub runs infrastructure and application services with Docker Compose.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `docker/compose/docker-compose.yml` | Development / single-node Compose |
+| `docker/compose/docker-compose.yml` | Infrastructure (Traefik, Postgres, Redis, MinIO) |
+| `docker/compose/docker-compose.apps.yml` | Application service containers |
 | `docker/stack/docker-stack.yml` | Swarm Stack skeleton |
 | `.env.example` | Environment template |
 
-## Core services (M1)
+## Core infrastructure
 
 - traefik
 - postgres
@@ -18,23 +19,24 @@ OpenEventHub runs infrastructure and (from M2) application services with Docker 
 - minio
 - minio-init (bucket bootstrap)
 
-Application services (frontend, admin, api, scheduler, worker, crawler, ai-service, ocr-service, search) are added in Milestone 2+.
+## Application services (M2+)
 
-## Requirements per service
+- frontend, admin, api, scheduler, worker, crawler, ai-service, ocr-service, search
 
-Each long-running service has:
-
-- healthcheck
-- restart policy
-- persistent volumes where needed
-- environment-based configuration
+Each long-running service has healthcheck, restart policy, and env-based config.
 
 ## Commands
 
 ```bash
 cp .env.example .env
-npm run infra:bootstrap
-npm run infra:health
-npm run infra:logs
+npm run infra:bootstrap   # infrastructure only
+npm run apps:up           # infra + apps (build)
+npm run apps:health
 npm run infra:down
 ```
+
+Traefik (default host ports from `.env.example`):
+
+- Frontend: http://localhost:8088 (Host `localhost`)
+- API: http://api.localhost:8088
+- Admin: http://admin.localhost:8088

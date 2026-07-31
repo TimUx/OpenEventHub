@@ -63,7 +63,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M2 — Architecture Skeleton (`Package 02`) · `planned`
+### M2 — Architecture Skeleton (`Package 02`) · `done`
 
 **Goal:** Service boundaries as runnable containers with health/ready/metrics and shared libraries — still without domain features.
 
