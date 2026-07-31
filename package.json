@@ -1,6 +1,6 @@
 {
   "name": "openeventhub",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "AI-powered open-source Event Intelligence Platform",
   "license": "Apache-2.0",
@@ -32,7 +32,11 @@
     "stack:up": "npm run apps:up && npm run apps:health",
     "tools:lint": "bash scripts/run-in-node.sh 'npm ci && npm run lint'",
     "tools:test": "bash scripts/run-in-node.sh 'npm ci && npm run build && npm test'",
-    "tools:check": "bash scripts/run-in-node.sh 'npm ci && npm run format:check && npm run lint && npm run typecheck && npm test'"
+    "tools:check": "bash scripts/run-in-node.sh 'npm ci && npm run db:generate && npm run format:check && npm run lint && npm run typecheck && npm test'",
+    "db:generate": "npm run generate --workspace=@openeventhub/database",
+    "db:migrate": "npm run migrate --workspace=@openeventhub/database",
+    "db:seed": "npm run seed --workspace=@openeventhub/database",
+    "db:studio": "npm run studio --workspace=@openeventhub/database"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

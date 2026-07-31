@@ -1,0 +1,378 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  draft
+  pending_moderation
+  published
+  archived
+  rejected
+}
+
+enum SourceStatus {
+  healthy
+  warning
+  failed
+  disabled
+}
+
+enum CrawlJobStatus {
+  pending
+  queued
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum CrawlResultStatus {
+  success
+  failed
+  skipped
+  partial
+}
+
+enum ModerationStatus {
+  pending
+  approved
+  rejected
+  escalated
+}
+
+enum SubmissionType {
+  event
+  source
+  correction
+}
+
+enum SubmissionStatus {
+  pending
+  processing
+  accepted
+  rejected
+}
+
+enum MediaType {
+  image
+  video
+  document
+  audio
+  other
+}
+
+enum RegionType {
+  country
+  state
+  district
+  municipality
+  city
+  suburb
+}
+
+model Event {
+  id              String      @id @default(uuid()) @db.Uuid
+  slug            String      @unique
+  title           String
+  summary         String?
+  description     String?     @db.Text
+  startAt         DateTime    @map("start_at")
+  endAt           DateTime?   @map("end_at")
+  confidenceScore Decimal     @default(0) @map("confidence_score") @db.Decimal(5, 4)
+  status          EventStatus @default(draft)
+  venueId         String?     @map("venue_id") @db.Uuid
+  organizerId     String?     @map("organizer_id") @db.Uuid
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  venue           Venue?           @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  organizer       Organizer?       @relation(fields: [organizerId], references: [id], onDelete: SetNull)
+  versions        EventVersion[]
+  eventSources    EventSource[]
+  categories      EventCategory[]
+  tags            EventTag[]
+  media           Media[]
+  aiAnalyses      AIAnalysis[]
+  moderationItems ModerationItem[]
+  userSubmissions UserSubmission[]
+
+  @@index([status])
+  @@index([startAt])
+  @@map("events")
+}
+
+model EventVersion {
+  id              String      @id @default(uuid()) @db.Uuid
+  eventId         String      @map("event_id") @db.Uuid
+  versionNumber   Int         @map("version_number")
+  title           String
+  startAt         DateTime    @map("start_at")
+  endAt           DateTime?   @map("end_at")
+  venueId         String?     @map("venue_id") @db.Uuid
+  organizerId     String?     @map("organizer_id") @db.Uuid
+  confidenceScore Decimal     @map("confidence_score") @db.Decimal(5, 4)
+  status          EventStatus
+  changeReason    String?     @map("change_reason")
+  changedAt       DateTime    @default(now()) @map("changed_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, versionNumber])
+  @@index([eventId])
+  @@map("event_versions")
+}
+
+model EventSource {
+  id              String   @id @default(uuid()) @db.Uuid
+  eventId         String   @map("event_id") @db.Uuid
+  sourceId        String   @map("source_id") @db.Uuid
+  externalId      String?  @map("external_id")
+  sourceUrl       String?  @map("source_url")
+  confidenceScore Decimal? @map("confidence_score") @db.Decimal(5, 4)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, externalId])
+  @@index([eventId])
+  @@map("event_sources")
+}
+
+model Source {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String
+  pluginType   String       @map("plugin_type")
+  url          String
+  scheduleCron String?      @map("schedule_cron")
+  config       Json         @default("{}")
+  status       SourceStatus @default(healthy)
+  lastCrawlAt  DateTime?    @map("last_crawl_at")
+  lastError    String?      @map("last_error") @db.Text
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  crawlJobs    CrawlJob[]
+  eventSources EventSource[]
+
+  @@index([status])
+  @@index([pluginType])
+  @@map("sources")
+}
+
+model CrawlJob {
+  id           String         @id @default(uuid()) @db.Uuid
+  sourceId     String         @map("source_id") @db.Uuid
+  status       CrawlJobStatus @default(pending)
+  scheduledAt  DateTime       @map("scheduled_at")
+  startedAt    DateTime?      @map("started_at")
+  completedAt  DateTime?      @map("completed_at")
+  errorMessage String?        @map("error_message") @db.Text
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  source  Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  results CrawlResult[]
+
+  @@index([sourceId, status])
+  @@index([scheduledAt])
+  @@map("crawl_jobs")
+}
+
+model CrawlResult {
+  id          String            @id @default(uuid()) @db.Uuid
+  crawlJobId  String            @map("crawl_job_id") @db.Uuid
+  minioKey    String            @map("minio_key")
+  contentHash String            @map("content_hash")
+  status      CrawlResultStatus
+  mimeType    String?           @map("mime_type")
+  byteSize    Int?              @map("byte_size")
+  fetchedAt   DateTime          @map("fetched_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  crawlJob   CrawlJob     @relation(fields: [crawlJobId], references: [id], onDelete: Cascade)
+  aiAnalyses AIAnalysis[]
+
+  @@index([crawlJobId])
+  @@index([contentHash])
+  @@map("crawl_results")
+}
+
+model Organizer {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  website     String?
+  email       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  events Event[]
+
+  @@map("organizers")
+}
+
+model Venue {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  address   String?
+  city      String?
+  regionId  String?  @map("region_id") @db.Uuid
+  latitude  Decimal? @db.Decimal(10, 7)
+  longitude Decimal? @db.Decimal(10, 7)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  region Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  events Event[]
+
+  @@index([regionId])
+  @@map("venues")
+}
+
+model Region {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String     @unique
+  type      RegionType
+  parentId  String?    @map("parent_id") @db.Uuid
+  isoCode   String?    @map("iso_code")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  parent   Region?  @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children Region[] @relation("RegionHierarchy")
+  venues   Venue[]
+
+  @@index([parentId])
+  @@index([type])
+  @@map("regions")
+}
+
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  parentId  String?  @map("parent_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   Category?       @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[]      @relation("CategoryHierarchy")
+  events   EventCategory[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  events EventTag[]
+
+  @@map("tags")
+}
+
+model EventCategory {
+  eventId    String @map("event_id") @db.Uuid
+  categoryId String @map("category_id") @db.Uuid
+
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, categoryId])
+  @@map("event_categories")
+}
+
+model EventTag {
+  eventId String @map("event_id") @db.Uuid
+  tagId   String @map("tag_id") @db.Uuid
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tagId])
+  @@map("event_tags")
+}
+
+model Media {
+  id        String    @id @default(uuid()) @db.Uuid
+  eventId   String    @map("event_id") @db.Uuid
+  type      MediaType
+  url       String?
+  minioKey  String?   @map("minio_key")
+  altText   String?   @map("alt_text")
+  sortOrder Int       @default(0) @map("sort_order")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("media")
+}
+
+model AIAnalysis {
+  id              String   @id @default(uuid()) @db.Uuid
+  eventId         String   @map("event_id") @db.Uuid
+  crawlResultId   String?  @map("crawl_result_id") @db.Uuid
+  promptId        String   @map("prompt_id")
+  promptVersion   String   @map("prompt_version")
+  model           String
+  provider        String
+  extractedFields Json     @map("extracted_fields")
+  confidence      Decimal  @db.Decimal(5, 4)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  crawlResult CrawlResult? @relation(fields: [crawlResultId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@index([promptId, promptVersion])
+  @@map("ai_analyses")
+}
+
+model ModerationItem {
+  id               String           @id @default(uuid()) @db.Uuid
+  eventId          String?          @map("event_id") @db.Uuid
+  userSubmissionId String?          @map("user_submission_id") @db.Uuid
+  status           ModerationStatus @default(pending)
+  reason           String?
+  reviewedBy       String?          @map("reviewed_by")
+  reviewedAt       DateTime?        @map("reviewed_at")
+  notes            String?          @db.Text
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  event          Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  userSubmission UserSubmission? @relation(fields: [userSubmissionId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("moderation_items")
+}
+
+model UserSubmission {
+  id             String           @id @default(uuid()) @db.Uuid
+  type           SubmissionType
+  eventId        String?          @map("event_id") @db.Uuid
+  payload        Json
+  submitterEmail String?          @map("submitter_email")
+  status         SubmissionStatus @default(pending)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  event           Event?           @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  moderationItems ModerationItem[]
+
+  @@index([type, status])
+  @@map("user_submissions")
+}

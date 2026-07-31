@@ -15,7 +15,7 @@ Status legend: `planned` · `in_progress` · `done`
 | Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
 | Application code | none |
 | Docker Compose / Stack | none |
-| Prisma / Database | none |
+| Prisma / Database | M3 complete (`@openeventhub/database`) |
 | CI/CD | none |
 | Plugins / Prompts | directories only |
 
@@ -83,7 +83,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M3 — Data Model (`Package 03`) · `planned`
+### M3 — Data Model (`Package 03`) · `done`
 
 **Goal:** Prisma schema matching `DATA_MODEL.md` / `DATABASE_SCHEMA.md` with migrations, versioning, and repositories.
 

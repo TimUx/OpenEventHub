@@ -35,6 +35,23 @@ npm run apps:health
 npm run infra:down
 ```
 
+## Database (M3+)
+
+Apply migrations and seed reference data (requires Postgres from infra):
+
+```bash
+npm run db:migrate          # host Node, uses DATABASE_URL from .env
+bash scripts/db-migrate.sh  # containerized, Compose network
+
+npm run db:seed
+bash scripts/db-seed.sh
+
+# One-shot via Compose profile
+docker compose -f docker/compose/docker-compose.yml \
+  -f docker/compose/docker-compose.apps.yml \
+  --env-file .env --profile tools run --rm migrate
+```
+
 Traefik (default host ports from `.env.example`):
 
 - Frontend: http://localhost:8088 (Host `localhost`)
