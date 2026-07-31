@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-31
+
+### Added
+
+- Event Intelligence Engine in `ai-service` (extraction → classification → confidence)
+- Central prompt catalog under `prompts/` (`event-extraction`, `event-classification`)
+- OpenAI-compatible LLM provider adapter (OpenAI, Azure, OpenRouter, Ollama via env)
+- BullMQ consumer for the `ai` queue
+- ADR 0005: exchangeable OpenAI-compatible AI provider
+
 ## [0.3.1] - 2026-07-31
 
 ### Changed

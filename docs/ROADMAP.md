@@ -101,7 +101,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M4 — AI Engine (`Package 04`) · `planned`
+### M4 — AI Engine (`Package 04`) · `done`
 
 **Goal:** Exchangeable OpenAI-compatible AI service with centralized prompts.
 

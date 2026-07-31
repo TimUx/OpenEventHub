@@ -1,12 +1,4 @@
 export {
-  createHealthResult,
-  createReadinessResult,
-  type HealthCheckResult,
-  type HealthStatus,
-  type ReadinessCheckResult,
-} from './health.js';
-
-export {
   APPLICATION_SERVICES,
   INFRASTRUCTURE_SERVICES,
   SERVICE_NAMES,
@@ -14,3 +6,18 @@ export {
 } from './services.js';
 
 export { QUEUE_NAMES, type QueueName } from './queues.js';
+
+export {
+  type AiJobPayload,
+  type AiJobResult,
+  type ClassificationFields,
+  type ExtractedEventFields,
+} from './ai-jobs.js';
+
+export {
+  createHealthResult,
+  createReadinessResult,
+  type HealthCheckResult,
+  type HealthStatus,
+  type ReadinessCheckResult,
+} from './health.js';

@@ -12,11 +12,12 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 2 — Architecture Skeleton (`v0.2.0`)**
+**Milestone 4 — AI Engine (`v0.4.0`)**
 
 - Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
 - All application containers running with `/health`, `/ready`, `/metrics`
 - Shared runtime (`@openeventhub/service-runtime`) and contracts (`@openeventhub/shared`)
+- AI Engine with centralized prompts and OpenAI-compatible providers
 
 Domain features (data model, AI, crawler plugins, full API) start in **Milestone 3+**.
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).

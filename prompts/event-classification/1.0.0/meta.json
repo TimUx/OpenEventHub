@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.0",
+  "task": "classification",
+  "description": "Assign categories, tags, and region labels to an extracted event.",
+  "responseFormat": "json"
+}

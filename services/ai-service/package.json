@@ -1,22 +1,27 @@
 {
   "name": "@openeventhub/ai-service",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "OpenEventHub ai-service service shell",
+  "description": "OpenEventHub Event Intelligence Engine (AI service)",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --import reflect-metadata --test src/**/*.test.ts"
+    "test": "node --import tsx --import reflect-metadata --test 'src/**/*.test.ts'"
   },
   "dependencies": {
+    "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
+    "@openeventhub/database": "0.3.1",
     "@openeventhub/service-runtime": "0.1.0",
     "@openeventhub/shared": "0.1.0",
+    "@prisma/client": "^6.19.3",
+    "bullmq": "^5.44.0",
+    "ioredis": "^5.6.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
