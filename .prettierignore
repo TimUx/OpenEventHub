@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+docker/data
+.next
+*.min.js
+.npm-cache
+package-lock.json
+CHANGELOG.md
+LICENSE
+# Binding product documentation — content-owned, not auto-reformatted
+docs/**

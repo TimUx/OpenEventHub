@@ -1,0 +1,144 @@
+# OpenEventHub — Docker Stack (Swarm) skeleton
+# Production target per docs/DOCKER_STACK.md / docs/DEPLOYMENT.md.
+# Secrets and configs are placeholders for M11 hardening; do not deploy as-is
+# without replacing credentials.
+
+networks:
+  edge:
+    driver: overlay
+    attachable: true
+  internal:
+    driver: overlay
+    internal: true
+    attachable: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+secrets:
+  postgres_password:
+    external: true
+  redis_password:
+    external: true
+  minio_root_password:
+    external: true
+
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --providers.docker=true
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=openeventhub_edge
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --ping=true
+      - --api.dashboard=true
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - edge
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        order: start-first
+    healthcheck:
+      test: ['CMD', 'traefik', 'healthcheck', '--ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: openeventhub
+      POSTGRES_DB: openeventhub
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.oeh.storage == true
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U openeventhub -d openeventhub']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command:
+      - sh
+      - -c
+      - redis-server --requirepass "$$(cat /run/secrets/redis_password)" --appendonly yes
+    secrets:
+      - redis_password
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_root_password
+    secrets:
+      - minio_root_password
+    volumes:
+      - minio_data:/data
+    networks:
+      - internal
+      - edge
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.oeh.storage == true
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 15s
+      timeout: 10s
+      retries: 10

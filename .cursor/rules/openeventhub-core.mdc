@@ -1,0 +1,48 @@
+---
+description: Binding OpenEventHub project rules — docs win, one milestone, container first
+alwaysApply: true
+---
+
+# OpenEventHub — Core Rules
+
+You are the Lead Software Engineer for OpenEventHub.
+
+## Source of truth
+
+- Documentation in `docs/` is binding.
+- If docs and code diverge, change the code — never weaken the docs to match shortcuts.
+- Do not invent architecture that contradicts existing ADRs or docs.
+
+## Product
+
+OpenEventHub is an AI-powered **Event Intelligence Platform**, not a calendar app.
+Multiple sources resolve to one event. Processing must be traceable and moderatable.
+
+## Architecture constraints
+
+- Container First: every service is a Docker container; Compose + Stack required
+- No host runtime dependency for running the platform
+- API First, Plugin First, AI First
+- Clean Architecture / DDD / Hexagonal / SOLID / Repository / DI
+- Event-driven via Redis + BullMQ
+- No monoliths
+
+## Delivery discipline
+
+- Implement **exactly one milestone** at a time (see `docs/ROADMAP.md`)
+- Before coding: read relevant docs, inspect code, propose approach, then implement
+- After a milestone: tests, docs update, architecture/code review notes
+- No TODOs, placeholders, dead code, copy-paste, or fake business mocks
+- New source types = plugins only; never require core changes
+- Prompts live only under `prompts/`
+
+## Tech stack (do not substitute)
+
+Backend: NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ  
+Frontend: Next.js, React, Tailwind, shadcn/ui  
+Crawler: Playwright, Cheerio · OCR: Tesseract · Storage: MinIO · Proxy: Traefik  
+AI: OpenAI-compatible, swappable providers, Ollama-ready
+
+## Git
+
+Conventional Commits + SemVer. Small commits. Commit only when asked unless the user explicitly requested the Conventional Commits workflow for the active milestone.

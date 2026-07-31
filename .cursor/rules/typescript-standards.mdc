@@ -1,0 +1,15 @@
+---
+description: TypeScript and NestJS coding standards for OpenEventHub
+globs: **/*.{ts,tsx,mts,cts}
+alwaysApply: false
+---
+
+# TypeScript Standards
+
+- `strict` TypeScript only; no `any` unless justified at a true boundary and typed immediately
+- Prefer explicit domain types in `packages/*` over duplicating shapes in services
+- Public APIs must be documented
+- No raw SQL — Prisma only
+- No distributed prompts — load from `prompts/`
+- Prefer dependency injection and ports/adapters over concrete imports in domain layers
+- ESLint + Prettier must pass; do not disable rules without an ADR or documented exception

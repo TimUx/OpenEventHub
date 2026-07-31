@@ -1,0 +1,14 @@
+---
+description: Docker Compose and Stack conventions for OpenEventHub
+globs: docker/**/*
+alwaysApply: false
+---
+
+# Docker Conventions
+
+- Every service: Dockerfile, healthcheck, structured logging, env-based config
+- Compose for development; Stack for Swarm production
+- Prefer internal networks for data stores; expose via Traefik when public
+- Never bake secrets into images; use env/secrets
+- Image tags must be reproducible (pin versions for infra images)
+- Validate compose/stack in CI when changing `docker/`
