@@ -18,7 +18,7 @@ Duplicating bootstrap code across nine services would create drift.
    - environment-based service identity (`SERVICE_NAME`, `SERVICE_VERSION`)
 2. Each backend service (`api`, `scheduler`, `worker`, `crawler`, `ai-service`,
    `ocr-service`, `search`) is a thin NestJS application that imports the runtime
-   module and declares its readiness checks (postgres/redis/minio as applicable).
+   module and declares its readiness checks (postgres/redis/object-storage as applicable).
 3. `frontend` and `admin` are separate Next.js applications exposing the same
    probe paths via App Router route handlers.
 4. Compose wires all services onto `edge`/`internal` networks; Traefik routes

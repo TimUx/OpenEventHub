@@ -40,7 +40,7 @@ Multiple sources resolve to one event. Processing must be traceable and moderata
 
 Backend: NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ  
 Frontend: Next.js, React, Tailwind, shadcn/ui  
-Crawler: Playwright, Cheerio · OCR: Tesseract · Storage: MinIO · Proxy: Traefik  
+Crawler: Playwright, Cheerio · OCR: Tesseract · Storage: SeaweedFS (S3) · Proxy: Traefik  
 AI: OpenAI-compatible, swappable providers, Ollama-ready
 
 ## Git

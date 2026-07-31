@@ -22,7 +22,7 @@ end
 subgraph Data
 PG[(PostgreSQL)]
 RD[(Redis)]
-MIN[(MinIO)]
+OBJ[(SeaweedFS S3)]
 end
 
 TR-->FE
@@ -33,5 +33,5 @@ API-->RD
 CR-->RD
 WK-->AI
 AI-->PG
-OCR-->MIN
+OCR-->OBJ
 SRCH-->PG

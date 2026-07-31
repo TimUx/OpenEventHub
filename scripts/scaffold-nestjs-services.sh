@@ -5,14 +5,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="0.1.0"
 
-# name|port|checks (comma-separated: postgres,redis,minio,runtime)
+# name|port|checks (comma-separated: postgres,redis,object-storage,runtime)
 SERVICES=(
   "api|3000|postgres,redis"
   "scheduler|3001|postgres,redis"
   "worker|3002|redis"
-  "crawler|3003|redis,minio"
+  "crawler|3003|redis,object-storage"
   "ai-service|3004|redis"
-  "ocr-service|3005|redis,minio"
+  "ocr-service|3005|redis,object-storage"
   "search|3006|postgres,redis"
 )
 
@@ -87,8 +87,9 @@ EOF
       redis)
         check_entries+="    redis: await probeTcp(process.env.REDIS_HOST ?? 'redis', Number(process.env.REDIS_PORT_INTERNAL ?? 6379)),"$'\n'
         ;;
-      minio)
-        check_entries+="    minio: await probeTcp(process.env.MINIO_HOST ?? 'minio', Number(process.env.MINIO_PORT_INTERNAL ?? 9000)),"$'\n'
+      object-storage)
+        check_entries+="    objectStorage: await probeTcp(process.env.OBJECT_STORAGE_HOST ?? 'object-storage', Number(process.env.OBJECT_STORAGE_PORT_INTERNAL ?? 8333)),"$'
+'
         ;;
       runtime)
         check_entries+="    runtime: 'ok',"$'\n'

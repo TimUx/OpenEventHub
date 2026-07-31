@@ -6,7 +6,7 @@ OpenEventHub runs infrastructure and application services with Docker Compose.
 
 | File | Purpose |
 |------|---------|
-| `docker/compose/docker-compose.yml` | Infrastructure (Traefik, Postgres, Redis, MinIO) |
+| `docker/compose/docker-compose.yml` | Infrastructure (Traefik, Postgres, Redis, SeaweedFS) |
 | `docker/compose/docker-compose.apps.yml` | Application service containers |
 | `docker/stack/docker-stack.yml` | Swarm Stack skeleton |
 | `.env.example` | Environment template |
@@ -16,8 +16,7 @@ OpenEventHub runs infrastructure and application services with Docker Compose.
 - traefik
 - postgres
 - redis
-- minio
-- minio-init (bucket bootstrap)
+- object-storage (SeaweedFS S3; bucket via `S3_BUCKET`)
 
 ## Application services (M2+)
 

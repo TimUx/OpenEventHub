@@ -23,7 +23,7 @@ We need a foundation that:
    - `plugins/*` — source connectors
    - `prompts/` — centralized AI prompts
    - `docker/` — Compose and Stack definitions
-2. Run **infrastructure via Docker Compose** from day one (Traefik, PostgreSQL, Redis, MinIO).
+2. Run **infrastructure via Docker Compose** from day one (Traefik, PostgreSQL, Redis, SeaweedFS (see ADR 0004)).
 3. Keep a **Docker Stack skeleton** for Swarm production deployment.
 4. Put cross-cutting contracts in `@openeventhub/shared` (service names, queues, health payloads).
 5. Treat **documentation as source of truth**; code must follow docs.

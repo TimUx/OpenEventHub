@@ -187,7 +187,7 @@ model CrawlJob {
 model CrawlResult {
   id          String            @id @default(uuid()) @db.Uuid
   crawlJobId  String            @map("crawl_job_id") @db.Uuid
-  minioKey    String            @map("minio_key")
+  objectKey   String            @map("object_key")
   contentHash String            @map("content_hash")
   status      CrawlResultStatus
   mimeType    String?           @map("mime_type")
@@ -310,7 +310,7 @@ model Media {
   eventId   String    @map("event_id") @db.Uuid
   type      MediaType
   url       String?
-  minioKey  String?   @map("minio_key")
+  objectKey String?   @map("object_key")
   altText   String?   @map("alt_text")
   sortOrder Int       @default(0) @map("sort_order")
   createdAt DateTime  @default(now()) @map("created_at")

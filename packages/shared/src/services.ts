@@ -15,7 +15,7 @@ export const SERVICE_NAMES = {
   search: 'search',
   postgres: 'postgres',
   redis: 'redis',
-  minio: 'minio',
+  objectStorage: 'object-storage',
   traefik: 'traefik',
 } as const;
 
@@ -36,6 +36,6 @@ export const APPLICATION_SERVICES = [
 export const INFRASTRUCTURE_SERVICES = [
   SERVICE_NAMES.postgres,
   SERVICE_NAMES.redis,
-  SERVICE_NAMES.minio,
+  SERVICE_NAMES.objectStorage,
   SERVICE_NAMES.traefik,
 ] as const;

@@ -16,9 +16,9 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.1.0';
           process.env.REDIS_HOST ?? 'redis',
           Number(process.env.REDIS_PORT_INTERNAL ?? 6379),
         ),
-        minio: await probeTcp(
-          process.env.MINIO_HOST ?? 'minio',
-          Number(process.env.MINIO_PORT_INTERNAL ?? 9000),
+        objectStorage: await probeTcp(
+          process.env.OBJECT_STORAGE_HOST ?? 'object-storage',
+          Number(process.env.OBJECT_STORAGE_PORT_INTERNAL ?? 8333),
         ),
       }),
     }),

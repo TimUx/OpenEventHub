@@ -22,7 +22,7 @@
 - Docker Stack
 - PostgreSQL
 - Redis
-- MinIO
+- SeaweedFS (S3-compatible object storage)
 - Scalable workers
 - Health checks
 - Logging

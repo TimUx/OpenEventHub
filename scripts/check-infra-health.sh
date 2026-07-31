@@ -11,7 +11,7 @@ if [[ ! -f "${ENV_FILE}" ]]; then
   exit 1
 fi
 
-SERVICES=(traefik postgres redis minio)
+SERVICES=(traefik postgres redis object-storage)
 TIMEOUT_SECONDS="${TIMEOUT_SECONDS:-180}"
 INTERVAL_SECONDS="${INTERVAL_SECONDS:-5}"
 DEADLINE=$((SECONDS + TIMEOUT_SECONDS))

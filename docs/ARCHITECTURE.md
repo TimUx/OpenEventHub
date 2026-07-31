@@ -39,4 +39,4 @@ flowchart LR
 | Search | Full-text & semantic search |
 | PostgreSQL | Primary database |
 | Redis | Queue & cache |
-| MinIO | Object storage |
+| SeaweedFS (S3) | Object storage |

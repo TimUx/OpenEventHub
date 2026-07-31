@@ -3,7 +3,7 @@
 Back up
 
 - PostgreSQL
-- MinIO
+- Object storage (SeaweedFS)
 - Configuration
 - Uploaded files
 

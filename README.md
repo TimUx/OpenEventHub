@@ -14,7 +14,7 @@ Multiple sources become **one** high-quality event record.
 
 **Milestone 2 — Architecture Skeleton (`v0.2.0`)**
 
-- Infrastructure: Traefik, PostgreSQL, Redis, MinIO
+- Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
 - All application containers running with `/health`, `/ready`, `/metrics`
 - Shared runtime (`@openeventhub/service-runtime`) and contracts (`@openeventhub/shared`)
 
@@ -38,17 +38,18 @@ npm run apps:up
 npm run apps:health
 ```
 
-| Entry               | URL (defaults)                                  |
-| ------------------- | ----------------------------------------------- |
-| Frontend            | http://localhost:8088                           |
-| API                 | http://api.localhost:8088                       |
-| Admin               | http://admin.localhost:8088                     |
-| Traefik dashboard   | http://localhost:18080                          |
-| PostgreSQL (host)   | `localhost:15432`                               |
-| Redis (host)        | `localhost:16379`                               |
-| MinIO API / Console | http://localhost:19000 / http://localhost:19001 |
+| Entry              | URL (defaults)              |
+| ------------------ | --------------------------- |
+| Frontend           | http://localhost:8088       |
+| API                | http://api.localhost:8088   |
+| Admin              | http://admin.localhost:8088 |
+| Traefik dashboard  | http://localhost:18080      |
+| PostgreSQL (host)  | `localhost:15432`           |
+| Redis (host)       | `localhost:16379`           |
+| S3 API (SeaweedFS) | http://localhost:18333      |
+| Storage Admin UI   | http://localhost:23646      |
 
-Containers reach each other via Docker DNS (`postgres`, `redis`, `minio`, `api`, …).
+Containers reach each other via Docker DNS (`postgres`, `redis`, `object-storage`, `api`, …).
 
 ## Repository layout
 

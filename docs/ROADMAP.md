@@ -47,7 +47,7 @@ Never implement multiple large milestones in parallel.
 - Git repository, Conventional Commits, SemVer (`0.1.0`)
 - Monorepo layout aligned with container architecture
 - Shared TypeScript / ESLint / Prettier baseline
-- Docker Compose: Traefik, PostgreSQL, Redis, MinIO
+- Docker Compose: Traefik, PostgreSQL, Redis, SeaweedFS
 - Docker Stack skeleton for Swarm
 - Environment templates, scripts, healthcheck conventions
 - CI skeleton (lint / validate compose)
@@ -130,7 +130,7 @@ Never implement multiple large milestones in parallel.
 - BullMQ queues: Discovery, Crawl, OCR, AI, Geocoding, Search, Notifications
 - Scheduler service + crawler worker
 - First plugins: HTML, RSS, ICS
-- OCR service (Tesseract) + MinIO raw storage
+- OCR service (Tesseract) + SeaweedFS/S3 raw storage
 - Plugin auto-registration
 
 **Exit criteria**

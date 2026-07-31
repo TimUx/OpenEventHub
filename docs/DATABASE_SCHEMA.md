@@ -102,13 +102,13 @@ Crawler configuration and health metadata.
 
 ## crawl_results
 
-Raw fetch output references (MinIO) and content hash for change detection.
+Raw fetch output references (object storage / S3) and content hash for change detection.
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | UUID | |
 | crawl_job_id | UUID | FK → crawl_jobs |
-| minio_key | text | Object key in MinIO |
+| object_key | text | Object key in S3-compatible storage |
 | content_hash | text | |
 | status | CrawlResultStatus | |
 | mime_type | text | Nullable |
@@ -133,7 +133,7 @@ Categories are hierarchical (`parent_id`). Tags are flat. Events link via
 
 ## media
 
-Event-attached assets with `MediaType`, optional URL or MinIO key, sort order.
+Event-attached assets with `MediaType`, optional URL or object storage key, sort order.
 
 ## ai_analyses
 
