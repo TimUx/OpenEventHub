@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -73,6 +74,22 @@ enum RegionType {
   municipality
   city
   suburb
+}
+
+enum AiProviderType {
+  openai
+  anthropic
+  google
+  azure_openai
+  openrouter
+  ollama
+  custom_openai
+}
+
+enum AdminRole {
+  admin
+  moderator
+  viewer
 }
 
 model Event {
@@ -375,4 +392,49 @@ model UserSubmission {
 
   @@index([type, status])
   @@map("user_submissions")
+}
+
+model AdminUser {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         AdminRole @default(admin)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model AiProviderProfile {
+  id              String         @id @default(uuid()) @db.Uuid
+  name            String
+  type            AiProviderType
+  baseUrl         String?        @map("base_url")
+  apiKeyEncrypted String?        @map("api_key_encrypted") @db.Text
+  apiKeyHint      String?        @map("api_key_hint")
+  model           String
+  organizationId  String?        @map("organization_id")
+  projectId       String?        @map("project_id")
+  extraHeaders    Json           @default("{}") @map("extra_headers")
+  timeoutMs       Int            @default(60000) @map("timeout_ms")
+  enabled         Boolean        @default(true)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  activeForRuntime AiRuntimeSettings?
+
+  @@index([type])
+  @@index([enabled])
+  @@map("ai_provider_profiles")
+}
+
+model AiRuntimeSettings {
+  id                    String   @id @default("singleton")
+  activeProviderProfileId String? @unique @map("active_provider_profile_id") @db.Uuid
+  defaultTemperature    Decimal  @default(0) @map("default_temperature") @db.Decimal(3, 2)
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  activeProviderProfile AiProviderProfile? @relation(fields: [activeProviderProfileId], references: [id], onDelete: SetNull)
+
+  @@map("ai_runtime_settings")
 }

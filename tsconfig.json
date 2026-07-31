@@ -3,6 +3,7 @@
   "references": [
     { "path": "./packages/shared" },
     { "path": "./packages/service-runtime" },
+    { "path": "./packages/ai-core" },
     { "path": "./packages/database" }
   ]
 }

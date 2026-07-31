@@ -22,6 +22,8 @@ x-nestjs-service: &nestjs-service
     S3_SECRET_KEY: ${S3_SECRET_KEY:-openeventhub_change_me}
     S3_BUCKET: ${S3_BUCKET:-openeventhub}
     DATABASE_URL: postgresql://${POSTGRES_USER:-openeventhub}:${POSTGRES_PASSWORD:-openeventhub_change_me}@postgres:5432/${POSTGRES_DB:-openeventhub}
+    SETTINGS_ENCRYPTION_KEY: ${SETTINGS_ENCRYPTION_KEY:-dev-only-change-me-settings-key}
+    AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-dev-only-change-me-auth-jwt-secret}
     LOG_LEVEL: ${LOG_LEVEL:-info}
   depends_on:
     postgres:
@@ -32,7 +34,7 @@ x-nestjs-service: &nestjs-service
 services:
   api:
     <<: *nestjs-service
-    image: openeventhub/api:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/api:${SERVICE_VERSION:-0.4.1}
     build:
       context: ../..
       dockerfile: services/api/Dockerfile
@@ -41,6 +43,7 @@ services:
       <<: *nestjs-env
       PORT: 3000
       SERVICE_NAME: api
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.4.1}
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.rule=Host(`api.${DOMAIN:-localhost}`)
@@ -93,7 +96,7 @@ services:
 
   ai-service:
     <<: *nestjs-service
-    image: openeventhub/ai-service:${SERVICE_VERSION:-0.4.0}
+    image: openeventhub/ai-service:${SERVICE_VERSION:-0.4.1}
     build:
       context: ../..
       dockerfile: services/ai-service/Dockerfile
@@ -102,13 +105,8 @@ services:
       <<: *nestjs-env
       PORT: 3004
       SERVICE_NAME: ai-service
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.4.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.4.1}
       PROMPTS_DIR: /app/prompts
-      AI_PROVIDER: ${AI_PROVIDER:-ollama}
-      AI_BASE_URL: ${AI_BASE_URL:-http://host.docker.internal:11434/v1}
-      AI_API_KEY: ${AI_API_KEY:-}
-      AI_MODEL: ${AI_MODEL:-llama3.2}
-      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-60000}
     depends_on:
       redis:
         condition: service_healthy
@@ -168,17 +166,20 @@ services:
         condition: service_healthy
 
   admin:
-    image: openeventhub/admin:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/admin:${SERVICE_VERSION:-0.4.1}
     build:
       context: ../..
       dockerfile: services/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}
     container_name: oeh-admin
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.1.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.4.1}
       PORT: 3101
       HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}
     networks:
       - edge
     labels:

@@ -1,6 +1,9 @@
 export { Prisma, PrismaClient } from '@prisma/client';
 export type {
+  AdminUser,
   AIAnalysis,
+  AiProviderProfile,
+  AiRuntimeSettings,
   Category,
   CrawlJob,
   CrawlResult,
@@ -17,6 +20,8 @@ export type {
   Venue,
 } from '@prisma/client';
 export {
+  AdminRole,
+  AiProviderType,
   CrawlJobStatus,
   CrawlResultStatus,
   EventStatus,
@@ -34,4 +39,9 @@ export {
   getPrismaClient,
   type PrismaClientOptions,
 } from './client.js';
-export { EventRepository, SourceRepository } from './repositories/index.js';
+export {
+  AiSettingsRepository,
+  EventRepository,
+  SourceRepository,
+  type PublicAiProviderProfile,
+} from './repositories/index.js';

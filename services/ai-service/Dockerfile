@@ -2,6 +2,9 @@
 ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS build
 WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json tsconfig.base.json tsconfig.json ./
 COPY packages ./packages
 COPY prompts ./prompts
@@ -9,7 +12,9 @@ COPY services/ai-service ./services/ai-service
 RUN npm ci
 RUN npm run db:generate \
   && npm run build --workspace=@openeventhub/shared \
+  && npm run build --workspace=@openeventhub/ai-core \
   && npm run build --workspace=@openeventhub/service-runtime \
+  && npm run build --workspace=@openeventhub/database \
   && npm run build --workspace=@openeventhub/ai-service
 
 FROM ${NODE_IMAGE} AS runtime

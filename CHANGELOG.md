@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-07-31
+
+### Added
+
+- Admin-managed AI provider profiles (ChatGPT/OpenAI, Claude/Anthropic, Gemini/Google, Azure, OpenRouter, Ollama, custom)
+- `@openeventhub/ai-core` with OpenAI-compatible, Anthropic, and Gemini adapters + AES-GCM key encryption
+- Admin auth (`POST /api/v1/auth/login`) and AI Settings API (`/api/v1/admin/ai/*`)
+- Admin UI page `/ai-settings`
+- ADR 0006: admin-managed AI configuration
+
+### Changed
+
+- AI provider credentials no longer come from `AI_*` environment variables (ADR 0005 §3 superseded)
+- Seed creates bootstrap admin user and default Local Ollama profile
+- Traefik bumped to `v3.6.7` (Docker Engine API negotiation)
+- Prisma `binaryTargets` include `debian-openssl-3.0.x` for container runtime
+
 ## [0.4.0] - 2026-07-31
 
 ### Added

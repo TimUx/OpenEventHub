@@ -2,15 +2,12 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 import { QUEUE_NAMES } from '@openeventhub/shared';
-import { PrismaClient } from '@prisma/client';
+import { AiSettingsRepository, PrismaClient } from '@openeventhub/database';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { DatabaseBackedLlmProvider } from './adapters/database-backed-llm.provider.js';
 import { FilePromptRepository } from './adapters/file-prompt.repository.js';
-import {
-  OpenAiCompatibleProvider,
-  resolveProviderConfigFromEnv,
-} from './adapters/openai-compatible.provider.js';
 import { AiProcessingService } from './ai-processing.service.js';
 import { LLM_PROVIDER } from './ports/llm.provider.js';
 import { PROMPT_REPOSITORY } from './ports/prompt.repository.js';
@@ -18,19 +15,14 @@ import { probeTcp } from './probe-tcp.js';
 import { AiQueueProcessor } from './queue/ai-queue.processor.js';
 
 const SERVICE_NAME = 'ai-service';
-const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.4.0';
+const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.4.1';
 
 function resolvePromptsRoot(): string {
   if (process.env.PROMPTS_DIR) {
     return process.env.PROMPTS_DIR;
   }
   const here = path.dirname(fileURLToPath(import.meta.url));
-  // dist/ -> service root -> repo root prompts/
   return path.resolve(here, '../../../prompts');
-}
-
-function createPrismaClient(): PrismaClient {
-  return new PrismaClient();
 }
 
 @Module({
@@ -42,6 +34,10 @@ function createPrismaClient(): PrismaClient {
         redis: await probeTcp(
           process.env.REDIS_HOST ?? 'redis',
           Number(process.env.REDIS_PORT_INTERNAL ?? 6379),
+        ),
+        postgres: await probeTcp(
+          process.env.POSTGRES_HOST ?? 'postgres',
+          Number(process.env.POSTGRES_PORT_INTERNAL ?? 5432),
         ),
       }),
     }),
@@ -56,16 +52,22 @@ function createPrismaClient(): PrismaClient {
   ],
   providers: [
     {
+      provide: PrismaClient,
+      useFactory: () => new PrismaClient(),
+    },
+    {
+      provide: AiSettingsRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new AiSettingsRepository(prisma),
+    },
+    {
       provide: LLM_PROVIDER,
-      useFactory: () => new OpenAiCompatibleProvider(resolveProviderConfigFromEnv()),
+      inject: [AiSettingsRepository],
+      useFactory: (settings: AiSettingsRepository) => new DatabaseBackedLlmProvider(settings),
     },
     {
       provide: PROMPT_REPOSITORY,
       useFactory: () => new FilePromptRepository(resolvePromptsRoot()),
-    },
-    {
-      provide: PrismaClient,
-      useFactory: createPrismaClient,
     },
     AiProcessingService,
     AiQueueProcessor,

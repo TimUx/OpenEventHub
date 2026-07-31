@@ -1,25 +1,12 @@
-export type ChatRole = 'system' | 'user' | 'assistant';
-
-export interface ChatMessage {
-  readonly role: ChatRole;
-  readonly content: string;
-}
-
-export interface LlmCompletionRequest {
-  readonly messages: readonly ChatMessage[];
-  readonly model?: string;
-  readonly temperature?: number;
-  readonly responseFormat?: 'json' | 'text';
-}
-
-export interface LlmCompletionResult {
-  readonly content: string;
-  readonly model: string;
-  readonly provider: string;
-}
-
-export interface LlmProvider {
-  completeChat(request: LlmCompletionRequest): Promise<LlmCompletionResult>;
-}
+/**
+ * Re-export port types from ai-core for local DI tokens used by Nest wiring.
+ */
+export type {
+  ChatMessage,
+  ChatRole,
+  LlmCompletionRequest,
+  LlmCompletionResult,
+  LlmProvider,
+} from '@openeventhub/ai-core';
 
 export const LLM_PROVIDER = Symbol('LLM_PROVIDER');

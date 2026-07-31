@@ -6,20 +6,20 @@ Event Intelligence Engine container.
 
 - Consume BullMQ `ai` jobs
 - Load versioned prompts from `prompts/`
-- Call OpenAI-compatible LLM providers (OpenAI, Azure, OpenRouter, Ollama)
+- Call LLM providers configured in Admin (OpenAI, Anthropic, Gemini, Azure, OpenRouter, Ollama, custom)
 - Run extraction → classification → deterministic confidence scoring
 - Persist `AIAnalysis` when `eventId` is present on the job
 
 ## Configuration
 
-| Variable       | Purpose                                         |
-| -------------- | ----------------------------------------------- |
-| `AI_PROVIDER`  | `openai` \| `azure` \| `openrouter` \| `ollama` |
-| `AI_BASE_URL`  | OpenAI-compatible API base URL                  |
-| `AI_API_KEY`   | API key (optional for Ollama)                   |
-| `AI_MODEL`     | Model id                                        |
-| `PROMPTS_DIR`  | Absolute path to prompt catalog                 |
-| `REDIS_*`      | BullMQ connection                               |
-| `DATABASE_URL` | Prisma persistence for analyses                 |
+| Variable | Purpose |
+|----------|---------|
+| `PROMPTS_DIR` | Absolute path to prompt catalog |
+| `REDIS_*` | BullMQ connection |
+| `DATABASE_URL` | PostgreSQL (loads active AI provider profile) |
+| `SETTINGS_ENCRYPTION_KEY` | Decrypts API keys stored by Admin |
 
-See ADR 0005 and `docs/EVENT_INTELLIGENCE_ENGINE.md`.
+AI provider credentials are **not** configured via `AI_*` env vars.
+Configure them in Admin → AI Settings (ADR 0006).
+
+See ADR 0005/0006 and `docs/EVENT_INTELLIGENCE_ENGINE.md` / `docs/AI_CONFIGURATION.md`.

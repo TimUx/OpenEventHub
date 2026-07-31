@@ -28,6 +28,9 @@ docker run --rm \
   -w /workspace \
   -e npm_config_cache=/workspace/.npm-cache \
   -e "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:${POSTGRES_PORT}/${POSTGRES_DB}" \
+  -e "SETTINGS_ENCRYPTION_KEY=${SETTINGS_ENCRYPTION_KEY:-dev-only-change-me-settings-key}" \
+  -e "ADMIN_BOOTSTRAP_EMAIL=${ADMIN_BOOTSTRAP_EMAIL:-admin@openeventhub.local}" \
+  -e "ADMIN_BOOTSTRAP_PASSWORD=${ADMIN_BOOTSTRAP_PASSWORD:-ChangeMeNow!}" \
   node:22-bookworm \
   bash -lc "npm run db:generate && npm run db:seed"
 

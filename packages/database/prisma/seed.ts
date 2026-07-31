@@ -116,6 +116,49 @@ async function main(): Promise<void> {
   for (const category of categoryTree) {
     await upsertCategory(category);
   }
+
+  const bcrypt = await import('bcryptjs');
+  const adminEmail = process.env.ADMIN_BOOTSTRAP_EMAIL ?? 'admin@openeventhub.local';
+  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD ?? 'ChangeMeNow!';
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
+
+  await prisma.adminUser.upsert({
+    where: { email: adminEmail },
+    create: {
+      email: adminEmail,
+      passwordHash,
+      role: 'admin',
+    },
+    update: {
+      passwordHash,
+      role: 'admin',
+    },
+  });
+
+  await prisma.aiRuntimeSettings.upsert({
+    where: { id: 'singleton' },
+    create: { id: 'singleton' },
+    update: {},
+  });
+
+  const existingOllama = await prisma.aiProviderProfile.findFirst({
+    where: { name: 'Local Ollama' },
+  });
+  if (!existingOllama) {
+    const ollama = await prisma.aiProviderProfile.create({
+      data: {
+        name: 'Local Ollama',
+        type: 'ollama',
+        baseUrl: 'http://host.docker.internal:11434/v1',
+        model: 'llama3.2',
+        enabled: true,
+      },
+    });
+    await prisma.aiRuntimeSettings.update({
+      where: { id: 'singleton' },
+      data: { activeProviderProfileId: ollama.id },
+    });
+  }
 }
 
 main()

@@ -28,9 +28,11 @@
     "test": "node --import tsx --test src/schema.test.ts src/integration.test.ts src/repositories/event.repository.test.ts src/repositories/source.repository.test.ts"
   },
   "dependencies": {
+    "@openeventhub/ai-core": "0.4.1",
     "@prisma/client": "^6.5.0"
   },
   "devDependencies": {
+    "bcryptjs": "^3.0.2",
     "prisma": "^6.5.0",
     "tsx": "^4.19.3"
   },
