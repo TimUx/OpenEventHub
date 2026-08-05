@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
 
 type User = {
@@ -14,6 +15,7 @@ type User = {
 };
 
 export default function UsersPage() {
+  const { t } = useI18n();
   const { token } = useAuth();
   const { data, error, loading, reload } = useAdminQuery<User[]>('/api/v1/admin/users');
   const [email, setEmail] = useState('');
@@ -32,7 +34,7 @@ export default function UsersPage() {
       });
       setEmail('');
       setPassword('');
-      setMessage('User created');
+      setMessage(t('users.created'));
       await reload();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err));
@@ -50,23 +52,23 @@ export default function UsersPage() {
 
   async function remove(id: string) {
     if (!token) return;
-    if (!window.confirm('Delete user?')) return;
+    if (!window.confirm(t('users.confirmDelete'))) return;
     await adminFetch(`/api/v1/admin/users/${id}`, token, { method: 'DELETE' });
     await reload();
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Users & Roles" description="Admin accounts with RBAC roles." />
-      {message ? <p className="text-sm text-accent">{message}</p> : null}
+      <PageHeader title={t('users.title')} description={t('users.description')} />
+      {message ? <p className="text-sm text-primary">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <Panel>
-        <h2 className="mb-3 font-display text-lg">Create user</h2>
+        <h2 className="mb-3 font-bold text-lg">{t('users.createUser')}</h2>
         <form className="grid gap-3 md:grid-cols-4" onSubmit={(e) => void onCreate(e)}>
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3"
-            placeholder="Email"
+            placeholder={t('users.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -74,7 +76,7 @@ export default function UsersPage() {
           />
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3"
-            placeholder="Password (min 8)"
+            placeholder={t('users.passwordMin')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -90,20 +92,20 @@ export default function UsersPage() {
             <option value="moderator">moderator</option>
             <option value="viewer">viewer</option>
           </select>
-          <button type="submit" className="h-10 rounded-md bg-accent text-white">
-            Create
+          <button type="submit" className="h-10 rounded-xl bg-primary text-white">
+            {t('common.create')}
           </button>
         </form>
       </Panel>
 
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       <div className="space-y-3">
         {(data ?? []).map((user) => (
           <Panel key={user.id} className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-medium">{user.email}</p>
               <p className="text-xs text-[var(--muted)]">
-                since {new Date(user.createdAt).toLocaleDateString()}
+                {t('users.since', { date: new Date(user.createdAt).toLocaleDateString() })}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -122,7 +124,7 @@ export default function UsersPage() {
                 className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-700"
                 onClick={() => void remove(user.id)}
               >
-                Delete
+                {t('common.delete')}
               </button>
             </div>
           </Panel>

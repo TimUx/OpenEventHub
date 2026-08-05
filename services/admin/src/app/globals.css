@@ -3,19 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: #eef2f6;
-  --foreground: #1a1f2e;
-  --muted: #5b6577;
-  --border: #d0d7e2;
+  --background: #f5f7fa;
+  --foreground: #1a1a1a;
+  --muted: #5f6b7a;
+  --border: #dde3ea;
   --card: #ffffff;
-  --accent: #0e7490;
+  --primary: #1565c0;
+  --primary-bright: #1e88e5;
+  --primary-soft: #e3f2fd;
+  --primary-contrast: #ffffff;
+  --secondary: #00838f;
+  --accent: #1565c0;
+  --accent-bright: #1e88e5;
+  --success: #2e7d32;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
 }
 
 body {
   @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
-  background-image:
-    linear-gradient(180deg, rgba(14, 116, 144, 0.06), transparent 28%),
-    radial-gradient(circle at 100% 0%, rgba(165, 243, 252, 0.25), transparent 40%);
   min-height: 100vh;
 }
 
@@ -23,5 +29,5 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  @apply outline-none ring-2 ring-accent-bright ring-offset-2;
+  @apply outline-none ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--background)];
 }

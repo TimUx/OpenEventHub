@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
 
 type ProviderType =
@@ -29,6 +30,7 @@ type ProviderProfile = {
 };
 
 export default function AiSettingsPage() {
+  const { t } = useI18n();
   const { token } = useAuth();
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
@@ -83,7 +85,7 @@ export default function AiSettingsPage() {
       }),
     });
     setApiKey('');
-    setMessage('Provider profile created');
+    setMessage(t('aiSettings.providerCreated'));
     await loadData(token);
   }
 
@@ -94,7 +96,7 @@ export default function AiSettingsPage() {
       body: JSON.stringify({ activeProviderProfileId: id }),
     });
     setActiveId(id);
-    setMessage('Active provider updated');
+    setMessage(t('aiSettings.activeUpdated'));
   }
 
   async function testProvider(id: string) {
@@ -104,7 +106,13 @@ export default function AiSettingsPage() {
       token,
       { method: 'POST' },
     );
-    setMessage(`Test OK (${payload.provider}/${payload.model}): ${payload.sample}`);
+    setMessage(
+      t('aiSettings.testOk', {
+        provider: payload.provider,
+        model: payload.model,
+        sample: payload.sample,
+      }),
+    );
   }
 
   function onTypeChange(next: ProviderType) {
@@ -123,15 +131,12 @@ export default function AiSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="AI Settings"
-        description="Configure providers; the Event Intelligence Engine uses the active profile."
-      />
-      {message ? <p className="text-sm text-accent">{message}</p> : null}
+      <PageHeader title={t('aiSettings.title')} description={t('aiSettings.description')} />
+      {message ? <p className="text-sm text-primary">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <Panel>
-        <h2 className="mb-3 font-display text-lg">Provider profiles</h2>
+        <h2 className="mb-3 font-bold text-lg">{t('aiSettings.providerProfiles')}</h2>
         <ul className="space-y-3">
           {providers.map((provider) => (
             <li
@@ -140,23 +145,25 @@ export default function AiSettingsPage() {
             >
               <div className="text-sm">
                 <strong>{provider.name}</strong> · {provider.type} · {provider.model}
-                {provider.hasApiKey ? ` · key ${provider.apiKeyHint}` : ' · no API key'}
-                {activeId === provider.id ? ' · ACTIVE' : ''}
+                {provider.hasApiKey
+                  ? ` · ${t('aiSettings.keyHint', { hint: provider.apiKeyHint ?? '' })}`
+                  : ` · ${t('aiSettings.noApiKey')}`}
+                {activeId === provider.id ? ` · ${t('aiSettings.active')}` : ''}
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  className="rounded-md bg-accent px-3 py-1.5 text-xs text-white"
+                  className="rounded-xl bg-primary px-3 py-1.5 text-xs text-white"
                   onClick={() => void activate(provider.id)}
                 >
-                  Set active
+                  {t('aiSettings.setActive')}
                 </button>
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs"
                   onClick={() => void testProvider(provider.id)}
                 >
-                  Test
+                  {t('aiSettings.test')}
                 </button>
               </div>
             </li>
@@ -165,10 +172,10 @@ export default function AiSettingsPage() {
       </Panel>
 
       <Panel>
-        <h2 className="mb-3 font-display text-lg">Add provider</h2>
+        <h2 className="mb-3 font-bold text-lg">{t('aiSettings.addProvider')}</h2>
         <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onCreateProvider(e)}>
           <label className="text-sm">
-            Type
+            {t('aiSettings.type')}
             <select
               className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               value={type}
@@ -193,7 +200,7 @@ export default function AiSettingsPage() {
             </select>
           </label>
           <label className="text-sm">
-            Name
+            {t('aiSettings.name')}
             <input
               className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               value={name}
@@ -201,7 +208,7 @@ export default function AiSettingsPage() {
             />
           </label>
           <label className="text-sm md:col-span-2">
-            Base URL
+            {t('aiSettings.baseUrl')}
             <input
               className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               value={baseUrl}
@@ -209,7 +216,7 @@ export default function AiSettingsPage() {
             />
           </label>
           <label className="text-sm">
-            Model
+            {t('aiSettings.model')}
             <input
               className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               value={model}
@@ -217,7 +224,9 @@ export default function AiSettingsPage() {
             />
           </label>
           <label className="text-sm">
-            API key {selectedCatalog?.requiresApiKey ? '' : '(optional)'}
+            {selectedCatalog?.requiresApiKey
+              ? t('aiSettings.apiKey')
+              : t('aiSettings.apiKeyOptional')}
             <input
               className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               type="password"
@@ -225,8 +234,8 @@ export default function AiSettingsPage() {
               onChange={(e) => setApiKey(e.target.value)}
             />
           </label>
-          <button type="submit" className="h-10 rounded-md bg-accent text-white md:col-span-2">
-            Save profile
+          <button type="submit" className="h-10 rounded-xl bg-primary text-white md:col-span-2">
+            {t('aiSettings.saveProfile')}
           </button>
         </form>
       </Panel>

@@ -1,6 +1,6 @@
 {
   "name": "openeventhub",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "description": "AI-powered open-source Event Intelligence Platform",
   "license": "Apache-2.0",
@@ -42,10 +42,13 @@
     "db:generate": "npm run generate --workspace=@openeventhub/database",
     "db:migrate": "npm run migrate --workspace=@openeventhub/database",
     "db:seed": "npm run seed --workspace=@openeventhub/database",
-    "db:studio": "npm run studio --workspace=@openeventhub/database"
+    "db:seed:demo": "npx tsx packages/database/prisma/seed-demo-events.ts",
+    "db:studio": "npm run studio --workspace=@openeventhub/database",
+    "screenshots:ui": "bash scripts/capture-ui-screenshots.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.13.10",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",

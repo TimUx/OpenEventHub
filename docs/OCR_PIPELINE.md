@@ -1,6 +1,8 @@
 # OCR Pipeline
 
-Supported formats:
+> Sprache: Deutsch (primär) · [English](en/OCR_PIPELINE.md)
+
+Unterstützte Formate:
 
 - PDF
 - PNG
@@ -9,20 +11,20 @@ Supported formats:
 - WEBP
 - TIFF
 
-Steps
+Schritte
 
-1. File validation
-2. OCR text extraction
-3. Language detection
-4. LLM interpretation
-5. Event field extraction
-6. Structured JSON output
+1. Dateivalidierung
+2. OCR-Textextraktion
+3. Spracherkennung
+4. LLM-Interpretation
+5. Extraktion der Event-Felder
+6. Strukturierte JSON-Ausgabe
 
-In the running system (M5+): steps 1–3 are handled by `ocr-service` (Tesseract).
-Steps 4–6 are handled by `ai-service` after OCR enqueues an `ai` job with the
-extracted text. Image-only PDF rasterization (poppler) is a follow-up.
+Im laufenden System (M5+): Schritte 1–3 übernimmt `ocr-service` (Tesseract).
+Schritte 4–6 übernimmt `ai-service`, nachdem OCR einen `ai`-Job mit dem
+extrahierten Text enqueued. Rasterisierung bildbasierter PDFs (poppler) folgt später.
 
-Output fields:
+Ausgabefelder:
 
 - title
 - description

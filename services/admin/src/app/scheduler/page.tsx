@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
 
 type Repeatable = {
@@ -15,6 +16,7 @@ type Repeatable = {
 };
 
 export default function SchedulerPage() {
+  const { t } = useI18n();
   const { token } = useAuth();
   const { data, error, loading, reload } = useAdminQuery<Repeatable[]>('/api/v1/admin/scheduler');
   const [message, setMessage] = useState<string | null>(null);
@@ -27,27 +29,27 @@ export default function SchedulerPage() {
       token,
       { method: 'POST' },
     );
-    setMessage(`Reloaded ${result.scheduled} schedule(s)`);
+    setMessage(t('scheduler.reloaded', { count: result.scheduled }));
     await reload();
   }
 
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Scheduler"
-        description="Repeatable crawl schedules registered in BullMQ (UTC)."
+        title={t('scheduler.title')}
+        description={t('scheduler.description')}
         action={
           <button
             type="button"
-            className="rounded-md bg-accent px-3 py-1.5 text-sm text-white"
+            className="rounded-xl bg-primary px-3 py-1.5 text-sm text-white"
             onClick={() => void reloadSchedules()}
           >
-            Reload from sources
+            {t('scheduler.reloadFromSources')}
           </button>
         }
       />
-      {message ? <p className="text-sm text-accent">{message}</p> : null}
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      {message ? <p className="text-sm text-primary">{message}</p> : null}
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <Panel>
         <ul className="space-y-2 text-sm">
@@ -60,13 +62,13 @@ export default function SchedulerPage() {
                 {job.name} · <code>{job.pattern}</code>
               </span>
               <span className="text-[var(--muted)]">
-                next {job.next ? new Date(job.next).toLocaleString() : '—'}
+                {t('common.next')} {job.next ? new Date(job.next).toLocaleString() : '—'}
               </span>
             </li>
           ))}
         </ul>
         {!loading && (data?.length ?? 0) === 0 ? (
-          <p className="text-sm text-[var(--muted)]">No repeatable jobs registered.</p>
+          <p className="text-sm text-[var(--muted)]">{t('scheduler.empty')}</p>
         ) : null}
       </Panel>
     </div>

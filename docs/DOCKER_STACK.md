@@ -1,24 +1,27 @@
 # Docker Stack (Swarm)
 
-Production deployment targets Docker Swarm. The stack file is `docker/stack/docker-stack.yml`.
+> Sprache: Deutsch (primär) · [English](en/DOCKER_STACK.md)
 
-## Requirements
+Das Production-Deployment zielt auf Docker Swarm. Die Stack-Datei ist `docker/stack/docker-stack.yml`.
 
-- Overlay networks (`edge`, `internal`)
-- External Docker secrets (see below)
+## Anforderungen
+
+- Overlay-Netzwerke (`edge`, `internal` mit `internal: true`)
+- Externe Docker Secrets (siehe unten)
 - Configs (`postgres_init_extensions`)
-- Rolling updates with rollback (`start-first`, `failure_action: rollback`)
-- Placement constraints (`oeh.storage=true` for Postgres and SeaweedFS)
-- Resource limits on every service
-- Images from GHCR (`ghcr.io/<owner>/openeventhub-<service>:<version>`)
+- Rolling Updates mit Rollback (`start-first`, `failure_action: rollback`)
+- Placement Constraints (`oeh.storage=true` für Postgres und SeaweedFS)
+- Ressourcenlimits auf jedem Service
+- Images aus GHCR (`ghcr.io/<owner>/openeventhub-<service>:<version>`)
+- Host-Ports nur an Traefik (HTTP/HTTPS); Worker und Datenspeicher bleiben internal-only
 
-## Validate without Swarm
+## Validieren ohne Swarm
 
 ```bash
 npm run validate:stack
 ```
 
-## Bootstrap secrets
+## Secrets bootstrapen
 
 ```bash
 docker swarm init   # once
@@ -26,29 +29,29 @@ docker node update --label-add oeh.storage=true <node-id>
 ./scripts/stack-init-secrets.sh
 ```
 
-Secrets created: `postgres_password`, `redis_password`, `s3_secret_key`, `auth_jwt_secret`, `settings_encryption_key`, `database_url`.
+Erzeugte Secrets: `postgres_password`, `redis_password`, `s3_secret_key`, `auth_jwt_secret`, `settings_encryption_key`, `database_url`.
 
-NestJS services load `/run/secrets/*` via `docker/scripts/load-secrets-entrypoint.sh` (image ENTRYPOINT).
+NestJS-Services laden `/run/secrets/*` über `docker/scripts/load-secrets-entrypoint.sh` (Image-ENTRYPOINT).
 
 ## Deploy
 
 ```bash
-export SERVICE_VERSION=0.11.0
+export SERVICE_VERSION=0.12.0
 export GITHUB_OWNER=timux   # GHCR namespace
 docker stack deploy -c docker/stack/docker-stack.yml openeventhub
 docker stack services openeventhub
 ```
 
-Traefik publishes HTTP/HTTPS on the manager and routes:
+Traefik veröffentlicht HTTP/HTTPS auf dem Manager und routet:
 
 - `api.${DOMAIN}` → API
 - `${DOMAIN}` / `www.${DOMAIN}` → frontend
 - `admin.${DOMAIN}` → admin
 
-## Rolling updates
+## Rolling Updates
 
-`update_config` uses parallelism 1, `start-first`, and automatic rollback on failure. Override replica counts with `API_REPLICAS`, `FRONTEND_REPLICAS`, `CRAWLER_REPLICAS`.
+`update_config` nutzt Parallelität 1, `start-first` und automatischen Rollback bei Fehler. Replica-Counts überschreiben mit `API_REPLICAS`, `FRONTEND_REPLICAS`, `CRAWLER_REPLICAS`.
 
-## Local alternative
+## Lokale Alternative
 
-Development and CI use Docker Compose (`docs/DOCKER_COMPOSE.md`). Stack is the production path.
+Development und CI nutzen Docker Compose (`docs/DOCKER_COMPOSE.md`). Stack ist der Production-Pfad.

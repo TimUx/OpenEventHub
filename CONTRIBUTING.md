@@ -1,22 +1,23 @@
-# Contributing to OpenEventHub
+# Mitwirken an OpenEventHub
 
-Thank you for contributing. OpenEventHub is documentation-driven:
-**`docs/` always wins** over informal implementation shortcuts.
+Danke für deinen Beitrag. OpenEventHub ist dokumentationsgetrieben:
+**`docs/` (Deutsch, verbindlich)** hat Vorrang vor informellen Shortcuts. Englisch: [`docs/en/`](docs/en/).
 
-Full local workflows: [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md).
-Cursor / agent rules: [`docs/CURSOR_DEVELOPMENT.md`](docs/CURSOR_DEVELOPMENT.md), [`AGENTS.md`](AGENTS.md).
-Release / changelog rules: [`docs/RELEASE.md`](docs/RELEASE.md).
-CI: [`docs/CI_CD.md`](docs/CI_CD.md).
+Lokale Workflows: [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md).
+Cursor-/Agent-Regeln: [`docs/CURSOR_DEVELOPMENT.md`](docs/CURSOR_DEVELOPMENT.md), [`AGENTS.md`](AGENTS.md).
+Release: [`docs/RELEASE.md`](docs/RELEASE.md) · CI: [`docs/CI_CD.md`](docs/CI_CD.md).
 
-## Principles
+[English version](CONTRIBUTING.en.md)
 
-- Container First — develop and run via Docker Compose / Stack
-- One milestone at a time (`docs/ROADMAP.md`)
-- Plugin First for new sources (`docs/PLUGIN_DEVELOPMENT.md`)
-- Prompts only in `prompts/`
+## Prinzipien
+
+- Container First — Entwickeln und Betreiben über Docker Compose / Stack
+- Ein Milestone nach dem anderen (`docs/ROADMAP.md`)
+- Plugin First für neue Quellen (`docs/PLUGIN_DEVELOPMENT.md`)
+- Prompts nur unter `prompts/`
 - Conventional Commits + SemVer
 
-## Development setup
+## Setup
 
 ```bash
 cp .env.example .env
@@ -25,11 +26,7 @@ npm run db:migrate && npm run db:seed
 npm run stack:up
 ```
 
-URLs and env keys: `docs/DEVELOPER_GUIDE.md`, `docs/DOCKER_COMPOSE.md`.
-
-## Quality gates
-
-Prefer containerized tooling (no host Node dependency):
+## Quality Gates
 
 ```bash
 npm run tools:check
@@ -38,27 +35,8 @@ npm run validate:compose
 npm run validate:stack
 ```
 
-Or with a local Node 20+ install:
+## Pull Requests
 
-```bash
-npm ci
-npm run format:check
-npm run lint
-npm run typecheck
-npm test
-npm run verify:plugins
-npm run validate:compose
-```
-
-## Pull requests
-
-1. Branch from `main` or `develop` (`feature/*`, `bugfix/*`, `hotfix/*`) — see `docs/GITHUB_WORKFLOW.md`
-2. Keep PRs scoped to a single milestone concern
-3. Update docs when behavior or architecture changes
-4. Include tests for new behavior
-5. Ensure quality gates are green
-6. For milestone completion: update `CHANGELOG.md` per `docs/RELEASE.md`
-
-## Architecture decisions
-
-Non-trivial decisions need an ADR under `architecture/adr/` using `docs/ADR_GUIDE.md`.
+- Kleine, reviewbare PRs
+- Tests und Docs mitliefern
+- Conventional-Commit-Titel

@@ -49,7 +49,7 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="font-display text-3xl">{title}</h1>
+        <h1 className="font-bold text-3xl">{title}</h1>
         {description ? <p className="mt-1 text-sm text-[var(--muted)]">{description}</p> : null}
       </div>
       {action}
@@ -73,7 +73,7 @@ export function Panel({
 
 export function StatusPill({ value }: { readonly value: string }) {
   return (
-    <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs uppercase tracking-wide text-accent">
+    <span className="rounded-xl bg-primary-soft px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
       {value}
     </span>
   );

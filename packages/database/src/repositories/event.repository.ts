@@ -1,4 +1,4 @@
-import type { Event, Prisma, PrismaClient } from '@prisma/client';
+import type { Category, Event, Prisma, PrismaClient, Venue } from '@prisma/client';
 import { EventStatus } from '@prisma/client';
 
 export type EventListOptions = {
@@ -9,6 +9,22 @@ export type EventListOptions = {
 export type EventSearchOptions = EventListOptions & {
   readonly q: string;
 };
+
+export type EventWithRelations = Event & {
+  readonly venue: Venue | null;
+  readonly categories: ReadonlyArray<{
+    readonly category: Category;
+  }>;
+};
+
+const publishedInclude = {
+  venue: true,
+  categories: {
+    include: {
+      category: true,
+    },
+  },
+} satisfies Prisma.EventInclude;
 
 export class EventRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -25,13 +41,14 @@ export class EventRepository {
     return this.prisma.event.findUnique({ where: { slug } });
   }
 
-  findPublishedById(id: string): Promise<Event | null> {
+  findPublishedById(id: string): Promise<EventWithRelations | null> {
     return this.prisma.event.findFirst({
       where: { id, status: EventStatus.published },
+      include: publishedInclude,
     });
   }
 
-  listPublished(options: EventListOptions = {}): Promise<Event[]> {
+  listPublished(options: EventListOptions = {}): Promise<EventWithRelations[]> {
     const take = Math.min(Math.max(options.limit ?? 50, 1), 100);
     const skip = Math.max(options.offset ?? 0, 0);
     return this.prisma.event.findMany({
@@ -39,6 +56,7 @@ export class EventRepository {
       orderBy: { startAt: 'asc' },
       take,
       skip,
+      include: publishedInclude,
     });
   }
 
@@ -58,7 +76,7 @@ export class EventRepository {
       .then((rows) => Object.fromEntries(rows.map((row) => [row.status, row._count._all])));
   }
 
-  searchPublished(options: EventSearchOptions): Promise<Event[]> {
+  searchPublished(options: EventSearchOptions): Promise<EventWithRelations[]> {
     const take = Math.min(Math.max(options.limit ?? 50, 1), 100);
     const skip = Math.max(options.offset ?? 0, 0);
     const q = options.q.trim();
@@ -73,11 +91,21 @@ export class EventRepository {
           { title: { contains: q, mode: 'insensitive' } },
           { summary: { contains: q, mode: 'insensitive' } },
           { description: { contains: q, mode: 'insensitive' } },
+          { venue: { name: { contains: q, mode: 'insensitive' } } },
+          { venue: { city: { contains: q, mode: 'insensitive' } } },
+          {
+            categories: {
+              some: {
+                category: { name: { contains: q, mode: 'insensitive' } },
+              },
+            },
+          },
         ],
       },
       orderBy: { startAt: 'asc' },
       take,
       skip,
+      include: publishedInclude,
     });
   }
 }

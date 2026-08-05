@@ -1,5 +1,7 @@
 # Queue & Workers
 
+> Sprache: Deutsch (primär) · [English](en/QUEUE_AND_WORKERS.md)
+
 Redis + BullMQ
 
 Queues:
@@ -11,4 +13,4 @@ Queues:
 - Search Index
 - Notifications
 
-Workers are stateless and horizontally scalable.
+Worker sind zustandslos und horizontal skalierbar.

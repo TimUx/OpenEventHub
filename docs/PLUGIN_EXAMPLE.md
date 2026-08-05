@@ -1,15 +1,17 @@
 # Example Plugin — HTML Table
 
-This walkthrough matches the code in `plugins/html/` (verified against the
-crawler loader and Plugin SDK contracts).
+> Sprache: Deutsch (primär) · [English](en/PLUGIN_EXAMPLE.md)
 
-## Goal
+Dieser Walkthrough entspricht dem Code in `plugins/html/` (geprüft gegen
+Crawler-Loader und Plugin-SDK-Verträge).
 
-Parse an HTML page with event rows into `ExtractedEventFields[]` without touching
-the database. The crawler stores raw fetch bytes, then hands normalized events
-downstream (AI / OCR queues as configured).
+## Ziel
 
-## Files
+Eine HTML-Seite mit Event-Zeilen in `ExtractedEventFields[]` parsen, ohne die
+Datenbank anzufassen. Der Crawler speichert die Raw-Fetch-Bytes und reicht
+normalisierte Events weiter (AI-/OCR-Queues je nach Konfiguration).
+
+## Dateien
 
 ```
 plugins/html/
@@ -30,26 +32,26 @@ plugins/html/
 
 ### Factory
 
-`index.js` exports `createPlugin` (and `default`). The registry does:
+`index.js` exportiert `createPlugin` (und `default`). Die Registry macht:
 
 ```js
 const factory = mod.createPlugin ?? mod.default;
 const plugin = await factory();
 ```
 
-## Lifecycle in this plugin
+## Lebenszyklus in diesem Plugin
 
 | Step | Behavior |
 |------|----------|
-| `initialize` | No-op (stateless) |
-| `discover` | Returns `[context.sourceUrl]` |
-| `fetch` | `fetchUrlToBuffer(sourceUrl)` from `plugins/utils/fetch-url.js` |
-| `parse` | Finds `<tr>` with `data-oeh-event`, `data-event`, or class `oeh-event`; falls back to all `<tr>` |
-| `normalize` | Reads cells with classes `title`, `summary`, `description`, `start-at`/`start`, `end-at`/`end`; builds events with confidence ~0.9 when title+start exist |
-| `emit` | Returns `normalized.events` |
+| `initialize` | No-op (zustandslos) |
+| `discover` | Gibt `[context.sourceUrl]` zurück |
+| `fetch` | `fetchUrlToBuffer(sourceUrl)` aus `plugins/utils/fetch-url.js` |
+| `parse` | Findet `<tr>` mit `data-oeh-event`, `data-event` oder Klasse `oeh-event`; Fallback: alle `<tr>` |
+| `normalize` | Liest Zellen mit Klassen `title`, `summary`, `description`, `start-at`/`start`, `end-at`/`end`; baut Events mit Confidence ~0.9, wenn Title+Start vorhanden |
+| `emit` | Gibt `normalized.events` zurück |
 | `healthCheck` | `{ status: 'ok' }` |
 
-## Sample markup the plugin expects
+## Erwartetes Beispiel-Markup
 
 ```html
 <tr data-oeh-event>
@@ -61,30 +63,30 @@ const plugin = await factory();
 </tr>
 ```
 
-## Wire it into the platform
+## In die Plattform einbinden
 
-1. Ensure the crawler image includes `plugins/` (`PLUGINS_DIR=/app/plugins`)
-2. Admin → Sources → create:
+1. Sicherstellen, dass das Crawler-Image `plugins/` enthält (`PLUGINS_DIR=/app/plugins`)
+2. Admin → Sources → anlegen:
    - **pluginType:** `html`
-   - **url:** page URL (or `file://…` in local experiments)
-   - **scheduleCron:** e.g. `0 */6 * * *` (UTC) or empty for manual only
-3. **Crawl now** enqueues BullMQ `crawl` with `{ sourceId }`
-4. Confirm a crawl job appears under Admin → Crawler
+   - **url:** Seiten-URL (oder `file://…` in lokalen Experimenten)
+   - **scheduleCron:** z. B. `0 */6 * * *` (UTC) oder leer nur für manuell
+3. **Crawl now** enqueued BullMQ `crawl` mit `{ sourceId }`
+4. Unter Admin → Crawler prüfen, dass ein Crawl-Job erscheint
 
-## Verify
+## Prüfen
 
 ```bash
 npm run verify:plugins
 ```
 
-Expected: `html`, `rss`, and `ics` each load and report `metadata.pluginType`.
+Erwartung: `html`, `rss` und `ics` laden jeweils und melden `metadata.pluginType`.
 
-## Sibling examples
+## Geschwister-Beispiele
 
 | Plugin | `pluginType` | Parse target |
 |--------|--------------|--------------|
 | RSS | `rss` | `<item>` / `pubDate` |
 | ICS | `ics` | `VEVENT` / `DTSTART` |
 
-Copy `plugins/html/` as a skeleton when adding a new type; change `pluginType`,
-parse/normalize logic, and Admin source rows — not the crawler core.
+`plugins/html/` als Skelett kopieren, wenn ein neuer Typ hinzukommt; `pluginType`,
+Parse-/Normalize-Logik und Admin-Source-Zeilen ändern — nicht den Crawler-Core.

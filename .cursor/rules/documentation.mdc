@@ -6,7 +6,9 @@ alwaysApply: false
 
 # Documentation & ADRs
 
-- `docs/` is binding; change code to match docs, not the reverse
+- `docs/` is binding; **German is primary**, English mirrors live under `docs/en/`
+- On DE/EN conflict, German wins (`docs/DOCUMENTATION_LANGUAGES.md`)
+- Change code to match docs, not the reverse
 - Non-trivial decisions need an ADR under `architecture/adr/` (`docs/ADR_GUIDE.md`)
 - Milestone completion requires ROADMAP update, CHANGELOG entry, and `architecture/reviews/mN-*.md`
 - Release SemVer process: `docs/RELEASE.md` (distinct from domain `docs/VERSIONING.md`)

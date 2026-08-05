@@ -1,19 +1,21 @@
-# Duplicate Detection
+# Duplikaterkennung
 
-Duplicate signals:
+> Sprache: Deutsch (primär) · [English](en/DEDUPLICATION.md)
 
-- Similar title
-- Same date
-- Same venue
-- Same organizer
-- Similar description
-- Same flyer
-- Similar image hash
+Duplikatsignale:
 
-Decision
+- Ähnlicher Titel
+- Gleiches Datum
+- Gleiches Venue
+- Gleicher Organisator
+- Ähnliche Beschreibung
+- Gleicher Flyer
+- Ähnlicher Image-Hash
 
-Existing Event
-OR
-New Event
+Entscheidung
 
-Multiple sources are linked to one logical event.
+Bestehende Veranstaltung
+ODER
+Neue Veranstaltung
+
+Mehrere Quellen werden mit einer logischen Veranstaltung verknüpft.

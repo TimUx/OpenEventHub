@@ -16,6 +16,16 @@ async function bootstrap(): Promise<void> {
     logger: ['error', 'warn', 'log'],
   });
 
+  const corsOrigins = (process.env.CORS_ORIGINS ??
+    'http://localhost:8088,http://admin.localhost:8088,http://localhost:3100,http://localhost:3101')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+  });
+
   const openApi = new DocumentBuilder()
     .setTitle('OpenEventHub API')
     .setDescription('Versioned public REST API for the Event Intelligence Platform')

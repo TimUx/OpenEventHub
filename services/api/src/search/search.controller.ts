@@ -1,11 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { EventRepository } from '@openeventhub/database';
+
+import { EventsService } from '../events/events.service.js';
 
 @ApiTags('search')
 @Controller('api/v1/search')
 export class SearchController {
-  constructor(private readonly events: EventRepository) {}
+  constructor(private readonly events: EventsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Search published events' })
@@ -13,10 +14,10 @@ export class SearchController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
   search(@Query('q') q = '', @Query('limit') limit?: string, @Query('offset') offset?: string) {
-    return this.events.searchPublished({
+    return this.events.search(
       q,
-      ...(limit ? { limit: Number(limit) } : {}),
-      ...(offset ? { offset: Number(offset) } : {}),
-    });
+      limit ? Number(limit) : undefined,
+      offset ? Number(offset) : undefined,
+    );
   }
 }

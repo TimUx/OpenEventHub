@@ -1,13 +1,15 @@
 # AI Configuration
 
-## Principles
+> Sprache: Deutsch (primär) · [English](en/AI_CONFIGURATION.md)
 
-- Provider credentials and model selection are managed in the **Admin Center**
-  (AI Settings), not via application environment variables.
-- Prompts remain centralized under `prompts/` and are versioned.
-- The active provider can be changed without code changes or redeploys.
+## Prinzipien
 
-## Supported providers
+- Provider-Zugangsdaten und Modellauswahl werden im **Admin Center**
+  (AI Settings) verwaltet, nicht über Umgebungsvariablen der Anwendung.
+- Prompts bleiben zentral unter `prompts/` und sind versioniert.
+- Der aktive Provider kann ohne Codeänderungen oder Redeploys gewechselt werden.
+
+## Unterstützte Provider
 
 | Type | Product examples | API style |
 |------|------------------|-----------|
@@ -19,17 +21,17 @@
 | `ollama` | Local Ollama | OpenAI-compatible (`/v1`) |
 | `custom_openai` | Any OpenAI-compatible gateway | OpenAI-compatible |
 
-## Admin settings
+## Admin-Einstellungen
 
-Operators configure:
+Betreiber konfigurieren:
 
-- Named provider profiles (base URL, API key, model, timeouts)
-- Which profile is **active** for the Event Intelligence Engine
-- Optional per-profile headers / organization ids
+- Benannte Provider-Profile (Base URL, API-Key, Modell, Timeouts)
+- Welches Profil für die Event Intelligence Engine **aktiv** ist
+- Optionale Header / Organization-IDs pro Profil
 
-API keys are stored encrypted at rest.
+API-Keys werden verschlüsselt at rest gespeichert.
 
 ## Runtime
 
-`ai-service` loads the active profile from PostgreSQL when processing BullMQ `ai`
-jobs and instantiates the matching adapter.
+`ai-service` lädt bei der Verarbeitung von BullMQ-`ai`-Jobs das aktive Profil
+aus PostgreSQL und instanziiert den passenden Adapter.

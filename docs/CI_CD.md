@@ -1,36 +1,38 @@
 # CI/CD
 
-GitHub Actions enforce documentation-driven quality gates and SemVer releases.
+> Sprache: Deutsch (primär) · [English](en/CI_CD.md)
+
+GitHub Actions erzwingen dokumentationsgetriebene Quality Gates und SemVer-Releases.
 
 ## Workflows
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `.github/workflows/ci.yml` | Push/PR to `main`, `develop` | Lint, tests, plugin verify, compose/stack/monitoring validate, restore dry-run, Docker builds, security scan |
-| `.github/workflows/release.yml` | Push tag `v*` | Build/push GHCR images + GitHub Release from `CHANGELOG.md` |
+| Workflow | Trigger | Zweck |
+|----------|---------|-------|
+| `.github/workflows/ci.yml` | Push/PR auf `main`, `develop` | Lint, Tests, Plugin-Verify, Compose-/Stack-/Monitoring-Validate, Restore-Dry-Run, Docker-Builds, Security-Scan |
+| `.github/workflows/release.yml` | Push-Tag `v*` | GHCR-Images bauen/pushen + GitHub Release aus `CHANGELOG.md` |
 
-## CI jobs
+## CI-Jobs
 
-1. **Lint, typecheck, unit & contract tests** — Prettier, ESLint, `tsc`, `npm test`, `verify:plugins`
-2. **Compose / Stack integration validate** — `validate:compose`, `validate:stack`, `validate:monitoring`, `restore:dry-run`, plugin contract
-3. **Docker build** — `api`, `frontend`, `admin`, `crawler` (Buildx, no push)
-4. **Security scan** — `npm audit --audit-level=critical`, Trivy filesystem (CRITICAL fails the gate; HIGH is reported)
+1. **Lint, Typecheck, Unit- & Contract-Tests** — Prettier, ESLint, `tsc`, `npm test`, `verify:plugins`
+2. **Compose-/Stack-Integrations-Validate** — `validate:compose`, `validate:stack`, `validate:monitoring`, `restore:dry-run`, Plugin-Contract
+3. **Docker-Build** — `api`, `frontend`, `admin`, `crawler` (Buildx, kein Push)
+4. **Security-Scan** — `npm audit --audit-level=critical`, Trivy-Filesystem (CRITICAL lässt das Gate scheitern; HIGH wird gemeldet)
 
-## Release (SemVer tags)
+## Release (SemVer-Tags)
 
 ```bash
-# After CHANGELOG + version bump per docs/RELEASE.md
+# Nach CHANGELOG + Version-Bump gemäß docs/RELEASE.md
 git tag -a v0.11.0 -m "v0.11.0"
 git push origin v0.11.0
 ```
 
-Images published to GHCR:
+Images werden nach GHCR veröffentlicht:
 
-`ghcr.io/<owner>/openeventhub-<service>:<version>` and `:latest`
+`ghcr.io/<owner>/openeventhub-<service>:<version>` und `:latest`
 
 Services: api, frontend, admin, crawler, scheduler, ocr-service, ai-service, search, worker.
 
-## Local stand-ins
+## Lokale Entsprechungen
 
 ```bash
 npm run tools:check
@@ -41,4 +43,4 @@ npm run validate:monitoring
 npm run restore:dry-run
 ```
 
-See also: `docs/CURSOR_DEVELOPMENT.md`, `docs/RELEASE.md`, `docs/DEPLOYMENT.md`, `AGENTS.md`.
+Siehe auch: `docs/CURSOR_DEVELOPMENT.md`, `docs/RELEASE.md`, `docs/DEPLOYMENT.md`, `AGENTS.md`.

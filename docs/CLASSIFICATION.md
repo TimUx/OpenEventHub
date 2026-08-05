@@ -1,6 +1,8 @@
-# Classification
+# Klassifikation
 
-AI assigns:
+> Sprache: Deutsch (primär) · [English](en/CLASSIFICATION.md)
+
+Die KI weist zu:
 
 - Category
 - Subcategory
@@ -9,4 +11,4 @@ AI assigns:
 - Municipality
 - District
 
-Multiple categories are allowed.
+Mehrere Kategorien sind erlaubt.

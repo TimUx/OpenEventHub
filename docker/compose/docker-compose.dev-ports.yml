@@ -1,0 +1,23 @@
+# Optional host port publishes for local tooling (psql, RedisInsight, aws CLI against S3, …).
+# Not used by default — internal services stay off the host network.
+#
+# Usage:
+#   docker compose \
+#     -f docker/compose/docker-compose.yml \
+#     -f docker/compose/docker-compose.apps.yml \
+#     -f docker/compose/docker-compose.dev-ports.yml \
+#     --env-file .env up -d
+
+services:
+  postgres:
+    ports:
+      - '${POSTGRES_PORT:-15432}:5432'
+
+  redis:
+    ports:
+      - '${REDIS_PORT:-16379}:6379'
+
+  object-storage:
+    ports:
+      - '${S3_API_PORT:-18333}:8333'
+      - '${SEAWEED_ADMIN_PORT:-23646}:23646'

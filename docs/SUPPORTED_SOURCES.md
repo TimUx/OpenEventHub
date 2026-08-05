@@ -1,5 +1,7 @@
 # Supported Source Types
 
+> Sprache: Deutsch (primär) · [English](en/SUPPORTED_SOURCES.md)
+
 - HTML
 - RSS
 - Atom

@@ -1,14 +1,15 @@
+# Architekturentscheidungen
 
-# Architecture Decisions
+> Sprache: Deutsch (primär) · [English](en/DECISIONS.md)
 
-## Why Docker?
-Consistent deployment and development.
+## Warum Docker?
+Konsistentes Deployment und Entwicklungsumgebung.
 
-## Why Plugins?
-Easy extension without touching the core.
+## Warum Plugins?
+Einfache Erweiterung, ohne den Core anzufassen.
 
-## Why AI?
-Regional event sources have no common format.
+## Warum KI?
+Regionale Veranstaltungsquellen haben kein gemeinsames Format.
 
-## Why Event Intelligence?
-The platform aggregates information instead of managing events.
+## Warum Event Intelligence?
+Die Plattform aggregiert Informationen, statt Veranstaltungen zu verwalten.

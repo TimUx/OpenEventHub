@@ -1,4 +1,4 @@
-# Scrape NestJS /metrics endpoints on the Compose/Swarm edge+internal networks.
+# Scrape NestJS /metrics endpoints on the Compose/Swarm internal network.
 # Job names match MONITORING.md metric families.
 
 global:

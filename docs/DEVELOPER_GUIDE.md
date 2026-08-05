@@ -1,92 +1,96 @@
 # Developer Guide
 
-Contributor guide for the running OpenEventHub platform (Compose + Stack).
-Documentation under `docs/` is binding — if code and docs diverge, change the code.
+> Sprache: Deutsch (primär) · [English](en/DEVELOPER_GUIDE.md)
 
-## Principles
+Leitfaden für Mitwirkende an der laufenden OpenEventHub-Plattform (Compose + Stack).
+Dokumentation unter `docs/` ist verbindlich — weichen Code und Docs voneinander ab, ändere den Code.
+
+## Prinzipien
 
 - Clean Architecture / DDD / Hexagonal / SOLID
 - API First · Plugin First · AI First · Container First
-- One milestone at a time (`docs/ROADMAP.md`)
-- No host runtime dependency for **running** the platform (Docker only)
-- Host Node 20+ is optional for contributor tooling; prefer `npm run tools:*`
+- Genau ein Milestone gleichzeitig (`docs/ROADMAP.md`)
+- Keine Host-Runtime-Abhängigkeit für den **Betrieb** der Plattform (nur Docker)
+- Host-Node 20+ ist optional für Contributor-Tooling; bevorzugt `npm run tools:*`
 
-## Repository layout
+## Repository-Layout
 
 ```
-architecture/   ADRs + milestone reviews
-docker/         Compose, Stack, Traefik / Postgres assets
-docs/           Binding documentation
-packages/       Shared libraries (npm workspaces)
-services/       One directory per deployable container
-plugins/        Source connectors (SDK-based)
-prompts/        Centralized LLM prompts (only place for prompts)
-scripts/        Bootstrap and ops helpers
+architecture/   ADRs + Milestone-Reviews
+docker/         Compose, Stack, Traefik-/Postgres-Assets
+docs/           Verbindliche Dokumentation
+packages/       Gemeinsame Bibliotheken (npm Workspaces)
+services/       Ein Verzeichnis pro deploybarem Container
+plugins/        Quellen-Connectoren (SDK-basiert)
+prompts/        Zentrale LLM-Prompts (einziger Ort für Prompts)
+scripts/        Bootstrap- und Ops-Helfer
 ```
 
 ### Packages
 
-| Package | Role |
-|---------|------|
-| `@openeventhub/shared` | Service names, queue names, health helpers, crawl/AI job contracts |
-| `@openeventhub/database` | Prisma schema, client, repositories |
-| `@openeventhub/plugin-sdk` | Crawl plugin TypeScript contracts |
-| `@openeventhub/ai-core` | LLM provider adapters + key encryption |
-| `@openeventhub/service-runtime` | NestJS health / ready / metrics shell |
+| Package | Rolle |
+|---------|-------|
+| `@openeventhub/shared` | Service-Namen, Queue-Namen, Health-Helfer, Crawl-/AI-Job-Contracts |
+| `@openeventhub/database` | Prisma-Schema, Client, Repositories |
+| `@openeventhub/plugin-sdk` | Crawl-Plugin TypeScript-Contracts |
+| `@openeventhub/ai-core` | LLM-Provider-Adapter + Key-Verschlüsselung |
+| `@openeventhub/service-runtime` | NestJS Health-/Ready-/Metrics-Shell |
 
 ### Services
 
-| Service | Port (container) | Role |
-|---------|------------------|------|
-| `api` | 3000 | REST `/api/v1`, GraphQL, OpenAPI, admin APIs |
-| `frontend` | 3100 | Public portal |
-| `admin` | 3101 | Operator center |
-| `scheduler` | — | Registers repeatable crawl jobs from `Source.scheduleCron` |
-| `crawler` | — | Plugin crawl pipeline + object storage |
-| `ocr-service` | — | Tesseract OCR queue consumer |
+| Service | Port (Container) | Rolle |
+|---------|------------------|-------|
+| `api` | 3000 | REST `/api/v1`, GraphQL, OpenAPI, Admin-APIs |
+| `frontend` | 3100 | Öffentliches Portal |
+| `admin` | 3101 | Operator-Center |
+| `scheduler` | — | Registriert wiederholbare Crawl-Jobs aus `Source.scheduleCron` |
+| `crawler` | — | Plugin-Crawl-Pipeline + Objektspeicher |
+| `ocr-service` | — | Tesseract-OCR-Queue-Consumer |
 | `ai-service` | — | Event Intelligence Engine |
-| `search` | — | Search index worker (shell) |
-| `worker` | — | Generic worker shell |
+| `search` | — | Suchindex-Worker (Shell) |
+| `worker` | — | Generische Worker-Shell |
 
-Communication: HTTP APIs and Redis/BullMQ queues (`docs/COMMUNICATION.md`, `docs/QUEUE_AND_WORKERS.md`).
+Kommunikation: HTTP-APIs und Redis/BullMQ-Queues (`docs/COMMUNICATION.md`, `docs/QUEUE_AND_WORKERS.md`).
 
-## Local stack (day one)
+## Lokaler Stack (Tag eins)
 
-Requirements: Docker Engine + Docker Compose v2.
+Voraussetzungen: Docker Engine + Docker Compose v2.
 
 ```bash
 cp .env.example .env
-# Edit secrets in .env (never commit real secrets)
+# Secrets in .env bearbeiten (niemals echte Secrets committen)
 
 npm run infra:bootstrap   # Traefik, Postgres, Redis, SeaweedFS
-npm run db:migrate        # or: bash scripts/db-migrate.sh
-npm run db:seed           # or: bash scripts/db-seed.sh
-npm run apps:up           # build + start all app containers
-npm run apps:health       # wait until healthy
+bash scripts/db-migrate.sh  # Container am internal-Netz (bevorzugt)
+# npm run db:migrate      # Host-Node nur mit docker-compose.dev-ports.yml
+
+npm run db:seed           # oder: bash scripts/db-seed.sh
+npm run apps:up           # alle App-Container bauen + starten
+npm run apps:health       # warten bis healthy
 ```
 
-Shortcut after `.env` exists:
+Shortcut, sobald `.env` existiert:
 
 ```bash
 npm run stack:up          # apps:up + apps:health
 ```
 
-### Useful URLs (defaults from `.env.example`)
+### Nützliche URLs (Defaults aus `.env.example`)
 
-| Entry | URL |
-|-------|-----|
+| Einstieg | URL |
+|----------|-----|
 | Frontend | http://localhost:8088 |
 | API | http://api.localhost:8088 |
 | OpenAPI | http://api.localhost:8088/api/docs |
 | GraphQL | http://api.localhost:8088/graphql |
 | Admin | http://admin.localhost:8088 |
-| Traefik dashboard | http://localhost:18080 |
+| Traefik-Dashboard | http://traefik.localhost:8088 |
 
-Bootstrap admin (from `.env`): `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`.
+Bootstrap-Admin (aus `.env`): `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`.
 
-AI provider keys are **not** set via env — configure them in Admin → AI Settings after login.
+AI-Provider-Keys werden **nicht** per Env gesetzt — nach Login unter Admin → AI Settings konfigurieren.
 
-### Ops helpers
+### Ops-Helfer
 
 ```bash
 npm run infra:ps
@@ -96,21 +100,21 @@ npm run validate:compose
 npm run validate:stack
 ```
 
-Script details: `scripts/bootstrap-infra.sh`, `check-infra-health.sh`, `check-apps-health.sh`,
+Script-Details: `scripts/bootstrap-infra.sh`, `check-infra-health.sh`, `check-apps-health.sh`,
 `db-migrate.sh`, `db-seed.sh`, `run-in-node.sh`, `verify-plugins.sh`.
 
-## Contributor tooling
+## Contributor-Tooling
 
-Prefer containerized Node 22 (no host dependency):
+Bevorzugt containerisiertes Node 22 (keine Host-Abhängigkeit):
 
 ```bash
-npm run tools:check       # ci-like: format, lint, typecheck, test
+npm run tools:check       # CI-ähnlich: Format, Lint, Typecheck, Test
 npm run tools:lint
 npm run tools:test
-npm run verify:plugins    # plugin.json + createPlugin smoke check
+npm run verify:plugins    # plugin.json + createPlugin Smoke-Check
 ```
 
-With a local Node ≥ 20.11:
+Mit lokalem Node ≥ 20.11:
 
 ```bash
 npm ci
@@ -122,56 +126,56 @@ npm run verify:plugins
 npm run validate:compose
 ```
 
-## Environment
+## Umgebung
 
-Copy `.env.example` → `.env`. Contributors usually need:
+`.env.example` → `.env` kopieren. Contributors brauchen üblicherweise:
 
 - `POSTGRES_*`, `DATABASE_URL`
 - `REDIS_PASSWORD`
-- `S3_*` / SeaweedFS ports
+- `S3_*` / SeaweedFS-Ports
 - `SETTINGS_ENCRYPTION_KEY`, `AUTH_JWT_SECRET`
 - `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD`
 - `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `API_INTERNAL_URL`
-- Traefik ports (`TRAEFIK_HTTP_PORT`, …)
+- Traefik-Ports (`TRAEFIK_HTTP_PORT`, …)
 
-Optional: `PLUGINS_DIR` (Compose crawler defaults to `/app/plugins` baked into the image).
+Optional: `PLUGINS_DIR` (Compose-Crawler defaultet auf `/app/plugins` im Image).
 
-## Working on plugins
+## An Plugins arbeiten
 
-New sources = plugins only. Do not change crawler core for a new source type.
+Neue Quellen = nur Plugins. Crawler-Core für einen neuen Quellentyp nicht ändern.
 
-1. Read `docs/PLUGIN_SDK.md` and `docs/PLUGIN_DEVELOPMENT.md`
-2. Follow the worked example in `docs/PLUGIN_EXAMPLE.md` (`plugins/html`)
-3. Add `plugins/<name>/plugin.json` + `index.js`
-4. Rebuild crawler (`npm run apps:up`) so the image picks up plugins
-5. Create a Source in Admin with matching `pluginType`
-6. Run `npm run verify:plugins`
+1. `docs/PLUGIN_SDK.md` und `docs/PLUGIN_DEVELOPMENT.md` lesen
+2. Ausgearbeitetes Beispiel in `docs/PLUGIN_EXAMPLE.md` (`plugins/html`) folgen
+3. `plugins/<name>/plugin.json` + `index.js` anlegen
+4. Crawler neu bauen (`npm run apps:up`), damit das Image Plugins übernimmt
+5. Source im Admin mit passendem `pluginType` anlegen
+6. `npm run verify:plugins` ausführen
 
-## Working on API / Admin / Frontend
+## An API / Admin / Frontend arbeiten
 
-- Public API: `docs/API.md`, `docs/REST_ENDPOINTS.md`
-- Admin center: `docs/ADMIN_CENTER.md` (UI at `admin.localhost`)
+- Öffentliche API: `docs/API.md`, `docs/REST_ENDPOINTS.md`
+- Admin Center: `docs/ADMIN_CENTER.md` (UI unter `admin.localhost`)
 - Frontend: `docs/FRONTEND.md`, `docs/SEO.md`
-- Contract/unit tests live next to services (`*.test.ts`); run via workspace or `tools:test`
+- Contract-/Unit-Tests liegen neben den Services (`*.test.ts`); Ausführung über Workspace oder `tools:test`
 
-## Milestone & git discipline
+## Milestone- & Git-Disziplin
 
-1. Implement **exactly one** milestone from `docs/ROADMAP.md`
-2. Exit criteria: code + tests + docs + architecture review note
-3. Conventional Commits; SemVer release notes in `CHANGELOG.md` (see `docs/RELEASE.md`)
-4. Prefer small commits; do not invent architecture that contradicts ADRs
+1. **Genau einen** Milestone aus `docs/ROADMAP.md` umsetzen
+2. Exit-Kriterien: Code + Tests + Docs + Architecture-Review-Note
+3. Conventional Commits; SemVer-Release-Notes in `CHANGELOG.md` (siehe `docs/RELEASE.md`)
+4. Kleine Commits bevorzugen; keine Architektur erfinden, die ADRs widerspricht
 
-## Where to read next
+## Weiterlesen
 
-| Topic | Doc |
+| Thema | Doc |
 |-------|-----|
-| Architecture | `docs/ARCHITECTURE.md` |
-| Data model | `docs/DATA_MODEL.md`, `docs/DATABASE_SCHEMA.md` |
+| Architektur | `docs/ARCHITECTURE.md` |
+| Datenmodell | `docs/DATA_MODEL.md`, `docs/DATABASE_SCHEMA.md` |
 | Crawler | `docs/CRAWLER_FRAMEWORK.md` |
 | Queues | `docs/QUEUE_AND_WORKERS.md` |
 | Compose | `docs/DOCKER_COMPOSE.md` |
-| Coding standards | `docs/CODING_STANDARDS.md` |
+| Coding Standards | `docs/CODING_STANDARDS.md` |
 | Testing | `docs/TESTING.md` |
 | Releases | `docs/RELEASE.md` |
-| Cursor / agents | `docs/CURSOR_DEVELOPMENT.md`, `AGENTS.md` |
+| Cursor / Agents | `docs/CURSOR_DEVELOPMENT.md`, `AGENTS.md` |
 | CI/CD | `docs/CI_CD.md` |

@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { adminFetch } from '../../lib/api';
 import { useAuth } from '../../components/auth-provider';
+import { useI18n } from '../../i18n/i18n-provider';
 
 type Source = {
   id: string;
@@ -18,6 +19,7 @@ type Source = {
 };
 
 export default function SourcesPage() {
+  const { t } = useI18n();
   const { token } = useAuth();
   const { data, error, loading, reload } = useAdminQuery<Source[]>('/api/v1/admin/sources');
   const [message, setMessage] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function SourcesPage() {
     });
     setName('');
     setUrl('');
-    setMessage('Source created');
+    setMessage(t('sources.created'));
     await reload();
   }
 
@@ -44,7 +46,7 @@ export default function SourcesPage() {
     if (!token) return;
     setMessage(null);
     await adminFetch(`/api/v1/admin/sources/${id}/crawl`, token, { method: 'POST' });
-    setMessage('Crawl enqueued');
+    setMessage(t('sources.crawlEnqueued'));
     await reload();
   }
 
@@ -59,26 +61,23 @@ export default function SourcesPage() {
 
   async function remove(id: string) {
     if (!token) return;
-    if (!window.confirm('Delete this source?')) return;
+    if (!window.confirm(t('sources.confirmDelete'))) return;
     await adminFetch(`/api/v1/admin/sources/${id}`, token, { method: 'DELETE' });
     await reload();
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Sources"
-        description="Manage crawl sources, schedules, and manual triggers."
-      />
-      {message ? <p className="text-sm text-accent">{message}</p> : null}
+      <PageHeader title={t('sources.title')} description={t('sources.description')} />
+      {message ? <p className="text-sm text-primary">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <Panel>
-        <h2 className="mb-3 font-display text-lg">Add source</h2>
+        <h2 className="mb-3 font-bold text-lg">{t('sources.addSource')}</h2>
         <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onCreate(e)}>
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3"
-            placeholder="Name"
+            placeholder={t('sources.name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -94,24 +93,24 @@ export default function SourcesPage() {
           </select>
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3 md:col-span-2"
-            placeholder="URL"
+            placeholder={t('sources.url')}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
           />
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3"
-            placeholder="Cron (UTC)"
+            placeholder={t('sources.cronUtc')}
             value={scheduleCron}
             onChange={(e) => setScheduleCron(e.target.value)}
           />
-          <button type="submit" className="h-10 rounded-md bg-accent text-white">
-            Create
+          <button type="submit" className="h-10 rounded-xl bg-primary text-white">
+            {t('common.create')}
           </button>
         </form>
       </Panel>
 
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       <div className="space-y-3">
         {(data ?? []).map((source) => (
           <Panel key={source.id}>
@@ -122,8 +121,12 @@ export default function SourcesPage() {
                   {source.pluginType} · {source.url}
                 </p>
                 <p className="mt-1 text-xs text-[var(--muted)]">
-                  Cron: {source.scheduleCron ?? '—'} · Last crawl:{' '}
-                  {source.lastCrawlAt ? new Date(source.lastCrawlAt).toLocaleString() : 'never'}
+                  {t('sources.cronLabel', {
+                    cron: source.scheduleCron ?? '—',
+                    last: source.lastCrawlAt
+                      ? new Date(source.lastCrawlAt).toLocaleString()
+                      : t('common.never'),
+                  })}
                 </p>
                 {source.lastError ? (
                   <p className="mt-1 text-xs text-red-700">{source.lastError}</p>
@@ -136,21 +139,21 @@ export default function SourcesPage() {
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
                   onClick={() => void crawl(source.id)}
                 >
-                  Crawl now
+                  {t('sources.crawlNow')}
                 </button>
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
                   onClick={() => void disable(source.id)}
                 >
-                  Disable
+                  {t('sources.disable')}
                 </button>
                 <button
                   type="button"
                   className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-700"
                   onClick={() => void remove(source.id)}
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
               </div>
             </div>

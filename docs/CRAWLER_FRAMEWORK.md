@@ -1,13 +1,15 @@
 # Crawler Framework
 
-## Goals
+> Sprache: Deutsch (primär) · [English](en/CRAWLER_FRAMEWORK.md)
 
-- Discover new events automatically
-- Run continuously using scheduled jobs
-- Support thousands of sources
-- Plugin based architecture
-- Fault tolerant
-- Horizontally scalable
+## Ziele
+
+- Neue Veranstaltungen automatisch entdecken
+- Dauerhaft über geplante Jobs laufen
+- Tausende Quellen unterstützen
+- Plugin-basierte Architektur
+- Fehlertolerant
+- Horizontal skalierbar
 
 ## Pipeline
 
@@ -28,16 +30,17 @@ flowchart LR
 
 | Component | Role |
 |-----------|------|
-| `scheduler` | Loads `Source.scheduleCron` and registers BullMQ repeatable jobs on `crawl` |
-| `crawler` | Consumes `crawl`, runs plugin lifecycle, stores raw payloads, skips unchanged hashes |
-| `ocr-service` | Consumes `ocr` for image/PDF-marked payloads, writes `.ocr.txt`, enqueues `ai` |
-| `ai-service` | Consumes `ai` (Event Intelligence Engine) |
-| `plugins/*` | Independently deployable connectors (`html`, `rss`, `ics`) via Plugin SDK |
+| `scheduler` | Lädt `Source.scheduleCron` und registriert wiederholbare BullMQ-Jobs auf `crawl` |
+| `crawler` | Konsumiert `crawl`, führt den Plugin-Lebenszyklus aus, speichert Raw-Payloads, überspringt unveränderte Hashes |
+| `ocr-service` | Konsumiert `ocr` für Bild-/PDF-markierte Payloads, schreibt `.ocr.txt`, enqueued `ai` |
+| `ai-service` | Konsumiert `ai` (Event Intelligence Engine) |
+| `plugins/*` | Unabhängig deploybare Connectoren (`html`, `rss`, `ics`) über das Plugin SDK |
 
-New source types are added as plugins under `plugins/` with a `plugin.json` manifest.
-Core services discover them at startup (`PLUGINS_DIR`); no core code changes required.
+Neue Quelltypen werden als Plugins unter `plugins/` mit einem `plugin.json`-Manifest hinzugefügt.
+Core-Services entdecken sie beim Start (`PLUGINS_DIR`); Änderungen am Core-Code sind nicht erforderlich.
 
-## Change detection
+## Änderungserkennung
 
-When a crawl produces the same `contentHash` as a prior successful result for the same
-source, the job is marked `skipped` and downstream OCR/AI jobs are not enqueued.
+Wenn ein Crawl denselben `contentHash` wie ein vorheriges erfolgreiches Ergebnis
+für dieselbe Quelle liefert, wird der Job als `skipped` markiert und nachgelagerte
+OCR-/AI-Jobs werden nicht enqueued.

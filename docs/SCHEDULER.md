@@ -1,13 +1,15 @@
 # Scheduler
 
-Default interval: Daily
+> Sprache: Deutsch (primär) · [English](en/SCHEDULER.md)
 
-Configurable:
-- Hourly
-- Every 6 hours
-- Daily
-- Weekly
-- Monthly
+Standardintervall: täglich
+
+Konfigurierbar:
+- stündlich
+- alle 6 Stunden
+- täglich
+- wöchentlich
+- monatlich
 - Custom cron
 
-Only changed content should be processed whenever possible.
+Wo möglich, soll nur geänderter Inhalt verarbeitet werden.

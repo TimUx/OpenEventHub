@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 
 type Region = {
   id: string;
@@ -11,12 +12,13 @@ type Region = {
 };
 
 export default function RegionsPage() {
+  const { t } = useI18n();
   const { data, error, loading } = useAdminQuery<Region[]>('/api/v1/admin/regions');
 
   return (
     <div>
-      <PageHeader title="Regions" description="Geographic hierarchy for filtering." />
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      <PageHeader title={t('regions.title')} description={t('regions.description')} />
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <div className="grid gap-2 md:grid-cols-2">
         {(data ?? []).map((item) => (

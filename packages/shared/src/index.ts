@@ -25,3 +25,14 @@ export {
   type HealthStatus,
   type ReadinessCheckResult,
 } from './health.js';
+
+export {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
+  SUPPORTED_LOCALES,
+  intlLocale,
+  isLocale,
+  parseAcceptLanguage,
+  resolveLocale,
+  type Locale,
+} from './i18n/locale.js';

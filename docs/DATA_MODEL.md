@@ -1,14 +1,15 @@
+# OpenEventHub-Datenmodell
 
-# OpenEventHub Data Model
+> Sprache: Deutsch (primär) · [English](en/DATA_MODEL.md)
 
-## Core Principles
+## Kernprinzipien
 
-- One logical event can have many sources.
-- Source data is immutable where possible.
-- AI produces normalized event records.
-- Every important change is versioned.
+- Eine logische Veranstaltung kann viele Quellen haben.
+- Quelldaten sind möglichst unveränderlich.
+- Die KI erzeugt normalisierte Event-Datensätze.
+- Jede wichtige Änderung wird versioniert.
 
-## Main Entities
+## Hauptentitäten
 
 - Event
 - EventVersion
@@ -26,7 +27,7 @@
 - ModerationItem
 - UserSubmission
 
-## Entity Relationship
+## Entity-Relationship
 
 ```mermaid
 erDiagram
@@ -43,6 +44,6 @@ erDiagram
     EVENT ||--o{ AI_ANALYSIS : analyzed_by
 ```
 
-## Event Lifecycle
+## Event-Lebenszyklus
 
 Discovery → AI Extraction → Deduplication → Moderation (optional) → Publish → Versioning

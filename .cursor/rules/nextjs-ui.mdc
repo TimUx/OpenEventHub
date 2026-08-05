@@ -9,6 +9,7 @@ alwaysApply: false
 - Stack: Next.js App Router, React, Tailwind, shadcn-style primitives
 - Frontend is public portal; Admin is JWT-gated operator UI
 - Browser calls `NEXT_PUBLIC_API_BASE_URL`; server may use `API_INTERNAL_URL`
+- UI i18n: `de` / `en`; resolve cookie `oeh_locale` → `Accept-Language` → default **`de`**
 - Do not invent purple/Inter default aesthetics; follow existing theme tokens
 - Keep SEO metadata / JSON-LD on public event pages (`docs/SEO.md`)
 - Docs: `docs/FRONTEND.md`, `docs/ADMIN_CENTER.md`, `docs/SEARCH_UI.md`

@@ -1,22 +1,24 @@
 # Event Intelligence Engine (EIE)
 
-## Purpose
+> Sprache: Deutsch (primär) · [English](en/EVENT_INTELLIGENCE_ENGINE.md)
 
-The Event Intelligence Engine is the core component of OpenEventHub.
+## Zweck
 
-Responsibilities:
-- Detect events
-- Extract structured information
-- Merge information from multiple sources
-- Calculate confidence score
-- Detect duplicates
-- Assign categories
-- Detect regions
-- Detect organizers
-- Detect venues
-- Generate searchable metadata
+Die Event Intelligence Engine ist die Kernkomponente von OpenEventHub.
 
-## Processing Pipeline
+Verantwortlichkeiten:
+- Veranstaltungen erkennen
+- Strukturierte Informationen extrahieren
+- Informationen aus mehreren Quellen zusammenführen
+- Confidence Score berechnen
+- Duplikate erkennen
+- Kategorien zuweisen
+- Regionen erkennen
+- Organisatoren erkennen
+- Venues erkennen
+- Durchsuchbare Metadaten erzeugen
+
+## Verarbeitungspipeline
 
 ```mermaid
 flowchart LR

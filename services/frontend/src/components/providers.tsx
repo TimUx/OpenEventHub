@@ -1,9 +1,21 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { Locale } from '@openeventhub/shared';
 import { useState, type ReactNode } from 'react';
 
-export function Providers({ children }: { readonly children: ReactNode }) {
+import { I18nProvider } from '../i18n/i18n-provider';
+import type { Dictionary } from '../i18n/get-dictionary';
+
+export function Providers({
+  children,
+  locale,
+  dictionary,
+}: {
+  readonly children: ReactNode;
+  readonly locale: Locale;
+  readonly dictionary: Dictionary;
+}) {
   const [client] = useState(
     () =>
       new QueryClient({
@@ -16,5 +28,9 @@ export function Providers({ children }: { readonly children: ReactNode }) {
       }),
   );
 
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <I18nProvider locale={locale} dictionary={dictionary}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </I18nProvider>
+  );
 }

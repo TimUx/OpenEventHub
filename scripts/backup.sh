@@ -64,9 +64,10 @@ fi
 OBJECT_STORAGE_NOTE="${DEST}/object-storage/README.txt"
 {
   echo "Object storage backup strategy:"
-  echo "  1. Prefer S3 sync (aws s3 sync / rclone) against SeaweedFS S3 API."
-  echo "  2. Endpoint default: http://localhost:\${S3_API_PORT:-18333}"
-  echo "  3. Bucket: \${S3_BUCKET:-openeventhub}"
+  echo "  1. Prefer S3 sync (aws s3 sync / rclone) against SeaweedFS S3 API on the internal network."
+  echo "  2. From a container on \${COMPOSE_PROJECT_NAME:-openeventhub}_internal: http://object-storage:8333"
+  echo "  3. Optional host access: compose overlay docker-compose.dev-ports.yml (S3_API_PORT)."
+  echo "  4. Bucket: \${S3_BUCKET:-openeventhub}"
   echo
   if command -v aws >/dev/null 2>&1 && [[ -n "${S3_ENDPOINT:-}" ]]; then
     AWS_ACCESS_KEY_ID="${S3_ACCESS_KEY:-openeventhub}" \

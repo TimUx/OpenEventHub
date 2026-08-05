@@ -31,6 +31,8 @@ const sampleEvent = {
   organizerId: null,
   createdAt: new Date('2026-08-01T00:00:00.000Z'),
   updatedAt: new Date('2026-08-01T00:00:00.000Z'),
+  venue: null,
+  categories: [],
 };
 
 describe('API v1 contract', () => {
@@ -104,6 +106,9 @@ describe('API v1 contract', () => {
     const listed = await service.list();
     assert.equal(listed.length, 1);
     assert.equal(listed[0]?.title, 'Open Air');
+    assert.equal(listed[0]?.startAt, '2026-08-15T17:00:00.000Z');
+    assert.equal(listed[0]?.venue, null);
+    assert.deepEqual(listed[0]?.categories, []);
 
     const one = await service.getById(sampleEvent.id);
     assert.equal(one.slug, 'open-air');

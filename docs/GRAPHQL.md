@@ -1,8 +1,10 @@
 # GraphQL
 
+> Sprache: Deutsch (primär) · [English](en/GRAPHQL.md)
+
 Endpoint: `POST /graphql`
 
-Main Queries:
+Haupt-Queries:
 
 - `events`
 - `event`
@@ -10,12 +12,12 @@ Main Queries:
 - `categories`
 - `search`
 
-Main Mutations:
+Haupt-Mutations:
 
 - `submitEvent`
 - `submitSource`
 
-Example:
+Beispiel:
 
 ```graphql
 query {

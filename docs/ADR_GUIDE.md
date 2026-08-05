@@ -1,8 +1,10 @@
-# ADR Guide
+# ADR-Leitfaden
 
-All architectural decisions must be documented as ADRs.
+> Sprache: Deutsch (primär) · [English](en/ADR_GUIDE.md)
 
-Template:
+Alle Architekturentscheidungen müssen als ADRs dokumentiert werden.
+
+Vorlage:
 
 - Context
 - Decision
