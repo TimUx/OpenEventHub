@@ -18,7 +18,7 @@ import {
 } from '../lib/api';
 import { eventHasCoordinates, filterMapEvents } from '../lib/map-events';
 
-const EventMap = dynamic(() => import('./event-map').then((mod) => mod.EventMap), {
+const EventMap = dynamic(() => import('./event-map'), {
   ssr: false,
   loading: () => (
     <div className="flex h-[min(70vh,560px)] min-h-80 items-center justify-center rounded-xl bg-primary-soft text-sm font-semibold text-primary">

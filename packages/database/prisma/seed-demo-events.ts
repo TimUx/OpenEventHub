@@ -217,7 +217,7 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log('Demo events/sources seeded for screenshots.');
+  console.warn('Demo events/sources seeded for screenshots.');
 }
 
 main()

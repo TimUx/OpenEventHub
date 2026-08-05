@@ -25,8 +25,7 @@ export function SiteHeader() {
 
   useEffect(() => {
     const stored = window.localStorage.getItem('oeh-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const enabled = stored ? stored === 'dark' : false;
+    const enabled = stored === 'dark';
     setDark(enabled);
     document.documentElement.classList.toggle('dark', enabled);
   }, []);

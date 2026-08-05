@@ -159,3 +159,5 @@ export function EventMap({
     />
   );
 }
+
+export default EventMap;
