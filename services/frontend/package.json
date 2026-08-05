@@ -11,7 +11,7 @@
     "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts src/lib/calendar-utils.test.ts src/lib/map-events.test.ts"
   },
   "dependencies": {
-    "@openeventhub/shared": "0.1.0",
+    "@openeventhub/shared": "0.2.0",
     "@tanstack/react-query": "^5.69.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
