@@ -153,7 +153,7 @@ export function EventMap({
   return (
     <div
       ref={containerRef}
-      className="h-[min(70vh,560px)] min-h-80 w-full overflow-hidden rounded-xl"
+      className="h-[min(55dvh,520px)] min-h-72 w-full overflow-hidden rounded-xl sm:h-[min(70vh,560px)] sm:min-h-80"
       role="application"
       aria-label={ariaLabel}
     />

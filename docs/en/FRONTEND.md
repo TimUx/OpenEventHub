@@ -13,12 +13,14 @@ Stack:
 
 Flat UI (FestSchmiede-inspired):
 - solid primary/accent (default blue `#1565c0`), secondary/teal (`#00838f`), success green (`#2e7d32`)
-- selectable accent colors in the header (only WCAG AA-safe pairs with contrast text for light/dark)
+- selectable accent colors via a header dropdown (swatch + name; only WCAG AA-safe pairs for light/dark)
 - light/dark mode and accent persist in the browser (`oeh-theme`, `oeh-accent`)
 - no background gradients; light grey + white surfaces
 - Roboto / sans, bold headings
-- rounded buttons (`12px`), flat icons, soft card shadows
-- solid primary app bar (contrast text on accent)
+- rounded buttons (`12px`, uniform height `44px` / `h-11` matching inputs), flat icons, soft card shadows
+- solid primary app bar (contrast text on accent) with a flat brand mark before the app name; favicon under `/brand/`
+- **Responsive:** bottom navigation on phones/tablets (`< lg`), desktop nav from large breakpoints; touch targets ≥ 44px; safe-area insets (notch); 16px inputs to avoid iOS zoom
+- **PWA:** web app manifest, install icons (192/512 + maskable), Apple touch icon, service worker (`/sw.js`) for shell caching; “Add to Home Screen” over HTTPS
 
 Views:
 - Home
@@ -39,6 +41,16 @@ Event actions (list, tiles, details, and detail page):
 - Resolution: cookie `oeh_locale` → browser `Accept-Language` → default **German**
 - Manual override via header language switcher
 - Messages: `services/frontend/src/i18n/messages/{de,en}.ts`
+
+## Mobile & PWA
+
+- Viewport: `device-width`, `viewport-fit=cover`, theme color
+- Navigation: fixed bottom bar with icons below `lg`; desktop uses the header nav
+- Calendar month grid: compact cells with event counts on narrow screens; event chips from `sm`
+- Map: heights use `dvh` so the bottom bar does not cover the map
+- Manifest: `/manifest.webmanifest` (Next.js `app/manifest.ts`)
+- Service worker: registered only in production builds (`PwaRegister`); API/health routes are not cached
+- Ops: public HTTPS URL (`NEXT_PUBLIC_SITE_URL`); install prompt appears after manifest + SW
 
 ## Display modes
 
@@ -98,3 +110,7 @@ Submissions go through `POST /api/v1/submissions` / `POST /api/v1/source-submiss
 ![Search](../assets/screenshots/frontend-search.png)
 
 *Search*
+
+![Home (mobile)](../assets/screenshots/frontend-home-mobile.png)
+
+*Home (phone / bottom navigation)*

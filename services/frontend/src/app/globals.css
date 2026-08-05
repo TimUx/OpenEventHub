@@ -147,7 +147,16 @@ html.dark {
 
 body {
   @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
-  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Prefer readable form controls on iOS without zooming into inputs. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 a:focus-visible,

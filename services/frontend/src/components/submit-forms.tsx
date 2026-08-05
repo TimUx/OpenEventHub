@@ -117,7 +117,7 @@ export function SubmitForms() {
           role="tab"
           aria-selected={kind === 'event'}
           className={cn(
-            'inline-flex min-h-tap items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold',
+            'inline-flex h-11 min-h-tap items-center gap-2 rounded-lg px-4 text-sm font-semibold',
             kind === 'event'
               ? 'bg-primary text-primary-contrast'
               : 'text-[var(--muted)] hover:bg-primary-soft hover:text-primary',
@@ -136,7 +136,7 @@ export function SubmitForms() {
           role="tab"
           aria-selected={kind === 'source'}
           className={cn(
-            'inline-flex min-h-tap items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold',
+            'inline-flex h-11 min-h-tap items-center gap-2 rounded-lg px-4 text-sm font-semibold',
             kind === 'source'
               ? 'bg-primary text-primary-contrast'
               : 'text-[var(--muted)] hover:bg-primary-soft hover:text-primary',
@@ -247,7 +247,7 @@ export function SubmitForms() {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </label>
-            <Button type="submit" size="lg" className="md:col-span-2" disabled={pending}>
+            <Button type="submit" className="md:col-span-2" disabled={pending}>
               {pending ? t('submit.sending') : t('submit.sendEvent')}
             </Button>
           </form>
@@ -307,7 +307,7 @@ export function SubmitForms() {
                 onChange={(e) => setNotes(e.target.value)}
               />
             </label>
-            <Button type="submit" size="lg" className="md:col-span-2" disabled={pending}>
+            <Button type="submit" className="md:col-span-2" disabled={pending}>
               {pending ? t('submit.sending') : t('submit.sendSource')}
             </Button>
           </form>

@@ -34,14 +34,16 @@ export function ViewModeToggle<T extends string>({
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            'inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors',
+            'inline-flex h-11 min-h-tap items-center justify-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold transition-colors sm:px-4',
             value === option.value
               ? 'bg-primary text-primary-contrast'
               : 'text-[var(--muted)] hover:bg-primary-soft hover:text-primary',
           )}
         >
           {option.icon}
-          {option.label}
+          <span className={option.icon ? 'sr-only sm:not-sr-only sm:inline' : undefined}>
+            {option.label}
+          </span>
         </button>
       ))}
     </div>

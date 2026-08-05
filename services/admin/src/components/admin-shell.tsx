@@ -6,6 +6,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { useAuth } from './auth-provider';
+import { BrandMark } from './brand-mark';
 import { LocaleSwitcher } from '../i18n/locale-switcher';
 import { useI18n } from '../i18n/i18n-provider';
 import { cn } from '../lib/utils';
@@ -42,7 +43,10 @@ export function AdminShell({ children }: { readonly children: ReactNode }) {
         <div className="mb-4 flex justify-end">
           <LocaleSwitcher />
         </div>
-        <h1 className="text-3xl font-bold">{t('auth.title')}</h1>
+        <h1 className="inline-flex items-center gap-3 text-3xl font-bold text-primary">
+          <BrandMark className="h-10 w-10" />
+          <span>{t('auth.title')}</span>
+        </h1>
         <p className="mt-2 text-sm text-[var(--muted)]">{t('auth.lead')}</p>
         <form
           className="mt-6 space-y-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-soft"
@@ -88,8 +92,12 @@ export function AdminShell({ children }: { readonly children: ReactNode }) {
     <div className="min-h-screen">
       <header className="bg-primary text-primary-contrast shadow-soft">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5">
-          <Link href="/" className="text-xl font-bold tracking-tight text-primary-contrast">
-            {t('auth.title')}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2.5 text-xl font-bold tracking-tight text-primary-contrast"
+          >
+            <BrandMark className="h-8 w-8" />
+            <span>{t('auth.title')}</span>
           </Link>
           <div className="flex items-center gap-3 text-sm text-primary-contrast/90">
             <LocaleSwitcher variant="onPrimary" />

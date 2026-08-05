@@ -246,15 +246,17 @@ Never implement multiple large milestones in parallel.
 
 ## Post-M11 — Portal and ops follow-ups
 
-After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.13.0):
+After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.14.0):
 
-- Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA)
+- Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark
 - Event actions: show on map, `.ics` for local calendars
 - Embedded map with search, filters, auto-zoom; deep link `?event=`
 - Public submission of events and sources
 - Admin AI Settings: provider profile CRUD; default **Local Ollama** (Compose/Stack)
 - Strict Docker network separation (`edge` / `internal`) with minimal host ports
 - UI i18n (`de`/`en`) and extended display modes (events/calendar)
+- SEO (sitemap, robots, JSON-LD, canonicals) and PWA (manifest, service worker, install icons)
+- Responsive portal navigation (bottom bar on phone/tablet)
 
 ---
 

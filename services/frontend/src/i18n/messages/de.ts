@@ -74,6 +74,8 @@ export const de = {
     title: 'Suche',
     description:
       'Nach Freitext, Kategorie, Region und Datum filtern. Sortierung nach Relevanz oder Startdatum.',
+    metaTitle: 'Suche',
+    metaDescription: 'Veranstaltungen auf OpenEventHub suchen und filtern.',
     freeText: 'Freitext',
     placeholder: 'Open Air…',
     category: 'Kategorie',
@@ -93,6 +95,9 @@ export const de = {
   calendar: {
     title: 'Kalender',
     description: 'Veröffentlichte Veranstaltungen in Tag-, Wochen-, Monats- oder Jahresansicht.',
+    metaTitle: 'Kalender',
+    metaDescription:
+      'Veranstaltungen im Kalender entdecken — Tag, Woche, Monat und Jahr auf OpenEventHub.',
     previous: 'Zurück',
     next: 'Weiter',
     today: 'Heute',
@@ -111,6 +116,9 @@ export const de = {
     title: 'Karte',
     description:
       'Eingebettete Karte mit Suche und Filtern. Die Ansicht zoomt automatisch auf die gefundenen Veranstaltungen.',
+    metaTitle: 'Karte',
+    metaDescription:
+      'Veranstaltungen auf der Karte finden — Marker, Filter und Orte auf OpenEventHub.',
     searchLabel: 'Suche',
     searchPlaceholder: 'Titel, Ort, Beschreibung…',
     category: 'Kategorie',
@@ -165,6 +173,9 @@ export const de = {
   notFound: {
     title: 'Seite nicht gefunden',
     body: 'Diese Seite konnte nicht gefunden werden.',
+  },
+  seo: {
+    upcomingEvents: 'Veranstaltungen zum Entdecken',
   },
 } as const;
 

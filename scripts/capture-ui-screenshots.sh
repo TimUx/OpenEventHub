@@ -63,6 +63,17 @@ const fs = require("fs");
   }
 
   await shot(frontend + "/", "frontend-home.png", 2500);
+
+  const mobile = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  await mobile.goto(frontend + "/", { waitUntil: "networkidle", timeout: 90000 });
+  await mobile.waitForTimeout(2000);
+  await mobile.screenshot({ path: `${out}/frontend-home-mobile.png`, fullPage: false });
+  await mobile.close();
+
   await shot(frontend + "/events", "frontend-events.png");
 
   await page.goto(frontend + "/events", { waitUntil: "networkidle", timeout: 90000 });

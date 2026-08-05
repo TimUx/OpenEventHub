@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-08-05
+
+### Added
+
+- SEO: richer sitemap (static routes + published events), hardened `robots.txt`, canonical/Open Graph/Twitter metadata, Organization/WebSite JSON-LD, crawlable event links on calendar/map
+- PWA: web app manifest, install icons (192/512 + maskable), Apple touch icon, production service worker for shell caching
+- Brand mark assets in portal/admin headers and docs (`docs/assets/brand/`)
+- Responsive portal: bottom navigation on phones/tablets, safe-area insets, touch-friendly controls
+
+### Changed
+
+- Search pages are `noindex` and omitted from the sitemap
+- Docs: `SEO.md`, `FRONTEND.md` (mobile/PWA), screenshots refreshed
+
 ## [0.13.0] - 2026-08-05
 
 ### Added
