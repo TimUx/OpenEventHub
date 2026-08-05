@@ -4,7 +4,9 @@ Thank you for contributing. OpenEventHub is documentation-driven:
 **`docs/` always wins** over informal implementation shortcuts.
 
 Full local workflows: [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md).
+Cursor / agent rules: [`docs/CURSOR_DEVELOPMENT.md`](docs/CURSOR_DEVELOPMENT.md), [`AGENTS.md`](AGENTS.md).
 Release / changelog rules: [`docs/RELEASE.md`](docs/RELEASE.md).
+CI: [`docs/CI_CD.md`](docs/CI_CD.md).
 
 ## Principles
 

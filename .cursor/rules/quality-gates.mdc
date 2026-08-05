@@ -1,0 +1,16 @@
+---
+description: Quality gates contributors and agents must keep green
+alwaysApply: true
+---
+
+# Quality Gates
+
+Before claiming a milestone or PR ready:
+
+1. `npm run format:check && npm run lint && npm run typecheck`
+2. `npm test` (workspaces) and `npm run verify:plugins`
+3. `npm run validate:compose` (and `validate:stack` if Stack changed)
+4. Prefer `npm run tools:check` when host Node is unavailable
+
+CI workflows under `.github/workflows/` enforce these on `main`/`develop` and PRs.
+Release tags `v*` publish images per `docs/RELEASE.md` and `docs/CI_CD.md`.

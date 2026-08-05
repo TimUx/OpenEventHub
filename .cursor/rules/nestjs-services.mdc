@@ -1,0 +1,17 @@
+---
+description: NestJS API and service conventions
+globs: services/**/*
+alwaysApply: false
+---
+
+# NestJS Services
+
+- Applies to backend service trees under `services/` (API, crawler, workers, …)
+- Frontend/Admin Next.js apps also match; prefer `nextjs-ui` guidance for UI files
+- One deployable service per directory; no monoliths
+- Hexagonal style: controllers → application services → repositories/ports
+- Public HTTP under `/api/v1`; admin routes JWT + `RolesGuard`
+- Queues via BullMQ + names from `@openeventhub/shared`
+- Every service exposes `/health`, `/ready`, `/metrics`
+- Prefer contract/unit tests that avoid Nest decorator/tsx pitfalls when needed
+- Docs: `docs/API.md`, `docs/REST_ENDPOINTS.md`, `docs/COMMUNICATION.md`

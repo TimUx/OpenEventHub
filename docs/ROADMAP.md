@@ -13,14 +13,16 @@ Status legend: `planned` · `in_progress` · `done`
 | Area | Status |
 |------|--------|
 | Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
-| Application code | M1–M6 implemented |
+| Application code | M1–M10 implemented |
 | Docker Compose / Stack | infra + apps |
 | Prisma / Database | M3 complete (`@openeventhub/database`) |
 | AI Engine | M4 complete (`ai-service`, Admin AI Settings) |
 | Crawler Framework | M5 complete (plugin SDK, HTML/RSS/ICS, scheduler, OCR) |
 | Public API | M6 complete (`/api/v1`, GraphQL, OpenAPI, rate limits) |
-| CI/CD | skeleton |
+| Frontend / Admin | M7–M8 complete |
+| CI/CD | M10 quality gates + SemVer release workflow |
 | Plugins / Prompts | first plugins + prompt catalog |
+| Developer / Cursor guidance | M9–M10 complete |
 
 ---
 
@@ -208,7 +210,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M10 — Cursor & Quality Gates (`Package 10`) · `planned`
+### M10 — Cursor & Quality Gates (`Package 10`) · `done`
 
 **Goal:** Enforce documentation-driven development in the IDE and CI.
 

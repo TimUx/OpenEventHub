@@ -1,0 +1,11 @@
+---
+description: LLM prompts must live only under prompts/
+globs: prompts/**/*
+alwaysApply: false
+---
+
+# Prompts
+
+- All LLM prompts live under `prompts/` — never hardcode production prompts in services
+- Version prompt files; AI jobs should record prompt id/version when analyzing
+- Docs: `docs/LLM_EXTRACTION.md`, `docs/EVENT_INTELLIGENCE_ENGINE.md`

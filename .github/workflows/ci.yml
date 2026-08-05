@@ -1,4 +1,4 @@
-name: Foundation CI
+name: Quality Gates
 
 on:
   push:
@@ -11,10 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Lint, test, compose
+  lint-test:
+    name: Lint, typecheck, unit & contract tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -32,6 +32,11 @@ jobs:
       - name: Generate Prisma client
         run: npm run db:generate
 
+      - name: Build shared packages required by tests
+        run: |
+          npm run build --workspace=@openeventhub/shared
+          npm run build --workspace=@openeventhub/database
+
       - name: Prettier
         run: npm run format:check
 
@@ -41,16 +46,100 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Shared package tests
-        run: npm run test --workspace=@openeventhub/shared
+      - name: Unit and contract tests
+        run: npm test
 
-      - name: Database package validate and tests
-        run: |
-          npm run validate --workspace=@openeventhub/database
-          npm run test --workspace=@openeventhub/database
+      - name: Verify plugins
+        run: npm run verify:plugins
 
-      - name: Validate Docker Compose files
+  integration:
+    name: Compose / Stack integration validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Docker Compose
         run: npm run validate:compose
 
-      - name: Validate Docker Stack file
+      - name: Validate Docker Stack
         run: npm run validate:stack
+
+      - name: Verify plugin loader contract
+        run: npm run verify:plugins
+
+  docker-build:
+    name: Docker build (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: api
+            dockerfile: services/api/Dockerfile
+          - service: frontend
+            dockerfile: services/frontend/Dockerfile
+          - service: admin
+            dockerfile: services/admin/Dockerfile
+          - service: crawler
+            dockerfile: services/crawler/Dockerfile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: openeventhub/${{ matrix.service }}:ci
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit (critical)
+        run: npm audit --audit-level=critical
+
+      - name: Filesystem vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          skip-dirs: node_modules,.next,.npm-cache

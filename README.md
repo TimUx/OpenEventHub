@@ -12,13 +12,13 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 9 — Developer Experience (`v0.9.0`)**
+**Milestone 10 — Cursor & Quality Gates (`v0.10.0`)**
 
-- Contributor guides, plugin walkthrough, Compose workflows, release discipline
-- Admin center, public portal, REST/GraphQL API, crawler plugins
+- Cursor rules + AGENTS.md; CI quality gates; SemVer release/image publish
+- Contributor DX, Admin, public portal, API, crawler plugins
 - Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
 
-Next: **Milestone 10 — Cursor & Quality Gates**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Next: **Milestone 11 — Production Hardening**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Quick start
 
@@ -75,6 +75,8 @@ scripts/          Bootstrap and ops helpers
 - [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Developer Guide](docs/DEVELOPER_GUIDE.md)
+- [Cursor Development](docs/CURSOR_DEVELOPMENT.md)
+- [CI/CD](docs/CI_CD.md)
 - [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
 

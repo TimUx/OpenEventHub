@@ -1,0 +1,14 @@
+---
+description: Next.js frontend and admin UI conventions
+globs: services/{frontend,admin}/**/*
+alwaysApply: false
+---
+
+# Next.js UI (Frontend / Admin)
+
+- Stack: Next.js App Router, React, Tailwind, shadcn-style primitives
+- Frontend is public portal; Admin is JWT-gated operator UI
+- Browser calls `NEXT_PUBLIC_API_BASE_URL`; server may use `API_INTERNAL_URL`
+- Do not invent purple/Inter default aesthetics; follow existing theme tokens
+- Keep SEO metadata / JSON-LD on public event pages (`docs/SEO.md`)
+- Docs: `docs/FRONTEND.md`, `docs/ADMIN_CENTER.md`, `docs/SEARCH_UI.md`

@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  release:
+    name: Publish images and GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          OWNER="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "image_owner=${OWNER}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push service images
+        env:
+          OWNER: ${{ steps.version.outputs.image_owner }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          services=(
+            api
+            frontend
+            admin
+            crawler
+            scheduler
+            ocr-service
+            ai-service
+            search
+            worker
+          )
+          for service in "${services[@]}"; do
+            image="${REGISTRY}/${OWNER}/openeventhub-${service}"
+            echo "Building ${image}:${VERSION}"
+            docker build \
+              -f "services/${service}/Dockerfile" \
+              -t "${image}:${VERSION}" \
+              -t "${image}:latest" \
+              .
+            docker push "${image}:${VERSION}"
+            docker push "${image}:latest"
+          done
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          python3 - <<'PY'
+          import pathlib, os, re
+          version = os.environ["VERSION"]
+          text = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          pattern = rf"## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n## \[|\Z)"
+          match = re.search(pattern, text, re.S)
+          body = match.group(1).strip() if match else f"Release {version}"
+          pathlib.Path("release-notes.md").write_text(body + "\n", encoding="utf-8")
+          PY
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: OpenEventHub ${{ steps.version.outputs.tag }}
+          body_path: release-notes.md
+          generate_release_notes: false

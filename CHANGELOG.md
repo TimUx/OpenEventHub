@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-08-05
+
+### Added
+
+- Complete Cursor rule set (`.cursor/rules/`) plus `AGENTS.md` and `docs/CURSOR_DEVELOPMENT.md`
+- Quality Gates CI: lint/typecheck/tests, plugin verify, compose/stack validate, Docker builds, Trivy + npm audit
+- Release workflow for `v*` tags: GHCR image publish and GitHub Release from CHANGELOG
+
+### Changed
+
+- CI/CD, RELEASE, and TESTING docs aligned with automated gates
+
 ## [0.9.0] - 2026-08-05
 
 ### Added

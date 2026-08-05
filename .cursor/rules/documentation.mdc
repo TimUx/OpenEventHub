@@ -1,0 +1,12 @@
+---
+description: Binding docs and ADR discipline
+globs: docs/**/*,architecture/**/*
+alwaysApply: false
+---
+
+# Documentation & ADRs
+
+- `docs/` is binding; change code to match docs, not the reverse
+- Non-trivial decisions need an ADR under `architecture/adr/` (`docs/ADR_GUIDE.md`)
+- Milestone completion requires ROADMAP update, CHANGELOG entry, and `architecture/reviews/mN-*.md`
+- Release SemVer process: `docs/RELEASE.md` (distinct from domain `docs/VERSIONING.md`)

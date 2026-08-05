@@ -1,8 +1,7 @@
 # Release process
 
 OpenEventHub uses **Semantic Versioning** and **Keep a Changelog**.
-Automated SemVer tagging and image publish land in Milestone 10; until then
-releases are documented and versioned manually as part of milestone completion.
+Milestone 10 automates GitHub Releases and GHCR image publish for SemVer tags.
 
 ## Sources of truth
 
@@ -25,6 +24,13 @@ After a roadmap milestone meets its exit criteria:
 4. `CHANGELOG.md` section for the new version
 5. Version fields bumped (root + touched services)
 6. Conventional Commit on `main` (or PR merge), e.g. `feat(scope): … (vX.Y.Z)`
+7. Annotated tag and push:
+   ```bash
+   git tag -a "v$(node -p "require('./package.json').version")" -m "v$(node -p "require('./package.json').version")"
+   git push origin "v$(node -p "require('./package.json').version")"
+   ```
+
+`release.yml` creates the GitHub Release body from the matching `CHANGELOG.md` section and publishes container images.
 
 ## SemVer mapping (Conventional Commits)
 
@@ -36,7 +42,7 @@ After a roadmap milestone meets its exit criteria:
 | Docs/chore-only milestone packaging | MINOR if it ships a roadmap package; else PATCH |
 
 Milestones M1–M11 normally advance the **MINOR** (or MAJOR when breaking) as
-named packages (`v0.9.0` for M9, etc.).
+named packages (`v0.10.0` for M10, etc.).
 
 ## Changelog discipline
 
@@ -58,8 +64,10 @@ Do **not** weaken docs to match incomplete code — fix the code.
 - [ ] README “Current status” points at the new milestone
 - [ ] Compose default image tags updated when services ship
 - [ ] `npm run validate:compose` (and `validate:stack` when Stack changed)
+- [ ] CI green on `main`
+- [ ] Tag `vX.Y.Z` pushed (triggers image publish)
 
-## After M10
+## Image registry
 
-CI will enforce SemVer tags and container image publish. Until then, do not claim
-automated GitHub Releases — keep `CHANGELOG.md` accurate so M10 can automate from it.
+Published by `.github/workflows/release.yml` to `ghcr.io/<owner>/openeventhub-<service>`.
+Details: `docs/CI_CD.md`.

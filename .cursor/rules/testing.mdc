@@ -1,0 +1,13 @@
+---
+description: Testing expectations for OpenEventHub
+globs: **/*.{test,spec}.{ts,tsx,js}
+alwaysApply: false
+---
+
+# Testing
+
+- Prefer unit + contract tests beside the code (`*.test.ts`)
+- Plugins: run `npm run verify:plugins`; add fixtures for parse/normalize when practical
+- Do not ship fake business mocks that pretend production behavior
+- CI runs format, lint, typecheck, workspace tests, plugin verify, compose/stack validate
+- Docs: `docs/TESTING.md`

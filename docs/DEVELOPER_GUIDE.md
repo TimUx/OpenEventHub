@@ -173,3 +173,5 @@ New sources = plugins only. Do not change crawler core for a new source type.
 | Coding standards | `docs/CODING_STANDARDS.md` |
 | Testing | `docs/TESTING.md` |
 | Releases | `docs/RELEASE.md` |
+| Cursor / agents | `docs/CURSOR_DEVELOPMENT.md`, `AGENTS.md` |
+| CI/CD | `docs/CI_CD.md` |

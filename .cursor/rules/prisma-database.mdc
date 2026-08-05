@@ -1,0 +1,14 @@
+---
+description: Prisma and repository layer conventions
+globs: packages/database/**/*
+alwaysApply: false
+---
+
+# Database / Prisma
+
+- Schema and migrations live only in `packages/database`
+- No raw SQL in services — use Prisma + repositories
+- Export domain access via repository classes; register via DI in Nest modules
+- Migrations are additive; never weaken schema to match incomplete app code
+- After schema changes: `npm run db:generate` and add/adjust repository tests
+- Docs: `docs/DATA_MODEL.md`, `docs/DATABASE_SCHEMA.md`

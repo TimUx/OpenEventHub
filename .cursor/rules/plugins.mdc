@@ -1,0 +1,14 @@
+---
+description: Plugin-first rules for source connectors
+globs: plugins/**/*
+alwaysApply: false
+---
+
+# Plugins
+
+- New source types = plugins only; never change crawler core for a new connector
+- Each plugin: `plugin.json` + ESM `createPlugin()` (see `docs/PLUGIN_SDK.md`)
+- No direct database access from plugins
+- Match `metadata.pluginType` to Admin `Source.pluginType`
+- After changes: `npm run verify:plugins`
+- Worked example: `docs/PLUGIN_EXAMPLE.md` (`plugins/html`)
