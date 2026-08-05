@@ -12,6 +12,7 @@ COPY services/crawler ./services/crawler
 RUN npm ci
 RUN npm run db:generate \
   && npm run build --workspace=@openeventhub/shared \
+  && npm run build --workspace=@openeventhub/ai-core \
   && npm run build --workspace=@openeventhub/plugin-sdk \
   && npm run build --workspace=@openeventhub/service-runtime \
   && npm run build --workspace=@openeventhub/database \

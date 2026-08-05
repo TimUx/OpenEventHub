@@ -11,6 +11,7 @@ COPY services/scheduler ./services/scheduler
 RUN npm ci
 RUN npm run db:generate \
   && npm run build --workspace=@openeventhub/shared \
+  && npm run build --workspace=@openeventhub/ai-core \
   && npm run build --workspace=@openeventhub/service-runtime \
   && npm run build --workspace=@openeventhub/database \
   && npm run build --workspace=@openeventhub/scheduler
