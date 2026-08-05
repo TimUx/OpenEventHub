@@ -48,6 +48,12 @@ export {
   CategoryRepository,
   RegionRepository,
   SubmissionRepository,
+  ModerationRepository,
+  AdminUserRepository,
   type CreateSubmissionInput,
+  type DecideModerationInput,
+  type ModerationListItem,
+  type PublicAdminUser,
   type PublicAiProviderProfile,
+  type SourceUpdateInput,
 } from './repositories/index.js';

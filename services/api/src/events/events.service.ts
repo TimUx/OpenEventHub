@@ -11,7 +11,10 @@ export class EventsService {
   ) {}
 
   list(limit?: number, offset?: number) {
-    return this.events.listPublished({ limit, offset });
+    return this.events.listPublished({
+      ...(limit !== undefined ? { limit } : {}),
+      ...(offset !== undefined ? { offset } : {}),
+    });
   }
 
   async getById(id: string) {

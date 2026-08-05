@@ -8,7 +8,7 @@ import { AppModule } from './app.module.js';
 
 const SERVICE_NAME = 'api';
 const PORT = Number(process.env.PORT ?? 3000);
-const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.6.0';
+const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
 
 async function bootstrap(): Promise<void> {
   const logger = createLogger(SERVICE_NAME);

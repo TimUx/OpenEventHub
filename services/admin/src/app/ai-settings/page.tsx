@@ -1,6 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+
+import { useAuth } from '../../components/auth-provider';
+import { PageHeader, Panel } from '../../components/ui';
+import { adminFetch } from '../../lib/api';
 
 type ProviderType =
   | 'openai'
@@ -30,18 +34,13 @@ type ProviderProfile = {
   apiKeyHint: string | null;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://api.localhost:8088';
-
 export default function AiSettingsPage() {
-  const [token, setToken] = useState<string | null>(null);
-  const [email, setEmail] = useState('admin@openeventhub.local');
-  const [password, setPassword] = useState('ChangeMeNow!');
+  const { token } = useAuth();
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const [name, setName] = useState('ChatGPT Production');
   const [type, setType] = useState<ProviderType>('openai');
   const [baseUrl, setBaseUrl] = useState('https://api.openai.com/v1');
@@ -53,73 +52,33 @@ export default function AiSettingsPage() {
     [catalog, type],
   );
 
-  const authHeaders = useCallback((): HeadersInit => {
-    if (!token) {
-      return { 'content-type': 'application/json' };
-    }
-    return {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`,
-    };
-  }, [token]);
-
   const loadData = useCallback(async (accessToken: string) => {
-    const headers = {
-      'content-type': 'application/json',
-      authorization: `Bearer ${accessToken}`,
-    };
-    const [catalogRes, providersRes, settingsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/v1/admin/ai/providers/catalog`, { headers }),
-      fetch(`${API_BASE}/api/v1/admin/ai/providers`, { headers }),
-      fetch(`${API_BASE}/api/v1/admin/ai/settings`, { headers }),
+    const [catalogData, providersData, settings] = await Promise.all([
+      adminFetch<CatalogItem[]>('/api/v1/admin/ai/providers/catalog', accessToken),
+      adminFetch<ProviderProfile[]>('/api/v1/admin/ai/providers', accessToken),
+      adminFetch<{ activeProviderProfileId: string | null }>(
+        '/api/v1/admin/ai/settings',
+        accessToken,
+      ),
     ]);
-    if (!catalogRes.ok || !providersRes.ok || !settingsRes.ok) {
-      throw new Error('Failed to load AI settings');
-    }
-    setCatalog((await catalogRes.json()) as CatalogItem[]);
-    setProviders((await providersRes.json()) as ProviderProfile[]);
-    const settings = (await settingsRes.json()) as { activeProviderProfileId: string | null };
+    setCatalog(catalogData);
+    setProviders(providersData);
     setActiveId(settings.activeProviderProfileId);
   }, []);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('oeh_admin_token');
-    if (!stored) {
-      return;
-    }
-    setToken(stored);
-    void loadData(stored).catch((err: unknown) => {
+    if (!token) return;
+    void loadData(token).catch((err: unknown) => {
       setError(err instanceof Error ? err.message : String(err));
-      window.localStorage.removeItem('oeh_admin_token');
-      setToken(null);
     });
-  }, [loadData]);
-
-  async function onLogin(event: FormEvent) {
-    event.preventDefault();
-    setError(null);
-    const response = await fetch(`${API_BASE}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!response.ok) {
-      setError('Login failed');
-      return;
-    }
-    const payload = (await response.json()) as { accessToken: string };
-    window.localStorage.setItem('oeh_admin_token', payload.accessToken);
-    setToken(payload.accessToken);
-    await loadData(payload.accessToken);
-    setMessage('Signed in');
-  }
+  }, [token, loadData]);
 
   async function onCreateProvider(event: FormEvent) {
     event.preventDefault();
+    if (!token) return;
     setError(null);
-    const response = await fetch(`${API_BASE}/api/v1/admin/ai/providers`, {
+    await adminFetch('/api/v1/admin/ai/providers', token, {
       method: 'POST',
-      headers: authHeaders(),
       body: JSON.stringify({
         name,
         type,
@@ -129,43 +88,28 @@ export default function AiSettingsPage() {
         enabled: true,
       }),
     });
-    if (!response.ok) {
-      setError(await response.text());
-      return;
-    }
     setApiKey('');
     setMessage('Provider profile created');
-    if (token) {
-      await loadData(token);
-    }
+    await loadData(token);
   }
 
   async function activate(id: string) {
-    setError(null);
-    const response = await fetch(`${API_BASE}/api/v1/admin/ai/settings`, {
+    if (!token) return;
+    await adminFetch('/api/v1/admin/ai/settings', token, {
       method: 'PUT',
-      headers: authHeaders(),
       body: JSON.stringify({ activeProviderProfileId: id }),
     });
-    if (!response.ok) {
-      setError(await response.text());
-      return;
-    }
     setActiveId(id);
     setMessage('Active provider updated');
   }
 
   async function testProvider(id: string) {
-    setError(null);
-    const response = await fetch(`${API_BASE}/api/v1/admin/ai/providers/${id}/test`, {
-      method: 'POST',
-      headers: authHeaders(),
-    });
-    if (!response.ok) {
-      setError(await response.text());
-      return;
-    }
-    const payload = (await response.json()) as { sample: string; model: string; provider: string };
+    if (!token) return;
+    const payload = await adminFetch<{ sample: string; model: string; provider: string }>(
+      `/api/v1/admin/ai/providers/${id}/test`,
+      token,
+      { method: 'POST' },
+    );
     setMessage(`Test OK (${payload.provider}/${payload.model}): ${payload.sample}`);
   }
 
@@ -180,63 +124,42 @@ export default function AiSettingsPage() {
   }
 
   if (!token) {
-    return (
-      <main style={styles.main}>
-        <h1>AI Settings</h1>
-        <p>Sign in to configure ChatGPT, Claude, Gemini, Ollama, and more.</p>
-        <form
-          onSubmit={(event) => {
-            void onLogin(event);
-          }}
-          style={styles.card}
-        >
-          <label style={styles.label}>
-            Email
-            <input value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} />
-          </label>
-          <label style={styles.label}>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-            />
-          </label>
-          <button type="submit" style={styles.button}>
-            Sign in
-          </button>
-        </form>
-        {error ? <p style={styles.error}>{error}</p> : null}
-      </main>
-    );
+    return null;
   }
 
   return (
-    <main style={styles.main}>
-      <h1>AI Settings</h1>
-      <p>
-        Configure online providers (ChatGPT, Claude, Gemini, …) or local runtimes (Ollama). The
-        Event Intelligence Engine uses the <strong>active</strong> profile.
-      </p>
+    <div className="space-y-6">
+      <PageHeader
+        title="AI Settings"
+        description="Configure providers; the Event Intelligence Engine uses the active profile."
+      />
+      {message ? <p className="text-sm text-accent">{message}</p> : null}
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-      <section style={styles.card}>
-        <h2>Provider profiles</h2>
-        <ul style={styles.list}>
+      <Panel>
+        <h2 className="mb-3 font-display text-lg">Provider profiles</h2>
+        <ul className="space-y-3">
           {providers.map((provider) => (
-            <li key={provider.id} style={styles.listItem}>
-              <div>
+            <li
+              key={provider.id}
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)]/60 pb-3"
+            >
+              <div className="text-sm">
                 <strong>{provider.name}</strong> · {provider.type} · {provider.model}
                 {provider.hasApiKey ? ` · key ${provider.apiKeyHint}` : ' · no API key'}
                 {activeId === provider.id ? ' · ACTIVE' : ''}
               </div>
-              <div style={styles.row}>
-                <button type="button" style={styles.button} onClick={() => void activate(provider.id)}>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="rounded-md bg-accent px-3 py-1.5 text-xs text-white"
+                  onClick={() => void activate(provider.id)}
+                >
                   Set active
                 </button>
                 <button
                   type="button"
-                  style={styles.secondary}
+                  className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs"
                   onClick={() => void testProvider(provider.id)}
                 >
                   Test
@@ -245,25 +168,29 @@ export default function AiSettingsPage() {
             </li>
           ))}
         </ul>
-      </section>
+      </Panel>
 
-      <section style={styles.card}>
-        <h2>Add provider</h2>
-        <form
-          onSubmit={(event) => {
-            void onCreateProvider(event);
-          }}
-        >
-          <label style={styles.label}>
+      <Panel>
+        <h2 className="mb-3 font-display text-lg">Add provider</h2>
+        <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onCreateProvider(e)}>
+          <label className="text-sm">
             Type
             <select
+              className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               value={type}
               onChange={(e) => onTypeChange(e.target.value as ProviderType)}
-              style={styles.input}
             >
               {(catalog.length > 0
                 ? catalog
-                : ([{ type, label: type, defaultBaseUrl: null, defaultModel: model, requiresApiKey: true }] as CatalogItem[])
+                : ([
+                    {
+                      type,
+                      label: type,
+                      defaultBaseUrl: null,
+                      defaultModel: model,
+                      requiresApiKey: true,
+                    },
+                  ] as CatalogItem[])
               ).map((item) => (
                 <option key={item.type} value={item.type}>
                   {item.label}
@@ -271,85 +198,44 @@ export default function AiSettingsPage() {
               ))}
             </select>
           </label>
-          <label style={styles.label}>
+          <label className="text-sm">
             Name
-            <input value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
-          </label>
-          <label style={styles.label}>
-            Base URL {selectedCatalog?.requiresApiKey === false ? '(optional for some locals)' : ''}
-            <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} style={styles.input} />
-          </label>
-          <label style={styles.label}>
-            Model
-            <input value={model} onChange={(e) => setModel(e.target.value)} style={styles.input} />
-          </label>
-          <label style={styles.label}>
-            API key
             <input
+              className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <label className="text-sm md:col-span-2">
+            Base URL
+            <input
+              className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+            />
+          </label>
+          <label className="text-sm">
+            Model
+            <input
+              className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+            />
+          </label>
+          <label className="text-sm">
+            API key {selectedCatalog?.requiresApiKey ? '' : '(optional)'}
+            <input
+              className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              style={styles.input}
-              placeholder={selectedCatalog?.requiresApiKey ? 'required' : 'optional for Ollama'}
             />
           </label>
-          <button type="submit" style={styles.button}>
+          <button type="submit" className="h-10 rounded-md bg-accent text-white md:col-span-2">
             Save profile
           </button>
         </form>
-      </section>
-
-      {message ? <p style={styles.message}>{message}</p> : null}
-      {error ? <p style={styles.error}>{error}</p> : null}
-    </main>
+      </Panel>
+    </div>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  main: {
-    fontFamily: 'Georgia, serif',
-    maxWidth: 880,
-    margin: '0 auto',
-    padding: '2rem 1.25rem 4rem',
-    background: 'linear-gradient(180deg, #f7f3ea 0%, #efe7d8 100%)',
-    minHeight: '100vh',
-    color: '#1d1a16',
-  },
-  card: {
-    background: 'rgba(255,255,255,0.72)',
-    border: '1px solid #d9cbb3',
-    padding: '1.25rem',
-    marginTop: '1.25rem',
-  },
-  label: { display: 'grid', gap: 6, marginBottom: 12, fontSize: 14 },
-  input: {
-    padding: '0.65rem 0.75rem',
-    border: '1px solid #cbbfa8',
-    background: '#fffdf8',
-    font: 'inherit',
-  },
-  button: {
-    padding: '0.55rem 0.9rem',
-    border: '1px solid #3f5d45',
-    background: '#3f5d45',
-    color: '#f7f3ea',
-    cursor: 'pointer',
-  },
-  secondary: {
-    padding: '0.55rem 0.9rem',
-    border: '1px solid #3f5d45',
-    background: 'transparent',
-    color: '#3f5d45',
-    cursor: 'pointer',
-  },
-  list: { listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 12 },
-  listItem: {
-    display: 'grid',
-    gap: 8,
-    paddingBottom: 12,
-    borderBottom: '1px solid #e2d6c2',
-  },
-  row: { display: 'flex', gap: 8 },
-  message: { color: '#2f5d3a' },
-  error: { color: '#8a2f2f' },
-};

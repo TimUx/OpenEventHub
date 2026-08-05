@@ -39,4 +39,12 @@ export class SubmissionRepository {
   findById(id: string): Promise<UserSubmission | null> {
     return this.prisma.userSubmission.findUnique({ where: { id } });
   }
+
+  listRecent(limit = 20): Promise<UserSubmission[]> {
+    const take = Math.min(Math.max(limit, 1), 100);
+    return this.prisma.userSubmission.findMany({
+      orderBy: { createdAt: 'desc' },
+      take,
+    });
+  }
 }

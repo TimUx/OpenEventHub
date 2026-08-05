@@ -16,10 +16,11 @@
 - Regions
 - Search
 - Public event / source submissions (moderation queue)
-- Admin AI settings (JWT + RBAC)
+- Admin ops: dashboard, sources, crawler, scheduler, queues, moderation, users, AI settings (JWT + RBAC)
 
 ## Auth & RBAC
 
 - `POST /api/v1/auth/login` issues a Bearer JWT
-- Admin AI routes require roles `admin` or `moderator`
-- Audit hooks emit structured log lines for login, reads, and submissions
+- Admin routes require roles `admin`, `moderator`, and/or `viewer` (see `REST_ENDPOINTS.md`)
+- User management is `admin`-only
+- Audit hooks emit structured log lines for login and admin mutations

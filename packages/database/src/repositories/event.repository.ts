@@ -42,6 +42,24 @@ export class EventRepository {
     });
   }
 
+  listAll(options: EventListOptions = {}): Promise<Event[]> {
+    const take = Math.min(Math.max(options.limit ?? 50, 1), 200);
+    const skip = Math.max(options.offset ?? 0, 0);
+    return this.prisma.event.findMany({
+      orderBy: { updatedAt: 'desc' },
+      take,
+      skip,
+    });
+  }
+
+  countByStatus(): Promise<Record<string, number>> {
+    return this.prisma.event
+      .groupBy({ by: ['status'], _count: { _all: true } })
+      .then((rows) =>
+        Object.fromEntries(rows.map((row) => [row.status, row._count._all])),
+      );
+  }
+
   searchPublished(options: EventSearchOptions): Promise<Event[]> {
     const take = Math.min(Math.max(options.limit ?? 50, 1), 100);
     const skip = Math.max(options.offset ?? 0, 0);

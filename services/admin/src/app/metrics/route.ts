@@ -1,5 +1,5 @@
 const SERVICE_NAME = 'admin';
-const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.1.0';
+const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
 
 function escapeLabel(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/"/g, '\\"');

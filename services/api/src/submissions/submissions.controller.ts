@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SubmissionRepository, SubmissionType } from '@openeventhub/database';
+import { SubmissionRepository, SubmissionType, type Prisma } from '@openeventhub/database';
 
 import { AuditService } from '../audit/audit.service.js';
 
@@ -36,7 +36,7 @@ export class SubmissionsController {
 
     const result = await this.submissions.createWithModeration({
       type,
-      payload: body.payload,
+      payload: body.payload as Prisma.InputJsonValue,
       submitterEmail: body.submitterEmail ?? null,
     });
 

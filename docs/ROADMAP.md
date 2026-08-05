@@ -180,7 +180,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M8 — Administration (`Package 08`) · `planned`
+### M8 — Administration (`Package 08`) · `done`
 
 **Goal:** Admin center for ops and moderation.
 

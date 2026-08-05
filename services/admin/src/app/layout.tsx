@@ -1,30 +1,39 @@
 import type { Metadata } from 'next';
+import { IBM_Plex_Sans, Source_Serif_4 } from 'next/font/google';
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+
+import { AdminShell } from '../components/admin-shell';
+import { AuthProvider } from '../components/auth-provider';
+import './globals.css';
+
+const display = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const sans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'OpenEventHub Admin',
+  title: {
+    default: 'OpenEventHub Admin',
+    template: '%s · Admin',
+  },
   description: 'OpenEventHub administration center',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body style={{ margin: 0 }}>
-        <header
-          style={{
-            display: 'flex',
-            gap: '1rem',
-            padding: '0.85rem 1.25rem',
-            borderBottom: '1px solid #d9cbb3',
-            background: '#f7f3ea',
-            fontFamily: 'Georgia, serif',
-          }}
-        >
-          <Link href="/">Dashboard</Link>
-          <Link href="/ai-settings">AI Settings</Link>
-        </header>
-        {children}
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <body>
+        <AuthProvider>
+          <AdminShell>{children}</AdminShell>
+        </AuthProvider>
       </body>
     </html>
   );

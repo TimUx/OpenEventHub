@@ -1,18 +1,35 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { BullModule } from '@nestjs/bullmq';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 import {
+  AdminUserRepository,
   AiSettingsRepository,
   CategoryRepository,
+  CrawlJobRepository,
   EventRepository,
+  ModerationRepository,
   PrismaClient,
   RegionRepository,
+  SourceRepository,
   SubmissionRepository,
 } from '@openeventhub/database';
+import { QUEUE_NAMES } from '@openeventhub/shared';
 
 import { AdminAiController } from './admin/admin-ai.controller.js';
+import { AdminDashboardController } from './admin/admin-dashboard.controller.js';
+import { AdminModerationController } from './admin/admin-moderation.controller.js';
+import {
+  AdminCrawlerController,
+  AdminQueuesController,
+  AdminSchedulerController,
+} from './admin/admin-ops.controller.js';
+import { AdminQueuesService } from './admin/admin-queues.service.js';
+import { AdminSchedulerService } from './admin/admin-scheduler.service.js';
+import { AdminSourcesController } from './admin/admin-sources.controller.js';
+import { AdminUsersController } from './admin/admin-users.controller.js';
 import { AuditService } from './audit/audit.service.js';
 import { AdminJwtAuthGuard } from './auth/admin-jwt.guard.js';
 import { AuthController } from './auth/auth.controller.js';
@@ -27,7 +44,7 @@ import { SubmissionsController } from './submissions/submissions.controller.js';
 import { probeTcp } from './probe-tcp.js';
 
 const SERVICE_NAME = 'api';
-const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.6.0';
+const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
 
 @Module({
   imports: [
@@ -62,10 +79,33 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.6.0';
         },
       },
     ]),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST ?? '127.0.0.1',
+        port: Number(process.env.REDIS_PORT_INTERNAL ?? process.env.REDIS_PORT ?? 6379),
+        password: process.env.REDIS_PASSWORD || undefined,
+      },
+    }),
+    BullModule.registerQueue(
+      { name: QUEUE_NAMES.discovery },
+      { name: QUEUE_NAMES.crawl },
+      { name: QUEUE_NAMES.ocr },
+      { name: QUEUE_NAMES.ai },
+      { name: QUEUE_NAMES.geocoding },
+      { name: QUEUE_NAMES.searchIndex },
+      { name: QUEUE_NAMES.notifications },
+    ),
   ],
   controllers: [
     AuthController,
     AdminAiController,
+    AdminDashboardController,
+    AdminSourcesController,
+    AdminModerationController,
+    AdminUsersController,
+    AdminCrawlerController,
+    AdminSchedulerController,
+    AdminQueuesController,
     EventsController,
     CategoriesController,
     RegionsController,
@@ -103,8 +143,30 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.6.0';
       inject: [PrismaClient],
       useFactory: (prisma: PrismaClient) => new SubmissionRepository(prisma),
     },
+    {
+      provide: SourceRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new SourceRepository(prisma),
+    },
+    {
+      provide: CrawlJobRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new CrawlJobRepository(prisma),
+    },
+    {
+      provide: ModerationRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new ModerationRepository(prisma),
+    },
+    {
+      provide: AdminUserRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new AdminUserRepository(prisma),
+    },
     AuditService,
     EventsService,
+    AdminSchedulerService,
+    AdminQueuesService,
     AdminJwtAuthGuard,
     RolesGuard,
     {

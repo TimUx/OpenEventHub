@@ -16,6 +16,7 @@ import type {
   EventRepository,
   RegionRepository,
   SubmissionRepository,
+  Prisma,
 } from '@openeventhub/database';
 import { SubmissionType } from '@openeventhub/database';
 
@@ -128,7 +129,7 @@ export function createPublicGraphQlSchema(deps: PublicGraphQlDeps): GraphQLSchem
 
     const result = await deps.submissions.createWithModeration({
       type,
-      payload: args.payload,
+      payload: args.payload as Prisma.InputJsonValue,
       submitterEmail: args.submitterEmail ?? null,
     });
 
@@ -157,7 +158,10 @@ export function createPublicGraphQlSchema(deps: PublicGraphQlDeps): GraphQLSchem
             offset: { type: GraphQLInt },
           },
           resolve: async (_root, args: { limit?: number; offset?: number }) => {
-            const rows = await deps.events.listPublished(args);
+            const rows = await deps.events.listPublished({
+              ...(args.limit !== undefined ? { limit: args.limit } : {}),
+              ...(args.offset !== undefined ? { offset: args.offset } : {}),
+            });
             return rows.map(mapEvent);
           },
         },
