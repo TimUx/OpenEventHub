@@ -162,7 +162,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M7 — Frontend (`Package 07`) · `planned`
+### M7 — Frontend (`Package 07`) · `done`
 
 **Goal:** Public portal: list, calendar, map, search, SEO.
 

@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-08-05
+
+### Added
+
+- Public Next.js portal with Tailwind and shadcn-style UI primitives
+- Views: Home, Event List, Event Detail, Calendar, Map, Search
+- Dark mode, Schema.org JSON-LD, OpenGraph metadata, sitemap and robots
+- TanStack Query client integration against `/api/v1`
+- Frontend Compose wiring (`NEXT_PUBLIC_API_BASE_URL`, `API_INTERNAL_URL`, site URL)
+
 ## [0.6.0] - 2026-08-05
 
 ### Added

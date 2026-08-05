@@ -12,13 +12,13 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 6 — Public API (`v0.6.0`)**
+**Milestone 7 — Frontend (`v0.7.0`)**
 
+- Public portal (list, calendar, map, search, event detail) with SEO
+- API: REST `/api/v1`, GraphQL, OpenAPI; crawler plugins + OCR/AI queues
 - Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
-- Crawler plugins + OCR/AI queues
-- Versioned REST `/api/v1`, GraphQL, OpenAPI/Swagger, JWT/RBAC, rate limits
 
-Next: **Milestone 7 — Frontend**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Next: **Milestone 8 — Administration**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Quick start
 

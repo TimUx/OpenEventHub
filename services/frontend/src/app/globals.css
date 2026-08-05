@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f3f6f4;
+  --foreground: #10221f;
+  --accent: #0f766e;
+  --muted: #5b6e69;
+  --border: #d5e0db;
+  --card: #ffffff;
+}
+
+.dark {
+  --background: #0c1614;
+  --foreground: #e7efec;
+  --accent: #2dd4bf;
+  --muted: #9db0aa;
+  --border: #243532;
+  --card: #13201d;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(214, 199, 168, 0.18), transparent 35%);
+  min-height: 100vh;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 42%),
+    radial-gradient(circle at 85% 0%, rgba(214, 199, 168, 0.06), transparent 30%);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  @apply outline-none ring-2 ring-teal-bright ring-offset-2 ring-offset-[var(--background)];
+}

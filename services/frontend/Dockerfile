@@ -1,6 +1,10 @@
 # syntax=docker/dockerfile:1.7
 ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS build
+ARG NEXT_PUBLIC_API_BASE_URL=http://api.localhost:8088
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:8088
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json tsconfig.json ./
 COPY packages/shared ./packages/shared
