@@ -24,6 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
       template: '%s · Admin',
     },
     description: dictionary.meta.description,
+    icons: {
+      icon: [{ url: '/brand/mark.svg', type: 'image/svg+xml' }, { url: '/brand/mark.png' }],
+      apple: [{ url: '/brand/mark.png' }],
+    },
   };
 }
 

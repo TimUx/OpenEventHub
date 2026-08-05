@@ -1,7 +1,7 @@
 'use client';
 
-import { Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, ChevronDown, Moon, Sun } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { useI18n } from '../i18n/i18n-provider';
 import {
@@ -9,6 +9,7 @@ import {
   type AccentId,
   applyAccentToDocument,
   applyThemeModeToDocument,
+  getAccentTheme,
   persistAccent,
   persistThemeMode,
   readStoredAccent,
@@ -24,9 +25,12 @@ export function AppearanceControls({
   readonly showThemeToggle?: boolean;
 }) {
   const { t } = useI18n();
+  const listboxId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const [dark, setDark] = useState(false);
   const [accent, setAccent] = useState<AccentId>('blue');
   const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const nextDark = readStoredDarkMode();
@@ -37,6 +41,31 @@ export function AppearanceControls({
     applyAccentToDocument(nextAccent);
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
 
   function toggleTheme() {
     const next = !dark;
@@ -49,41 +78,87 @@ export function AppearanceControls({
     setAccent(next);
     applyAccentToDocument(next);
     persistAccent(next);
+    setOpen(false);
   }
 
+  const current = getAccentTheme(ready ? accent : 'blue');
+
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <div
-        role="radiogroup"
+    <div ref={rootRef} className={cn('relative flex items-center gap-2', className)}>
+      <button
+        type="button"
+        className="inline-flex h-11 min-h-tap items-center gap-2 rounded-xl border border-white/50 bg-white px-2.5 text-sm font-semibold text-primary shadow-soft"
         aria-label={t('nav.accentColor')}
-        className="flex items-center gap-1 rounded-xl border border-primary-contrast/30 bg-primary-contrast/10 p-1"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        onClick={() => setOpen((value) => !value)}
       >
-        {ACCENT_THEMES.map((theme) => {
-          const selected = ready && accent === theme.id;
-          return (
-            <button
-              key={theme.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              aria-label={t(`nav.accent.${theme.id}`)}
-              title={t(`nav.accent.${theme.id}`)}
-              className={cn(
-                'h-6 w-6 rounded-full border-2 transition-transform',
-                selected
-                  ? 'scale-110 border-primary-contrast shadow-soft'
-                  : 'border-primary-contrast/40 hover:scale-105',
-              )}
-              style={{ backgroundColor: theme.swatch }}
-              onClick={() => selectAccent(theme.id)}
-            />
-          );
-        })}
-      </div>
+        <span
+          className="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
+          style={{ backgroundColor: current.swatch }}
+          aria-hidden
+        />
+        <span className="hidden max-w-20 truncate sm:inline">{t(`nav.accent.${current.id}`)}</span>
+        <ChevronDown
+          className={cn(
+            'h-3.5 w-3.5 shrink-0 opacity-70 transition-transform',
+            open && 'rotate-180',
+          )}
+          strokeWidth={2.5}
+          aria-hidden
+        />
+      </button>
+
+      {open ? (
+        <ul
+          id={listboxId}
+          role="listbox"
+          aria-label={t('nav.accentColor')}
+          className="absolute right-0 top-full z-50 mt-1.5 w-48 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] py-1 text-[var(--foreground)] shadow-soft"
+        >
+          {ACCENT_THEMES.map((theme) => {
+            const selected = ready && accent === theme.id;
+            return (
+              <li key={theme.id} role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  className={cn(
+                    'flex w-full min-h-tap items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors',
+                    selected
+                      ? 'bg-primary-soft font-semibold text-primary'
+                      : 'hover:bg-[var(--background)]',
+                  )}
+                  onClick={() => selectAccent(theme.id)}
+                >
+                  <span
+                    className="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/10"
+                    style={{ backgroundColor: theme.swatch }}
+                    aria-hidden
+                  />
+                  <span className="flex-1">{t(`nav.accent.${theme.id}`)}</span>
+                  {selected ? (
+                    <Check
+                      className="h-4 w-4 shrink-0 text-primary"
+                      strokeWidth={2.5}
+                      aria-hidden
+                    />
+                  ) : (
+                    <span className="h-4 w-4 shrink-0" aria-hidden />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
       {showThemeToggle ? (
         <button
           type="button"
-          className="inline-flex h-9 min-w-9 items-center justify-center rounded-xl text-primary-contrast hover:bg-primary-contrast/15"
+          className="inline-flex h-11 min-h-tap min-w-11 items-center justify-center rounded-xl text-primary-contrast hover:bg-primary-contrast/15"
           aria-label={dark ? t('nav.lightMode') : t('nav.darkMode')}
           onClick={toggleTheme}
         >

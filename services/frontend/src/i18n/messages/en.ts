@@ -75,6 +75,8 @@ export const en = {
     title: 'Search',
     description:
       'Filter by free text, category, region, and date. Sort by relevance or start date.',
+    metaTitle: 'Search',
+    metaDescription: 'Search and filter events on OpenEventHub.',
     freeText: 'Free text',
     placeholder: 'Open Air…',
     category: 'Category',
@@ -94,6 +96,8 @@ export const en = {
   calendar: {
     title: 'Calendar',
     description: 'Published events in day, week, month, or year view.',
+    metaTitle: 'Calendar',
+    metaDescription: 'Browse events in day, week, month, and year views on OpenEventHub.',
     previous: 'Previous',
     next: 'Next',
     today: 'Today',
@@ -112,6 +116,8 @@ export const en = {
     title: 'Map',
     description:
       'Embedded map with search and filters. The view auto-zooms to the matching events.',
+    metaTitle: 'Map',
+    metaDescription: 'Find events on the map — markers, filters, and places on OpenEventHub.',
     searchLabel: 'Search',
     searchPlaceholder: 'Title, venue, description…',
     category: 'Category',
@@ -165,5 +171,8 @@ export const en = {
   notFound: {
     title: 'Page not found',
     body: 'This page could not be found.',
+  },
+  seo: {
+    upcomingEvents: 'Events to explore',
   },
 } as const satisfies Dictionary;

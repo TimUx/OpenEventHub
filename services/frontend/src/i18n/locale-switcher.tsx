@@ -19,7 +19,7 @@ export function LocaleSwitcher({
       <span className="sr-only">{t('nav.language')}</span>
       <select
         className={cn(
-          'h-9 rounded-xl border px-2 text-sm font-semibold',
+          'h-11 min-h-tap rounded-xl border px-2 text-sm font-semibold',
           // Solid light control: native <option> lists ignore translucent/white text
           // and become unreadable on system dropdown backgrounds.
           variant === 'onPrimary'

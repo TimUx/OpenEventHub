@@ -1,6 +1,29 @@
 import type { ApiEvent } from '../lib/api';
 
 export function EventJsonLd({ event, url }: { readonly event: ApiEvent; readonly url: string }) {
+  const venue = event.venue;
+  const location =
+    venue == null
+      ? undefined
+      : {
+          '@type': 'Place' as const,
+          name: venue.name,
+          address: {
+            '@type': 'PostalAddress' as const,
+            streetAddress: venue.address ?? undefined,
+            addressLocality: venue.city ?? undefined,
+          },
+          ...(venue.latitude != null && venue.longitude != null
+            ? {
+                geo: {
+                  '@type': 'GeoCoordinates' as const,
+                  latitude: venue.latitude,
+                  longitude: venue.longitude,
+                },
+              }
+            : {}),
+        };
+
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -11,6 +34,8 @@ export function EventJsonLd({ event, url }: { readonly event: ApiEvent; readonly
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     url,
+    location,
+    keywords: event.categories?.map((category) => category.name).join(', ') || undefined,
   };
 
   return (

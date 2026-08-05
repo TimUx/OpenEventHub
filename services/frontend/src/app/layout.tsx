@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Roboto } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '../components/providers';
+import { PwaRegister } from '../components/pwa-register';
 import { SiteHeader } from '../components/site-header';
 import { getDictionary } from '../i18n/get-dictionary';
 import { getRequestLocale } from '../i18n/request-locale';
@@ -16,6 +17,16 @@ const sans = Roboto({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#1565c0' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b1520' },
+  ],
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const dictionary = getDictionary(locale);
@@ -26,12 +37,40 @@ export async function generateMetadata(): Promise<Metadata> {
       template: '%s · OpenEventHub',
     },
     description: dictionary.meta.description,
+    applicationName: 'OpenEventHub',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: 'OpenEventHub',
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    icons: {
+      icon: [
+        { url: '/brand/mark.svg', type: 'image/svg+xml' },
+        { url: '/brand/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/brand/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: [{ url: '/brand/apple-touch-icon.png', sizes: '180x180' }],
+    },
     openGraph: {
       type: 'website',
       siteName: 'OpenEventHub',
       title: 'OpenEventHub',
       description: dictionary.meta.ogDescription,
       locale: locale === 'de' ? 'de_DE' : 'en_GB',
+      images: [{ url: '/brand/mark.png', width: 512, height: 512, alt: 'OpenEventHub' }],
+    },
+    twitter: {
+      card: 'summary',
+      title: 'OpenEventHub',
+      description: dictionary.meta.ogDescription,
+      images: ['/brand/mark.png'],
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   };
 }
@@ -49,11 +88,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body className="min-h-dvh">
         <Providers locale={locale} dictionary={dictionary}>
+          <PwaRegister />
           <SiteHeader />
-          <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-8">{children}</main>
-          <footer className="border-t border-[var(--border)] bg-[var(--card)] px-4 py-6 text-center text-sm text-[var(--muted)]">
+          <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-6 sm:py-8">{children}</main>
+          <footer className="border-t border-[var(--border)] bg-[var(--card)] px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-center text-sm text-[var(--muted)] lg:pb-6">
             {dictionary.footer}
           </footer>
         </Providers>

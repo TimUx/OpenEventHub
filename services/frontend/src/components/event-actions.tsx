@@ -13,11 +13,9 @@ import { Button, buttonVariants } from './ui/button';
 export function EventActions({
   event,
   className,
-  size = 'sm',
 }: {
   readonly event: ApiEvent;
   readonly className?: string;
-  readonly size?: 'sm' | 'default';
 }) {
   const { t } = useI18n();
   const onMap = canShowEventOnMap(event);
@@ -36,33 +34,28 @@ export function EventActions({
       onKeyDown={(keyEvent) => keyEvent.stopPropagation()}
     >
       {onMap ? (
-        <Link
-          href={buildEventMapHref(event.id)}
-          className={buttonVariants({ variant: 'outline', size })}
-        >
-          <MapPinned className="h-3.5 w-3.5" aria-hidden />
+        <Link href={buildEventMapHref(event.id)} className={buttonVariants({ variant: 'outline' })}>
+          <MapPinned className="h-4 w-4" aria-hidden />
           {t('eventActions.showOnMap')}
         </Link>
       ) : (
         <Button
           type="button"
           variant="outline"
-          size={size}
           disabled
           title={t('eventActions.showOnMapUnavailable')}
         >
-          <MapPinned className="h-3.5 w-3.5" aria-hidden />
+          <MapPinned className="h-4 w-4" aria-hidden />
           {t('eventActions.showOnMap')}
         </Button>
       )}
       <Button
         type="button"
         variant="outline"
-        size={size}
         onClick={() => downloadEventIcs(event, pageUrl())}
         title={t('eventActions.addToCalendarHint')}
       >
-        <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
+        <CalendarPlus className="h-4 w-4" aria-hidden />
         {t('eventActions.addToCalendar')}
       </Button>
     </div>

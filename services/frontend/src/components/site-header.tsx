@@ -8,6 +8,7 @@ import { useI18n } from '../i18n/i18n-provider';
 import { LocaleSwitcher } from '../i18n/locale-switcher';
 import { cn } from '../lib/utils';
 import { AppearanceControls } from './appearance-controls';
+import { BrandMark } from './brand-mark';
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -22,58 +23,73 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-primary text-primary-contrast shadow-soft">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5">
-        <Link href="/" className="text-xl font-bold tracking-tight text-primary-contrast">
-          OpenEventHub
-        </Link>
-        <nav aria-label={t('nav.primary')} className="hidden items-center gap-1 md:flex">
+    <>
+      <header className="sticky top-0 z-40 bg-primary text-primary-contrast shadow-soft pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5">
+          <Link
+            href="/"
+            className="inline-flex min-h-tap items-center gap-2.5 text-lg font-bold tracking-tight text-primary-contrast sm:text-xl"
+          >
+            <BrandMark className="h-8 w-8 shrink-0" />
+            <span className="truncate">OpenEventHub</span>
+          </Link>
+          <nav aria-label={t('nav.primary')} className="hidden items-center gap-1 lg:flex">
+            {links.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href || pathname.startsWith(`${href}/`);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'inline-flex min-h-tap items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors',
+                    active
+                      ? 'bg-primary-contrast/20 text-primary-contrast'
+                      : 'text-primary-contrast/85 hover:bg-primary-contrast/10 hover:text-primary-contrast',
+                  )}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <LocaleSwitcher className="inline-flex items-center" variant="onPrimary" />
+            <AppearanceControls />
+          </div>
+        </div>
+      </header>
+
+      <nav
+        aria-label={t('nav.mobile')}
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--card)] pb-[env(safe-area-inset-bottom)] shadow-soft lg:hidden"
+      >
+        <ul className="mx-auto grid max-w-6xl grid-cols-5 gap-0 px-1 pt-1">
           {links.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'inline-flex min-h-tap items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors',
-                  active
-                    ? 'bg-primary-contrast/20 text-primary-contrast'
-                    : 'text-primary-contrast/85 hover:bg-primary-contrast/10 hover:text-primary-contrast',
-                )}
-              >
-                <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                {label}
-              </Link>
+              <li key={href}>
+                <Link
+                  href={href}
+                  className={cn(
+                    'flex min-h-tap flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-semibold leading-tight sm:text-xs',
+                    active
+                      ? 'text-primary'
+                      : 'text-[var(--muted)] hover:bg-[var(--background)] hover:text-[var(--foreground)]',
+                  )}
+                >
+                  <Icon
+                    className={cn('h-5 w-5', active && 'text-primary')}
+                    strokeWidth={active ? 2.5 : 2}
+                    aria-hidden
+                  />
+                  <span className="max-w-full truncate">{label}</span>
+                </Link>
+              </li>
             );
           })}
-        </nav>
-        <div className="flex items-center gap-2">
-          <LocaleSwitcher className="inline-flex items-center" variant="onPrimary" />
-          <AppearanceControls />
-        </div>
-      </div>
-      <nav
-        aria-label={t('nav.mobile')}
-        className="flex gap-1 overflow-x-auto border-t border-primary-contrast/15 px-2 py-2 md:hidden"
-      >
-        {links.map(({ href, label }) => {
-          const active = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-semibold',
-                active
-                  ? 'bg-primary-contrast/20 text-primary-contrast'
-                  : 'text-primary-contrast/80',
-              )}
-            >
-              {label}
-            </Link>
-          );
-        })}
+        </ul>
       </nav>
-    </header>
+    </>
   );
 }

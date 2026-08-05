@@ -51,6 +51,9 @@ const config = {
       minHeight: {
         tap: '44px',
       },
+      minWidth: {
+        tap: '44px',
+      },
     },
   },
   plugins: [],

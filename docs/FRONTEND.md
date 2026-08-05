@@ -13,12 +13,14 @@ Stack:
 
 Flaches UI (an FestSchmiede angelehnt):
 - solide Primär-/Akzentfarbe (Default Blau `#1565c0`), Sekundär/Teal (`#00838f`), Erfolg grün (`#2e7d32`)
-- wählbare Akzentfarben in der Kopfzeile (nur WCAG-AA-sichere Paare mit Kontrastschrift für Light/Dark)
+- wählbare Akzentfarben über ein Dropdown in der Kopfzeile (Farbpunkt + Name; nur WCAG-AA-sichere Paare für Light/Dark)
 - Light/Dark-Modus und Akzent werden lokal im Browser gespeichert (`oeh-theme`, `oeh-accent`)
 - keine Hintergrund-Farbverläufe; helles Grau + weiße Flächen
 - Roboto / Sans, fette Überschriften
-- abgerundete Buttons (`12px`), flache Icons, leichte Kartenschatten
-- solide Primär-AppBar (Kontrastschrift auf Akzent)
+- abgerundete Buttons (`12px`, einheitliche Höhe `44px` / `h-11` wie Inputs), flache Icons, leichte Kartenschatten
+- solide Primär-AppBar (Kontrastschrift auf Akzent) mit flachem Brand-Mark vor dem App-Namen; Favicon unter `/brand/`
+- **Responsive:** Bottom-Navigation auf Smartphones/Tablets (`< lg`), Desktop-Nav ab Large; Touch-Targets ≥ 44px; Safe-Area-Insets (Notch); 16px-Inputs gegen iOS-Zoom
+- **PWA:** Web App Manifest, Install-Icons (192/512 + maskable), Apple Touch Icon, Service Worker (`/sw.js`) für Shell-Caching; „Zum Homescreen“ unter HTTPS
 
 Ansichten:
 - Startseite
@@ -39,6 +41,16 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - Ermittlung: Cookie `oeh_locale` → Browser-`Accept-Language` → Default **Deutsch**
 - Manuelle Umschaltung über Sprachwähler in der Kopfzeile (setzt Cookie)
 - Message-Dateien: `services/frontend/src/i18n/messages/{de,en}.ts`
+
+## Mobile & PWA
+
+- Viewport: `device-width`, `viewport-fit=cover`, Theme-Color
+- Navigation: feste Bottom-Bar mit Icons unter `lg`; ab Desktop horizontale Kopfzeilen-Nav
+- Kalender Monatsraster: auf schmalen Screens kompakte Zellen mit Event-Anzahl; ab `sm` Event-Chips
+- Karte: Höhen an `dvh` angepasst, damit die Bottom-Bar nicht die Karte verdeckt
+- Manifest: `/manifest.webmanifest` (Next.js `app/manifest.ts`)
+- Service Worker: nur in Production-Builds registriert (`PwaRegister`); API/Health-Routen werden nicht gecacht
+- Betrieb: öffentliche HTTPS-URL (`NEXT_PUBLIC_SITE_URL`); Install-Prompt erscheint nach Manifest + SW
 
 ## Anzeigemodi
 
@@ -98,3 +110,7 @@ Einreichungen gehen über `POST /api/v1/submissions` bzw. `POST /api/v1/source-s
 ![Suche](assets/screenshots/frontend-search.png)
 
 *Suche*
+
+![Startseite mobil](assets/screenshots/frontend-home-mobile.png)
+
+*Startseite (Smartphone / Bottom-Navigation)*

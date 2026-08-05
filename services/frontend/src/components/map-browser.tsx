@@ -22,7 +22,7 @@ import { eventHasCoordinates, filterMapEvents } from '../lib/map-events';
 const EventMap = dynamic(() => import('./event-map'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[min(70vh,560px)] min-h-80 items-center justify-center rounded-xl bg-primary-soft text-sm font-semibold text-primary">
+    <div className="flex h-[min(55dvh,520px)] min-h-72 items-center justify-center rounded-xl bg-primary-soft text-sm font-semibold text-primary sm:h-[min(70vh,560px)] sm:min-h-80">
       …
     </div>
   ),
@@ -183,7 +183,7 @@ export function MapBrowser() {
               total: String(filtered.length),
             })}
           </p>
-          <Button type="button" variant="outline" size="sm" onClick={clearFilters}>
+          <Button type="button" variant="outline" onClick={clearFilters}>
             {t('map.clearFilters')}
           </Button>
         </div>
@@ -195,7 +195,7 @@ export function MapBrowser() {
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Card className="overflow-hidden p-0">
           {!isLoading && onMap.length === 0 ? (
-            <div className="flex h-[min(70vh,560px)] min-h-80 flex-col items-center justify-center gap-2 bg-primary-soft p-6 text-center">
+            <div className="flex h-[min(55dvh,520px)] min-h-72 flex-col items-center justify-center gap-2 bg-primary-soft p-6 text-center sm:h-[min(70vh,560px)] sm:min-h-80">
               <p className="text-lg font-bold text-primary">{t('map.noPins')}</p>
               <p className="max-w-md text-sm text-[var(--muted)]">{t('map.noPinsHint')}</p>
             </div>
@@ -210,7 +210,7 @@ export function MapBrowser() {
           )}
         </Card>
 
-        <div className="max-h-[min(70vh,560px)] space-y-3 overflow-y-auto">
+        <div className="max-h-[min(55dvh,520px)] space-y-3 overflow-y-auto sm:max-h-[min(70vh,560px)]">
           {filtered.map((event) => {
             const hasCoords = eventHasCoordinates(event);
             const active = event.id === selectedId;

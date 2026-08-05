@@ -18,6 +18,8 @@ export default tseslint.config(
       // Playwright root config/tests are not in tsconfig.eslint.json.
       'playwright.config.ts',
       'tests/**',
+      // Browser service workers use SW globals outside the TS project.
+      '**/public/sw.js',
     ],
   },
   eslint.configs.recommended,

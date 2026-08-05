@@ -4,13 +4,14 @@
 
 Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flaches UI.
 
-Akzentfarben und Light/Dark im Portal-Header; Event-Aktionen (Karte / Kalender) auf Listen und Detailseiten; Admin KI-Einstellungen mit Bearbeiten/Löschen.
+Akzentfarben und Light/Dark im Portal-Header; Event-Aktionen (Karte / Kalender); Brand-Mark; SEO/PWA-fähiges Portal mit Bottom-Navigation auf schmalen Viewports.
 
 ## Frontend
 
 | Datei | Inhalt |
 |-------|--------|
-| `frontend-home.png` | Startseite |
+| `frontend-home.png` | Startseite (Desktop) |
+| `frontend-home-mobile.png` | Startseite (Smartphone, Bottom-Nav) |
 | `frontend-events.png` | Veranstaltungsliste |
 | `frontend-event-detail.png` | Veranstaltungsdetail |
 | `frontend-calendar.png` | Kalender |

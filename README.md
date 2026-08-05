@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.13.0 — Event actions, accents, AI CRUD, Local Ollama** (post-M11)
+**v0.14.0 — SEO, PWA & responsive portal** (post-M11)
 
-Vorher: v0.12.0 — Portal UX, Map, Submit, Network Hardening
+Vorher: v0.13.0 — Event actions, accents, AI CRUD, Local Ollama
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates
