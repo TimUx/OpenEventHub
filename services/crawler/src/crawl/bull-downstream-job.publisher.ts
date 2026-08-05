@@ -3,11 +3,7 @@ import { ModuleRef } from '@nestjs/core';
 import { getQueueToken } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 
-import {
-  QUEUE_NAMES,
-  type AiJobPayload,
-  type OcrJobPayload,
-} from '@openeventhub/shared';
+import { QUEUE_NAMES, type AiJobPayload, type OcrJobPayload } from '@openeventhub/shared';
 
 import type { DownstreamJobPublisher } from './downstream-job.publisher.js';
 

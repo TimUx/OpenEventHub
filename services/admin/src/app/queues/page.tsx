@@ -40,7 +40,10 @@ export default function QueuesPage() {
             <h2 className="font-display text-lg">{queue.name}</h2>
             <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {Object.entries(queue.counts).map(([key, value]) => (
-                <div key={key} className="flex justify-between rounded-md bg-[var(--background)] px-2 py-1">
+                <div
+                  key={key}
+                  className="flex justify-between rounded-md bg-[var(--background)] px-2 py-1"
+                >
                   <dt className="text-[var(--muted)]">{key}</dt>
                   <dd className="font-medium">{value}</dd>
                 </div>

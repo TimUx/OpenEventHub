@@ -36,9 +36,7 @@ export class CrawlJobRepository {
   countByStatus(): Promise<Record<string, number>> {
     return this.prisma.crawlJob
       .groupBy({ by: ['status'], _count: { _all: true } })
-      .then((rows) =>
-        Object.fromEntries(rows.map((row) => [row.status, row._count._all])),
-      );
+      .then((rows) => Object.fromEntries(rows.map((row) => [row.status, row._count._all])));
   }
 
   update(id: string, data: Prisma.CrawlJobUpdateInput): Promise<CrawlJob> {

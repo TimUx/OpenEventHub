@@ -13,7 +13,7 @@ Creates crawl jobs for configured sources.
 
 ## Configuration
 
-| Variable | Purpose |
-|----------|---------|
-| `REDIS_*` | BullMQ connection |
-| `DATABASE_URL` / `POSTGRES_*` | Source schedules |
+| Variable                      | Purpose           |
+| ----------------------------- | ----------------- |
+| `REDIS_*`                     | BullMQ connection |
+| `DATABASE_URL` / `POSTGRES_*` | Source schedules  |

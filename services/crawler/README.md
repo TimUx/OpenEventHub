@@ -16,9 +16,9 @@ Plugin-first crawl worker for OpenEventHub.
 
 ## Configuration
 
-| Variable | Purpose |
-|----------|---------|
-| `REDIS_*` | BullMQ connection |
-| `DATABASE_URL` / `POSTGRES_*` | Source and crawl persistence |
-| `S3_*` / `OBJECT_STORAGE_ADAPTER` | Raw payload storage |
-| `PLUGINS_DIR` | Plugin root (default `/app/plugins` in container) |
+| Variable                          | Purpose                                           |
+| --------------------------------- | ------------------------------------------------- |
+| `REDIS_*`                         | BullMQ connection                                 |
+| `DATABASE_URL` / `POSTGRES_*`     | Source and crawl persistence                      |
+| `S3_*` / `OBJECT_STORAGE_ADAPTER` | Raw payload storage                               |
+| `PLUGINS_DIR`                     | Plugin root (default `/app/plugins` in container) |

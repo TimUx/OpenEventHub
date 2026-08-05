@@ -32,7 +32,6 @@ export function useAdminQuery<T>(path: string | null) {
 
   useEffect(() => {
     void reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, token]);
 
   return { data, error, loading, reload, token };
@@ -58,7 +57,13 @@ export function PageHeader({
   );
 }
 
-export function Panel({ children, className = '' }: { readonly children: ReactNode; readonly className?: string }) {
+export function Panel({
+  children,
+  className = '',
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+}) {
   return (
     <div className={`rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 ${className}`}>
       {children}

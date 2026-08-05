@@ -22,11 +22,11 @@ Status: Accepted for completion; next is M6 Public API
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| Crawler fixture + skip tests | pass (tsx) |
-| OCR processing tests (fake engine) | pass (tsx) |
-| Compose file structure for crawler/ocr/scheduler | updated |
+| Check                                            | Result     |
+| ------------------------------------------------ | ---------- |
+| Crawler fixture + skip tests                     | pass (tsx) |
+| OCR processing tests (fake engine)               | pass (tsx) |
+| Compose file structure for crawler/ocr/scheduler | updated    |
 
 ## Follow-ups (M6+)
 

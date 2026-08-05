@@ -11,7 +11,11 @@ function extractTagValue(xml, tagName) {
   const re = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i');
   const match = re.exec(xml);
   if (!match) return null;
-  return decodeCdata(match[1]).replace(/<!\[CDATA\[|]]>/g, '').trim() || null;
+  return (
+    decodeCdata(match[1])
+      .replace(/<!\[CDATA\[|]]>/g, '')
+      .trim() || null
+  );
 }
 
 function toIsoOrNull(value) {
@@ -91,4 +95,3 @@ export function createPlugin() {
 }
 
 export default createPlugin;
-

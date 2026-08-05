@@ -7,13 +7,7 @@ import { PageHeader, Panel } from '../../components/ui';
 import { adminFetch } from '../../lib/api';
 
 type ProviderType =
-  | 'openai'
-  | 'anthropic'
-  | 'google'
-  | 'azure_openai'
-  | 'openrouter'
-  | 'ollama'
-  | 'custom_openai';
+  'openai' | 'anthropic' | 'google' | 'azure_openai' | 'openrouter' | 'ollama' | 'custom_openai';
 
 type CatalogItem = {
   type: ProviderType;

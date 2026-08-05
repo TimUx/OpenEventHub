@@ -10,4 +10,3 @@ export type {
   PluginMetadata,
   DiscoveryResult,
 } from './plugin-types.js';
-

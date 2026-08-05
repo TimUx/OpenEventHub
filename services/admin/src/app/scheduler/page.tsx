@@ -52,7 +52,10 @@ export default function SchedulerPage() {
       <Panel>
         <ul className="space-y-2 text-sm">
           {(data ?? []).map((job) => (
-            <li key={job.key} className="flex flex-wrap justify-between gap-2 border-b border-[var(--border)]/50 py-2">
+            <li
+              key={job.key}
+              className="flex flex-wrap justify-between gap-2 border-b border-[var(--border)]/50 py-2"
+            >
               <span>
                 {job.name} · <code>{job.pattern}</code>
               </span>

@@ -13,9 +13,9 @@ OpenEventHub public REST + GraphQL API.
 
 ## Configuration
 
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` / `POSTGRES_*` | Persistence |
-| `AUTH_JWT_SECRET` | JWT signing |
-| `API_RATE_LIMIT` | Max requests per window (default 120) |
-| `API_RATE_LIMIT_TTL_MS` | Window size in ms (default 60000) |
+| Variable                      | Purpose                               |
+| ----------------------------- | ------------------------------------- |
+| `DATABASE_URL` / `POSTGRES_*` | Persistence                           |
+| `AUTH_JWT_SECRET`             | JWT signing                           |
+| `API_RATE_LIMIT`              | Max requests per window (default 120) |
+| `API_RATE_LIMIT_TTL_MS`       | Window size in ms (default 60000)     |

@@ -36,8 +36,7 @@ const sampleEvent = {
 describe('API v1 contract', () => {
   const eventRepo = {
     listPublished: () => Promise.resolve([sampleEvent]),
-    findPublishedById: (id: string) =>
-      Promise.resolve(id === sampleEvent.id ? sampleEvent : null),
+    findPublishedById: (id: string) => Promise.resolve(id === sampleEvent.id ? sampleEvent : null),
     searchPublished: ({ q }: { q: string }) =>
       Promise.resolve(
         sampleEvent.title.toLowerCase().includes(q.toLowerCase()) ? [sampleEvent] : [],
@@ -148,6 +147,9 @@ describe('API v1 contract', () => {
     });
 
     assert.equal(result.errors, undefined);
-    assert.equal((result.data as { events: Array<{ title: string }> }).events[0]?.title, 'Open Air');
+    assert.equal(
+      (result.data as { events: Array<{ title: string }> }).events[0]?.title,
+      'Open Air',
+    );
   });
 });

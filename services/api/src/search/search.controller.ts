@@ -12,11 +12,7 @@ export class SearchController {
   @ApiQuery({ name: 'q', required: true, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
-  search(
-    @Query('q') q = '',
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
-  ) {
+  search(@Query('q') q = '', @Query('limit') limit?: string, @Query('offset') offset?: string) {
     return this.events.searchPublished({
       q,
       ...(limit ? { limit: Number(limit) } : {}),

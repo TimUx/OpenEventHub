@@ -26,7 +26,11 @@ export default function CalendarPage() {
     return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   });
 
-  const { data: events = [], isLoading, error } = useQuery({
+  const {
+    data: events = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['events', 'calendar'],
     queryFn: fetchEvents,
   });
@@ -76,9 +80,7 @@ export default function CalendarPage() {
             type="button"
             variant="outline"
             onClick={() =>
-              setCursor(
-                new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() - 1, 1)),
-              )
+              setCursor(new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() - 1, 1)))
             }
           >
             Previous
@@ -88,9 +90,7 @@ export default function CalendarPage() {
             type="button"
             variant="outline"
             onClick={() =>
-              setCursor(
-                new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1)),
-              )
+              setCursor(new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1)))
             }
           >
             Next

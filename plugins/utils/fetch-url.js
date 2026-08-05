@@ -35,4 +35,3 @@ export async function fetchUrlToBuffer(sourceUrl) {
   const mimeType = response.headers.get('content-type') ?? mimeTypeFromUrl(sourceUrl);
   return { content, mimeType };
 }
-

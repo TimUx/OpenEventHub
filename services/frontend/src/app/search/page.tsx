@@ -92,7 +92,10 @@ function SearchInner() {
         role="search"
       >
         <div className="md:col-span-2">
-          <label className="mb-1 block text-xs uppercase tracking-wide text-[var(--muted)]" htmlFor="q">
+          <label
+            className="mb-1 block text-xs uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="q"
+          >
             Free text
           </label>
           <Input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Open Air…" />
@@ -173,7 +176,9 @@ function SearchInner() {
       </form>
 
       {!effectiveQuery ? (
-        <p className="text-sm text-[var(--muted)]">Enter a query or choose filters to see results.</p>
+        <p className="text-sm text-[var(--muted)]">
+          Enter a query or choose filters to see results.
+        </p>
       ) : isFetching ? (
         <p className="text-sm text-[var(--muted)]">Searching…</p>
       ) : events.length === 0 ? (

@@ -1,5 +1,5 @@
 import type { ModerationItem, Prisma, PrismaClient, UserSubmission } from '@prisma/client';
-import { ModerationStatus, SubmissionStatus, SubmissionType } from '@prisma/client';
+import { ModerationStatus, SubmissionStatus, type SubmissionType } from '@prisma/client';
 
 export type CreateSubmissionInput = {
   readonly type: SubmissionType;

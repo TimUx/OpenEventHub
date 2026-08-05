@@ -87,4 +87,3 @@ export function createPlugin() {
 }
 
 export default createPlugin;
-

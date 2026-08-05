@@ -23,13 +23,7 @@ export interface LlmProvider {
 }
 
 export type AiProviderTypeName =
-  | 'openai'
-  | 'anthropic'
-  | 'google'
-  | 'azure_openai'
-  | 'openrouter'
-  | 'ollama'
-  | 'custom_openai';
+  'openai' | 'anthropic' | 'google' | 'azure_openai' | 'openrouter' | 'ollama' | 'custom_openai';
 
 export interface AiProviderProfileConfig {
   readonly id: string;

@@ -21,10 +21,10 @@ Status: Accepted for completion; next is M8 Administration
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| Frontend unit tests | pass (tsx) |
-| Compose config | frontend 0.7.0 + API env |
+| Check               | Result                   |
+| ------------------- | ------------------------ |
+| Frontend unit tests | pass (tsx)               |
+| Compose config      | frontend 0.7.0 + API env |
 
 ## Follow-ups (M8+)
 

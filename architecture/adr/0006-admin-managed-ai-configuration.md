@@ -42,8 +42,8 @@ endpoints) from the Admin Center with credentials — not via deployment env var
 
 ## Alternatives considered
 
-| Alternative | Why rejected |
-|-------------|--------------|
-| Keep AI_* env vars as source of truth | Contradicts Admin AI Settings requirement |
-| Store API keys in plaintext | Unacceptable for production credentials |
+| Alternative                           | Why rejected                                     |
+| ------------------------------------- | ------------------------------------------------ |
+| Keep AI_* env vars as source of truth | Contradicts Admin AI Settings requirement        |
+| Store API keys in plaintext           | Unacceptable for production credentials          |
 | Single OpenAI-compatible adapter only | Cannot speak Claude/Gemini native APIs correctly |

@@ -37,18 +37,14 @@ export class AdminSchedulerService {
 
     await Promise.all(
       repeatable.map(async (source) => {
-        await this.crawlQueue.add(
-          'crawl',
-          { sourceId: source.id } satisfies CrawlJobPayload,
-          {
-            jobId: `source:${source.id}`,
-            repeat: {
-              pattern: source.scheduleCron as string,
-              tz: 'UTC',
-            },
-            removeOnComplete: true,
+        await this.crawlQueue.add('crawl', { sourceId: source.id } satisfies CrawlJobPayload, {
+          jobId: `source:${source.id}`,
+          repeat: {
+            pattern: source.scheduleCron as string,
+            tz: 'UTC',
           },
-        );
+          removeOnComplete: true,
+        });
       }),
     );
 
@@ -57,11 +53,10 @@ export class AdminSchedulerService {
   }
 
   async enqueueCrawl(sourceId: string): Promise<{ jobId?: string }> {
-    const job = await this.crawlQueue.add(
-      'crawl',
-      { sourceId } satisfies CrawlJobPayload,
-      { removeOnComplete: 100, removeOnFail: 50 },
-    );
+    const job = await this.crawlQueue.add('crawl', { sourceId } satisfies CrawlJobPayload, {
+      removeOnComplete: 100,
+      removeOnFail: 50,
+    });
     return job.id ? { jobId: job.id } : {};
   }
 }

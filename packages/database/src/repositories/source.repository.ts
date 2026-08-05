@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient, Source } from '@prisma/client';
-import { SourceStatus } from '@prisma/client';
+import type { SourceStatus } from '@prisma/client';
 
 export type SourceUpdateInput = {
   readonly name?: string;
@@ -46,9 +46,7 @@ export class SourceRepository {
   countByStatus(): Promise<Record<string, number>> {
     return this.prisma.source
       .groupBy({ by: ['status'], _count: { _all: true } })
-      .then((rows) =>
-        Object.fromEntries(rows.map((row) => [row.status, row._count._all])),
-      );
+      .then((rows) => Object.fromEntries(rows.map((row) => [row.status, row._count._all])));
   }
 
   updateLastCrawlAt(sourceId: string, lastCrawlAt: Date): Promise<Source> {

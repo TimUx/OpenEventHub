@@ -1,5 +1,5 @@
 import type { ModerationItem, PrismaClient, UserSubmission } from '@prisma/client';
-import { ModerationStatus, SubmissionStatus } from '@prisma/client';
+import { type ModerationStatus, SubmissionStatus } from '@prisma/client';
 
 export type ModerationListItem = ModerationItem & {
   readonly userSubmission: UserSubmission | null;
@@ -41,9 +41,7 @@ export class ModerationRepository {
   countByStatus(): Promise<Record<string, number>> {
     return this.prisma.moderationItem
       .groupBy({ by: ['status'], _count: { _all: true } })
-      .then((rows) =>
-        Object.fromEntries(rows.map((row) => [row.status, row._count._all])),
-      );
+      .then((rows) => Object.fromEntries(rows.map((row) => [row.status, row._count._all])));
   }
 
   async decide(id: string, input: DecideModerationInput): Promise<ModerationListItem> {

@@ -39,7 +39,9 @@ const GraphQLJSON = new GraphQLScalarType({
     if (ast.kind === Kind.NULL) {
       return null;
     }
-    throw new GraphQLError('JSON literal parsing supports primitives only; use variables for objects');
+    throw new GraphQLError(
+      'JSON literal parsing supports primitives only; use variables for objects',
+    );
   },
 } satisfies GraphQLScalarTypeConfig<unknown, unknown>);
 

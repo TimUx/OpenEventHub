@@ -1,10 +1,7 @@
 export const TOKEN_KEY = 'oeh_admin_token';
 
 export function getPublicApiBase(): string {
-  return (
-    process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ||
-    'http://api.localhost:8088'
-  );
+  return process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') || 'http://api.localhost:8088';
 }
 
 export type AdminUser = {
@@ -13,11 +10,7 @@ export type AdminUser = {
   readonly role: string;
 };
 
-export async function adminFetch<T>(
-  path: string,
-  token: string,
-  init?: RequestInit,
-): Promise<T> {
+export async function adminFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${getPublicApiBase()}${path}`, {
     ...init,
     headers: {
@@ -37,7 +30,10 @@ export async function adminFetch<T>(
   return (await response.json()) as T;
 }
 
-export async function login(email: string, password: string): Promise<{
+export async function login(
+  email: string,
+  password: string,
+): Promise<{
   accessToken: string;
   user: AdminUser;
 }> {

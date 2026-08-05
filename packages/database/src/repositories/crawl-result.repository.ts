@@ -15,7 +15,10 @@ export class CrawlResultRepository {
    * Returns a prior successful crawl of the same content hash for a source.
    * Used to skip reprocessing unchanged payloads (docs/SCHEDULER.md).
    */
-  findSuccessfulBySourceAndHash(sourceId: string, contentHash: string): Promise<CrawlResult | null> {
+  findSuccessfulBySourceAndHash(
+    sourceId: string,
+    contentHash: string,
+  ): Promise<CrawlResult | null> {
     return this.prisma.crawlResult.findFirst({
       where: {
         contentHash,
@@ -26,4 +29,3 @@ export class CrawlResultRepository {
     });
   }
 }
-

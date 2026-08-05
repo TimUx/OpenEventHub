@@ -35,17 +35,13 @@ export class CrawlSchedulerService implements OnModuleInit {
 
     await Promise.all(
       repeatable.map(async (source) => {
-        await this.crawlQueue.add(
-          'crawl',
-          { sourceId: source.id } satisfies CrawlJobPayload,
-          {
-            repeat: {
-              pattern: source.scheduleCron as string,
-              tz: 'UTC',
-            },
-            removeOnComplete: true,
+        await this.crawlQueue.add('crawl', { sourceId: source.id } satisfies CrawlJobPayload, {
+          repeat: {
+            pattern: source.scheduleCron as string,
+            tz: 'UTC',
           },
-        );
+          removeOnComplete: true,
+        });
       }),
     );
 

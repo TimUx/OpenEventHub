@@ -121,9 +121,7 @@ export class AiSettingsRepository {
       name: row.name,
       type: row.type,
       baseUrl: row.baseUrl,
-      apiKey: row.apiKeyEncrypted
-        ? decryptSecret(row.apiKeyEncrypted, this.encryptionKey)
-        : null,
+      apiKey: row.apiKeyEncrypted ? decryptSecret(row.apiKeyEncrypted, this.encryptionKey) : null,
       model: row.model,
       organizationId: row.organizationId,
       projectId: row.projectId,

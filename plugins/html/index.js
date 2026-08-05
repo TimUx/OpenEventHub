@@ -51,7 +51,8 @@ export function createPlugin() {
     async parse(fetchResult) {
       const html = fetchResult.content.toString('utf-8');
 
-      const rowRe = /<tr[^>]*(?:data-oeh-event|data-event|class=["'][^"']*\boeh-event\b[^"']*["'])[^>]*>([\s\S]*?)<\/tr>/gi;
+      const rowRe =
+        /<tr[^>]*(?:data-oeh-event|data-event|class=["'][^"']*\boeh-event\b[^"']*["'])[^>]*>([\s\S]*?)<\/tr>/gi;
       const matches = [...html.matchAll(rowRe)];
       const rows = matches.map((m) => m[1]);
 
@@ -71,7 +72,8 @@ export function createPlugin() {
         const summary = textFromCellHtml(rowHtml, 'summary');
         const description = textFromCellHtml(rowHtml, 'description');
 
-        const startAtRaw = textFromCellHtml(rowHtml, 'start-at') ?? textFromCellHtml(rowHtml, 'start');
+        const startAtRaw =
+          textFromCellHtml(rowHtml, 'start-at') ?? textFromCellHtml(rowHtml, 'start');
         const endAtRaw = textFromCellHtml(rowHtml, 'end-at') ?? textFromCellHtml(rowHtml, 'end');
 
         const startAt = toIsoOrNull(startAtRaw);
@@ -113,4 +115,3 @@ export function createPlugin() {
 
 // Default export for convenience.
 export default createPlugin;
-

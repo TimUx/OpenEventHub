@@ -27,7 +27,11 @@ export default async function HomePage() {
         <p className="mt-4 max-w-xl text-base text-[var(--muted)] md:text-lg">
           Discover regional events from many sources — consolidated into one trusted view.
         </p>
-        <form action="/search" className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row" role="search">
+        <form
+          action="/search"
+          className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+          role="search"
+        >
           <label className="sr-only" htmlFor="home-search">
             Search events
           </label>

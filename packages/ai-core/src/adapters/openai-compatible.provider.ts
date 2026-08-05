@@ -43,7 +43,12 @@ export class OpenAiCompatibleProvider implements LlmProvider {
       body.response_format = { type: 'json_object' };
     }
 
-    const payload = await postJson<ChatCompletionResponse>(url, headers, body, this.profile.timeoutMs);
+    const payload = await postJson<ChatCompletionResponse>(
+      url,
+      headers,
+      body,
+      this.profile.timeoutMs,
+    );
     const content = payload.choices?.[0]?.message?.content;
     if (!content) {
       throw new Error(`Provider ${this.profile.type} returned empty content`);

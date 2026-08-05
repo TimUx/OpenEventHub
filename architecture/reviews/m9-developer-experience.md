@@ -19,10 +19,10 @@ Status: Accepted for completion; next is M10 Cursor & Quality Gates
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| `npm run verify:plugins` | pass (3 plugins) |
-| Docs deliverables | DEVELOPER_GUIDE, PLUGIN_*, DOCKER_COMPOSE, RELEASE, CONTRIBUTING |
+| Check                    | Result                                                           |
+| ------------------------ | ---------------------------------------------------------------- |
+| `npm run verify:plugins` | pass (3 plugins)                                                 |
+| Docs deliverables        | DEVELOPER_GUIDE, PLUGIN_*, DOCKER_COMPOSE, RELEASE, CONTRIBUTING |
 
 ## Follow-ups (M10+)
 

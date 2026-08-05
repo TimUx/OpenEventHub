@@ -19,10 +19,10 @@ Status: Accepted for completion; next is M9 Developer Experience
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| Admin/API unit + contract tests | pass (tsx) |
-| Compose config | API/Admin 0.8.0 |
+| Check                           | Result          |
+| ------------------------------- | --------------- |
+| Admin/API unit + contract tests | pass (tsx)      |
+| Compose config                  | API/Admin 0.8.0 |
 
 ## Follow-ups (M9+)
 

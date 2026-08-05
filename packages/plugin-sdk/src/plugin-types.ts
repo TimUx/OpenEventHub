@@ -64,4 +64,3 @@ export interface PluginManifest {
    */
   readonly main: string;
 }
-

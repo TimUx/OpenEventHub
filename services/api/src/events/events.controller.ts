@@ -13,10 +13,7 @@ export class EventsController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
   list(@Query('limit') limit?: string, @Query('offset') offset?: string) {
-    return this.events.list(
-      limit ? Number(limit) : undefined,
-      offset ? Number(offset) : undefined,
-    );
+    return this.events.list(limit ? Number(limit) : undefined, offset ? Number(offset) : undefined);
   }
 
   @Get(':id')

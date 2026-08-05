@@ -15,7 +15,11 @@ async function fetchEvents(): Promise<ApiEvent[]> {
 }
 
 export default function MapPage() {
-  const { data: events = [], isLoading, error } = useQuery({
+  const {
+    data: events = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['events', 'map'],
     queryFn: fetchEvents,
   });

@@ -12,12 +12,12 @@ Event Intelligence Engine container.
 
 ## Configuration
 
-| Variable | Purpose |
-|----------|---------|
-| `PROMPTS_DIR` | Absolute path to prompt catalog |
-| `REDIS_*` | BullMQ connection |
-| `DATABASE_URL` | PostgreSQL (loads active AI provider profile) |
-| `SETTINGS_ENCRYPTION_KEY` | Decrypts API keys stored by Admin |
+| Variable                  | Purpose                                       |
+| ------------------------- | --------------------------------------------- |
+| `PROMPTS_DIR`             | Absolute path to prompt catalog               |
+| `REDIS_*`                 | BullMQ connection                             |
+| `DATABASE_URL`            | PostgreSQL (loads active AI provider profile) |
+| `SETTINGS_ENCRYPTION_KEY` | Decrypts API keys stored by Admin             |
 
 AI provider credentials are **not** configured via `AI_*` env vars.
 Configure them in Admin → AI Settings (ADR 0006).

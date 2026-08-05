@@ -41,9 +41,7 @@ export class GeminiProvider implements LlmProvider {
       contents,
       generationConfig: {
         temperature: request.temperature ?? 0,
-        ...(request.responseFormat === 'json'
-          ? { responseMimeType: 'application/json' }
-          : {}),
+        ...(request.responseFormat === 'json' ? { responseMimeType: 'application/json' } : {}),
       },
     };
     if (system) {

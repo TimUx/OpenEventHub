@@ -19,10 +19,10 @@ Status: Accepted for completion; next is M11 Production Hardening
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| Local `verify:plugins` / compose validate | pass |
-| Workflow YAML present | ci.yml + release.yml |
+| Check                                     | Result               |
+| ----------------------------------------- | -------------------- |
+| Local `verify:plugins` / compose validate | pass                 |
+| Workflow YAML present                     | ci.yml + release.yml |
 
 ## Follow-ups (M11+)
 

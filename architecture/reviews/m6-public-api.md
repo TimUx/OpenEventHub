@@ -21,10 +21,10 @@ Status: Accepted for completion; next is M7 Frontend
 
 ## Verification
 
-| Check | Result |
-|-------|--------|
-| API contract tests | pass (tsx) |
-| Compose config | updated for API 0.6.0 |
+| Check              | Result                |
+| ------------------ | --------------------- |
+| API contract tests | pass (tsx)            |
+| Compose config     | updated for API 0.6.0 |
 
 ## Follow-ups (M7+)
 

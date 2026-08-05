@@ -11,6 +11,10 @@ export default tseslint.config(
       'docker/data/**',
       '**/.next/**',
       '**/next-env.d.ts',
+      // Runtime ESM plugins are validated by `npm run verify:plugins`.
+      'plugins/**/*.js',
+      // Optional dependency shims (lazy-loaded SDKs).
+      '**/src/shims/**',
     ],
   },
   eslint.configs.recommended,
@@ -42,9 +46,16 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    files: ['**/*.test.ts'],
+    files: ['**/*.{test,spec}.ts', '**/*.{test,spec}.tsx'],
     rules: {
       '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/require-await': 'off',
     },
   },
 );

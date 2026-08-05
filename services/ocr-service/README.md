@@ -16,7 +16,7 @@ Tesseract-based OCR worker for crawled images (and PDF validation gate).
 
 ## Configuration
 
-| Variable | Purpose |
-|----------|---------|
-| `REDIS_*` | BullMQ connection |
+| Variable                          | Purpose                                 |
+| --------------------------------- | --------------------------------------- |
+| `REDIS_*`                         | BullMQ connection                       |
 | `S3_*` / `OBJECT_STORAGE_ADAPTER` | Read raw crawl objects / write OCR text |

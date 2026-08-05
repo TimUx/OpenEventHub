@@ -7,4 +7,3 @@ export interface CrawlJobPayload {
   /** The database identifier of the `Source` to crawl. */
   readonly sourceId: string;
 }
-

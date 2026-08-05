@@ -39,7 +39,10 @@ function fsSyncExistsDir(p: string): boolean {
   }
 }
 
-async function loadPluginFromManifest(pluginsRoot: string, pluginDirName: string): Promise<CrawlPlugin> {
+async function loadPluginFromManifest(
+  pluginsRoot: string,
+  pluginDirName: string,
+): Promise<CrawlPlugin> {
   const pluginDir = path.join(pluginsRoot, pluginDirName);
   const manifestPath = path.join(pluginDir, 'plugin.json');
   const manifestRaw = await fs.readFile(manifestPath, 'utf-8');
@@ -48,17 +51,22 @@ async function loadPluginFromManifest(pluginsRoot: string, pluginDirName: string
   const modulePath = path.resolve(pluginDir, manifest.main);
   const moduleUrl = pathToFileURL(modulePath).href;
 
-  const mod = await import(moduleUrl);
+  const mod = (await import(moduleUrl)) as {
+    createPlugin?: () => CrawlPlugin | Promise<CrawlPlugin>;
+    default?: () => CrawlPlugin | Promise<CrawlPlugin>;
+  };
   const factory = mod.createPlugin ?? mod.default;
   if (typeof factory !== 'function') {
-    throw new Error(`Plugin ${manifest.pluginType} at ${modulePath} does not export createPlugin()`);
+    throw new Error(
+      `Plugin ${manifest.pluginType} at ${modulePath} does not export createPlugin()`,
+    );
   }
 
   const plugin = await factory();
   if (!plugin?.metadata?.pluginType) {
     throw new Error(`Plugin ${manifest.pluginType} did not expose metadata.pluginType`);
   }
-  return plugin as CrawlPlugin;
+  return plugin;
 }
 
 @Injectable()
@@ -81,9 +89,7 @@ export class PluginRegistryService implements OnModuleInit {
 
   private async loadAllPlugins(pluginsRoot: string): Promise<void> {
     const entries = await fs.readdir(pluginsRoot, { withFileTypes: true });
-    const pluginDirNames = entries
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name);
+    const pluginDirNames = entries.filter((e) => e.isDirectory()).map((e) => e.name);
 
     for (const dirName of pluginDirNames) {
       const manifestPath = path.join(pluginsRoot, dirName, 'plugin.json');
@@ -99,7 +105,10 @@ export class PluginRegistryService implements OnModuleInit {
           continue;
         }
         // Helpful debugging: plugin folders might exist but fail to import/parse.
-        this.logger.warn({ err }, `Failed to load plugin '${dirName}' (manifestPath=${manifestPath})`);
+        this.logger.warn(
+          { err },
+          `Failed to load plugin '${dirName}' (manifestPath=${manifestPath})`,
+        );
       }
     }
 
@@ -108,4 +117,3 @@ export class PluginRegistryService implements OnModuleInit {
     );
   }
 }
-

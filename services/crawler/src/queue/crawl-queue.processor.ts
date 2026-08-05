@@ -19,4 +19,3 @@ export class CrawlQueueProcessor extends WorkerHost {
     await this.processing.process(job.data);
   }
 }
-

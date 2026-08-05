@@ -96,10 +96,7 @@ export function AdminShell({ children }: { readonly children: ReactNode }) {
             </button>
           </div>
         </div>
-        <nav
-          aria-label="Admin"
-          className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-2 pb-2"
-        >
+        <nav aria-label="Admin" className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-2 pb-2">
           {links.map((link) => (
             <Link
               key={link.href}

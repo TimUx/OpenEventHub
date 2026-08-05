@@ -8,10 +8,10 @@ Plugins must not access the primary database directly.
 ## First-party plugins
 
 | Directory | `pluginType` |
-|-----------|--------------|
-| `html/` | `html` |
-| `rss/` | `rss` |
-| `ics/` | `ics` |
+| --------- | ------------ |
+| `html/`   | `html`       |
+| `rss/`    | `rss`        |
+| `ics/`    | `ics`        |
 
 Shared helpers: `utils/fetch-url.js`, `utils/parse-date.js`.
 `package.json` sets `"type": "module"`.
