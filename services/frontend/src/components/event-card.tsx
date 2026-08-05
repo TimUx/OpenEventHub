@@ -51,16 +51,11 @@ export function EventCard({
               </span>
             </div>
             <h2 className="font-bold text-2xl leading-snug">
-              <Link
-                href={`/events/${event.id}`}
-                className="hover:text-primary"
-              >
+              <Link href={`/events/${event.id}`} className="hover:text-primary">
                 {event.title}
               </Link>
             </h2>
-            {event.summary ? (
-              <p className="text-sm text-[var(--muted)]">{event.summary}</p>
-            ) : null}
+            {event.summary ? <p className="text-sm text-[var(--muted)]">{event.summary}</p> : null}
             {event.description ? (
               <p className="line-clamp-3 text-sm leading-relaxed text-[var(--foreground)]/90">
                 {event.description}
@@ -72,10 +67,7 @@ export function EventCard({
               </p>
             ) : null}
           </div>
-          <Link
-            href={`/events/${event.id}`}
-            className="shrink-0 text-sm text-primary"
-          >
+          <Link href={`/events/${event.id}`} className="shrink-0 text-sm text-primary">
             →
           </Link>
         </div>

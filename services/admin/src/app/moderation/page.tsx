@@ -60,7 +60,9 @@ export default function ModerationPage() {
             key={status}
             type="button"
             className={`rounded-xl px-3 py-1.5 text-sm font-semibold ${
-              filter === status ? 'bg-primary text-primary-contrast' : 'border border-[var(--border)]'
+              filter === status
+                ? 'bg-primary text-primary-contrast'
+                : 'border border-[var(--border)]'
             }`}
             onClick={() => setFilter(status)}
           >

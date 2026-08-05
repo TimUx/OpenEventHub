@@ -1,9 +1,4 @@
-import {
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE,
-  resolveLocale,
-  type Locale,
-} from '@openeventhub/shared';
+import { DEFAULT_LOCALE, LOCALE_COOKIE, resolveLocale, type Locale } from '@openeventhub/shared';
 import { cookies, headers } from 'next/headers';
 
 /** Resolve request locale: cookie → Accept-Language → `de`. */

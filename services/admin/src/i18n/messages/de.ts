@@ -134,8 +134,7 @@ export const de = {
   },
   aiSettings: {
     title: 'KI-Einstellungen',
-    description:
-      'Provider konfigurieren; die Event Intelligence Engine nutzt das aktive Profil.',
+    description: 'Provider konfigurieren; die Event Intelligence Engine nutzt das aktive Profil.',
     providerProfiles: 'Provider-Profile',
     noApiKey: 'kein API-Schlüssel',
     keyHint: 'Schlüssel {hint}',

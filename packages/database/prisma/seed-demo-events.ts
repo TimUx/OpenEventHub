@@ -114,7 +114,8 @@ async function main(): Promise<void> {
       slug: 'sommerlauf-olympiapark-2026',
       title: 'Sommerlauf Olympiapark',
       summary: '10 km Volkslauf rund um den Olympiasee.',
-      description: 'Start und Ziel am Coubertinplatz. Anmeldung online; Startnummernabholung ab 08:00.',
+      description:
+        'Start und Ziel am Coubertinplatz. Anmeldung online; Startnummernabholung ab 08:00.',
       startAt: new Date('2026-08-23T09:00:00+02:00'),
       endAt: new Date('2026-08-23T13:00:00+02:00'),
       confidenceScore: 0.88,

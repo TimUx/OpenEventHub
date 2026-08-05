@@ -2,8 +2,7 @@ import type { Dictionary } from './de';
 
 export const en = {
   meta: {
-    description:
-      'AI-powered Event Intelligence Platform — discover and follow regional events.',
+    description: 'AI-powered Event Intelligence Platform — discover and follow regional events.',
     ogDescription: 'AI-powered Event Intelligence Platform',
   },
   nav: {

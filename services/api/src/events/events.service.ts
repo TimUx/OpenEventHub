@@ -36,7 +36,9 @@ export type PublicEvent = {
   readonly categories: readonly PublicEventCategory[];
 };
 
-function toNumber(value: { toNumber(): number } | number | string | null | undefined): number | null {
+function toNumber(
+  value: { toNumber(): number } | number | string | null | undefined,
+): number | null {
   if (value == null) {
     return null;
   }

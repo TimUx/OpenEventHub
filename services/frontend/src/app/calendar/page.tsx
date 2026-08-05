@@ -77,7 +77,11 @@ function EventChip({ event, locale }: { readonly event: ApiEvent; readonly local
 
 export default function CalendarPage() {
   const { t, locale, dictionary } = useI18n();
-  const [mode, setMode] = usePersistedViewMode<CalendarViewMode>('calendar', 'month', CALENDAR_MODES);
+  const [mode, setMode] = usePersistedViewMode<CalendarViewMode>(
+    'calendar',
+    'month',
+    CALENDAR_MODES,
+  );
   const [cursor, setCursor] = useCursorDate();
 
   const {
@@ -346,10 +350,7 @@ function DayView({
         <ul className="space-y-3">
           {events.map((event) => (
             <li key={event.id} className="border-b border-[var(--border)] pb-3 last:border-0">
-              <Link
-                href={`/events/${event.id}`}
-                className="font-bold text-xl hover:text-primary"
-              >
+              <Link href={`/events/${event.id}`} className="font-bold text-xl hover:text-primary">
                 {event.title}
               </Link>
               <p className="mt-1 text-sm text-[var(--muted)]">

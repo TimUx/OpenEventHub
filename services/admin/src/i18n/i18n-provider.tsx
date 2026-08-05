@@ -1,17 +1,7 @@
 'use client';
 
-import {
-  LOCALE_COOKIE,
-  SUPPORTED_LOCALES,
-  type Locale,
-} from '@openeventhub/shared';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react';
+import { LOCALE_COOKIE, SUPPORTED_LOCALES, type Locale } from '@openeventhub/shared';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 
 import { translate, type Dictionary } from './get-dictionary';
 

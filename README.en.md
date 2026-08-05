@@ -32,13 +32,12 @@ cp .env.example .env
 npm run stack:up
 ```
 
-| Entry              | URL (defaults)              |
-| ------------------ | --------------------------- |
-| Frontend           | http://localhost:8088         |
-| API                | http://api.localhost:8088     |
-| Admin              | http://admin.localhost:8088   |
-| Traefik dashboard  | http://traefik.localhost:8088 |
-
+| Entry             | URL (defaults)                |
+| ----------------- | ----------------------------- |
+| Frontend          | http://localhost:8088         |
+| API               | http://api.localhost:8088     |
+| Admin             | http://admin.localhost:8088   |
+| Traefik dashboard | http://traefik.localhost:8088 |
 
 ## Documentation
 

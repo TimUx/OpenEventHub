@@ -40,13 +40,12 @@ npm run apps:up
 npm run apps:health
 ```
 
-| Einstieg           | URL (Defaults)              |
-| ------------------ | --------------------------- |
-| Frontend           | http://localhost:8088       |
-| API                | http://api.localhost:8088   |
-| Admin              | http://admin.localhost:8088 |
-| Traefik-Dashboard  | http://traefik.localhost:8088 |
-
+| Einstieg          | URL (Defaults)                |
+| ----------------- | ----------------------------- |
+| Frontend          | http://localhost:8088         |
+| API               | http://api.localhost:8088     |
+| Admin             | http://admin.localhost:8088   |
+| Traefik-Dashboard | http://traefik.localhost:8088 |
 
 ## Dokumentation
 

@@ -1,19 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  DEFAULT_LOCALE,
-  parseAcceptLanguage,
-  resolveLocale,
-} from './locale.js';
+import { DEFAULT_LOCALE, parseAcceptLanguage, resolveLocale } from './locale.js';
 
 describe('parseAcceptLanguage', () => {
   it('orders by q-factor', () => {
-    assert.deepEqual(parseAcceptLanguage('fr-FR,en;q=0.8,de;q=0.9'), [
-      'fr-fr',
-      'de',
-      'en',
-    ]);
+    assert.deepEqual(parseAcceptLanguage('fr-FR,en;q=0.8,de;q=0.9'), ['fr-fr', 'de', 'en']);
   });
 
   it('returns empty for missing header', () => {
@@ -29,10 +21,7 @@ describe('resolveLocale', () => {
   });
 
   it('honors cookie over Accept-Language', () => {
-    assert.equal(
-      resolveLocale({ cookieLocale: 'en', acceptLanguage: 'de-DE,de;q=0.9' }),
-      'en',
-    );
+    assert.equal(resolveLocale({ cookieLocale: 'en', acceptLanguage: 'de-DE,de;q=0.9' }), 'en');
   });
 
   it('picks first supported from Accept-Language', () => {

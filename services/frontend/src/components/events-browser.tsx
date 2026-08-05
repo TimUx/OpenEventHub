@@ -24,11 +24,7 @@ export function EventsBrowser({
   readonly locale: Locale;
 }) {
   const { t, dictionary } = useI18n();
-  const [mode, setMode] = usePersistedViewMode<EventDisplayMode>(
-    'events',
-    'tiles',
-    EVENT_MODES,
-  );
+  const [mode, setMode] = usePersistedViewMode<EventDisplayMode>('events', 'tiles', EVENT_MODES);
 
   return (
     <div className="space-y-6">

@@ -37,11 +37,7 @@ export default async function HomePage() {
           <label className="sr-only" htmlFor="home-search">
             {dictionary.home.searchLabel}
           </label>
-          <Input
-            id="home-search"
-            name="q"
-            placeholder={dictionary.home.searchPlaceholder}
-          />
+          <Input id="home-search" name="q" placeholder={dictionary.home.searchPlaceholder} />
           <Button type="submit" size="lg">
             {dictionary.home.search}
           </Button>

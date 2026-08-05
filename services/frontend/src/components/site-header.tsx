@@ -74,7 +74,11 @@ export function SiteHeader() {
             aria-label={dark ? t('nav.lightMode') : t('nav.darkMode')}
             onClick={toggleTheme}
           >
-            {dark ? <Sun className="h-4 w-4" strokeWidth={2} /> : <Moon className="h-4 w-4" strokeWidth={2} />}
+            {dark ? (
+              <Sun className="h-4 w-4" strokeWidth={2} />
+            ) : (
+              <Moon className="h-4 w-4" strokeWidth={2} />
+            )}
           </Button>
         </div>
       </div>

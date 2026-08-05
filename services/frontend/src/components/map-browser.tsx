@@ -100,7 +100,10 @@ export function MapBrowser() {
         onSubmit={(event) => event.preventDefault()}
       >
         <div className="md:col-span-2">
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]" htmlFor="map-q">
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="map-q"
+          >
             {t('map.searchLabel')}
           </label>
           <Input
@@ -111,7 +114,10 @@ export function MapBrowser() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]" htmlFor="map-category">
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="map-category"
+          >
             {t('map.category')}
           </label>
           <select
@@ -129,7 +135,10 @@ export function MapBrowser() {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]" htmlFor="map-region">
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="map-region"
+          >
             {t('map.region')}
           </label>
           <select
@@ -147,7 +156,10 @@ export function MapBrowser() {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]" htmlFor="map-date">
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="map-date"
+          >
             {t('map.date')}
           </label>
           <Input id="map-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />

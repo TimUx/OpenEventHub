@@ -211,7 +211,11 @@ export function SubmitForms() {
             </label>
             <label className="text-sm font-semibold">
               {t('submit.venue')}
-              <Input className="mt-1" value={venueName} onChange={(e) => setVenueName(e.target.value)} />
+              <Input
+                className="mt-1"
+                value={venueName}
+                onChange={(e) => setVenueName(e.target.value)}
+              />
             </label>
             <label className="text-sm font-semibold">
               {t('submit.city')}
@@ -229,7 +233,11 @@ export function SubmitForms() {
             </label>
             <label className="text-sm font-semibold md:col-span-2">
               {t('submit.summary')}
-              <Input className="mt-1" value={summary} onChange={(e) => setSummary(e.target.value)} />
+              <Input
+                className="mt-1"
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+              />
             </label>
             <label className="text-sm font-semibold md:col-span-2">
               {t('submit.descriptionField')}
