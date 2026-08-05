@@ -11,18 +11,24 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   createLlmProvider,
   defaultBaseUrlForType,
   defaultModelForType,
   type AiProviderTypeName,
 } from '@openeventhub/ai-core';
-import { AiProviderType, AiSettingsRepository } from '@openeventhub/database';
+import { AdminRole, AiProviderType, AiSettingsRepository } from '@openeventhub/database';
 
 import { AdminJwtAuthGuard } from '../auth/admin-jwt.guard.js';
+import { Roles } from '../auth/roles.decorator.js';
+import { RolesGuard } from '../auth/roles.guard.js';
 
+@ApiTags('admin-ai')
+@ApiBearerAuth()
 @Controller('api/v1/admin/ai')
-@UseGuards(AdminJwtAuthGuard)
+@UseGuards(AdminJwtAuthGuard, RolesGuard)
+@Roles(AdminRole.admin, AdminRole.moderator)
 export class AdminAiController {
   constructor(private readonly settings: AiSettingsRepository) {}
 

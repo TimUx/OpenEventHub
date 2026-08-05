@@ -12,14 +12,13 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 5 — Crawler Framework (`v0.5.0`)**
+**Milestone 6 — Public API (`v0.6.0`)**
 
 - Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
-- All application containers with `/health`, `/ready`, `/metrics`
-- Prisma domain model + AI Engine (Admin-managed providers)
-- Plugin SDK + HTML/RSS/ICS plugins, scheduler → crawl → OCR/AI queues
+- Crawler plugins + OCR/AI queues
+- Versioned REST `/api/v1`, GraphQL, OpenAPI/Swagger, JWT/RBAC, rate limits
 
-Next: **Milestone 6 — Public API**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Next: **Milestone 7 — Frontend**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Quick start
 

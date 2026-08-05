@@ -21,3 +21,4 @@ Follow `docs/ADR_GUIDE.md`.
 | [m3-data-model.md](reviews/m3-data-model.md)                       | M3        |
 | [m4-ai-engine.md](reviews/m4-ai-engine.md)                         | M4        |
 | [m5-crawler-framework.md](reviews/m5-crawler-framework.md)         | M5        |
+| [m6-public-api.md](reviews/m6-public-api.md)                       | M6        |

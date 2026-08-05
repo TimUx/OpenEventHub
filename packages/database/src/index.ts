@@ -45,5 +45,9 @@ export {
   SourceRepository,
   CrawlJobRepository,
   CrawlResultRepository,
+  CategoryRepository,
+  RegionRepository,
+  SubmissionRepository,
+  type CreateSubmissionInput,
   type PublicAiProviderProfile,
 } from './repositories/index.js';

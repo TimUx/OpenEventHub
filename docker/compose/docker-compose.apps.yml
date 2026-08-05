@@ -34,7 +34,7 @@ x-nestjs-service: &nestjs-service
 services:
   api:
     <<: *nestjs-service
-    image: openeventhub/api:${SERVICE_VERSION:-0.4.1}
+    image: openeventhub/api:${SERVICE_VERSION:-0.6.0}
     build:
       context: ../..
       dockerfile: services/api/Dockerfile
@@ -43,7 +43,9 @@ services:
       <<: *nestjs-env
       PORT: 3000
       SERVICE_NAME: api
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.4.1}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.6.0}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-120}
+      API_RATE_LIMIT_TTL_MS: ${API_RATE_LIMIT_TTL_MS:-60000}
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.rule=Host(`api.${DOMAIN:-localhost}`)

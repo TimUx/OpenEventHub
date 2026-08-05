@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-08-05
+
+### Added
+
+- Public REST `/api/v1` resources: events, categories, regions, search, submissions
+- GraphQL endpoint (`POST /graphql`) with events/search queries and submit mutations
+- OpenAPI document + Swagger UI (`/api/docs`, `/api/docs-json`)
+- Global API rate limiting (skips health probes)
+- RBAC roles guard for admin AI routes and audit log hooks
+
 ## [0.5.0] - 2026-08-05
 
 ### Added

@@ -13,11 +13,12 @@ Status legend: `planned` · `in_progress` · `done`
 | Area | Status |
 |------|--------|
 | Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
-| Application code | M1–M5 implemented |
+| Application code | M1–M6 implemented |
 | Docker Compose / Stack | infra + apps |
 | Prisma / Database | M3 complete (`@openeventhub/database`) |
 | AI Engine | M4 complete (`ai-service`, Admin AI Settings) |
 | Crawler Framework | M5 complete (plugin SDK, HTML/RSS/ICS, scheduler, OCR) |
+| Public API | M6 complete (`/api/v1`, GraphQL, OpenAPI, rate limits) |
 | CI/CD | skeleton |
 | Plugins / Prompts | first plugins + prompt catalog |
 
@@ -142,7 +143,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M6 — Public API (`Package 06`) · `planned`
+### M6 — Public API (`Package 06`) · `done`
 
 **Goal:** Versioned REST + GraphQL with OpenAPI/Swagger, JWT, RBAC, rate limits.
 
