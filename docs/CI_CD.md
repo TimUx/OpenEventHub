@@ -14,7 +14,7 @@ GitHub Actions enforce documentation-driven quality gates and SemVer releases.
 1. **Lint, typecheck, unit & contract tests** — Prettier, ESLint, `tsc`, `npm test`, `verify:plugins`
 2. **Compose / Stack integration validate** — `validate:compose`, `validate:stack`, plugin contract
 3. **Docker build** — `api`, `frontend`, `admin`, `crawler` (Buildx, no push)
-4. **Security scan** — `npm audit --audit-level=critical`, Trivy filesystem (HIGH/CRITICAL)
+4. **Security scan** — `npm audit --audit-level=critical`, Trivy filesystem (CRITICAL fails the gate; HIGH is reported)
 
 ## Release (SemVer tags)
 

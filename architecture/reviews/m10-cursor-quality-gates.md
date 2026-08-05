@@ -28,4 +28,4 @@ Status: Accepted for completion; next is M11 Production Hardening
 
 - Swarm secrets/configs, monitoring, backup/restore
 - Broader E2E / performance suites
-- Optional: fail CI on npm audit high once dependency debt is cleared
+- Clear remaining HIGH dependency advisories (js-yaml / postcss / sharp via Next) so Trivy HIGH can fail the gate

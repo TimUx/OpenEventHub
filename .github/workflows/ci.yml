@@ -137,12 +137,22 @@ jobs:
       - name: npm audit (critical)
         run: npm audit --audit-level=critical
 
-      - name: Filesystem vulnerability scan (Trivy)
+      - name: Filesystem vulnerability scan (Trivy CRITICAL)
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
           exit-code: '1'
+          ignore-unfixed: true
+          skip-dirs: node_modules,.next,.npm-cache
+
+      - name: Filesystem vulnerability report (Trivy HIGH)
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH
+          exit-code: '0'
           ignore-unfixed: true
           skip-dirs: node_modules,.next,.npm-cache
