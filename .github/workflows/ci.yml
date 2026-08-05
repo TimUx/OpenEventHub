@@ -36,6 +36,8 @@ jobs:
         run: |
           npm run build --workspace=@openeventhub/shared
           npm run build --workspace=@openeventhub/ai-core
+          npm run build --workspace=@openeventhub/plugin-sdk
+          npm run build --workspace=@openeventhub/service-runtime
           npm run build --workspace=@openeventhub/database
 
       - name: Prettier
@@ -136,7 +138,7 @@ jobs:
         run: npm audit --audit-level=critical
 
       - name: Filesystem vulnerability scan (Trivy)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .

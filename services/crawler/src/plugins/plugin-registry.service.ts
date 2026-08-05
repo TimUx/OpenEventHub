@@ -28,7 +28,11 @@ function resolvePluginsRoot(): string {
   }
 
   // Fall back: the default should still error with a clear message later.
-  return candidates[0];
+  const fallback = candidates[0];
+  if (!fallback) {
+    throw new Error('No plugin directory candidates configured');
+  }
+  return fallback;
 }
 
 function fsSyncExistsDir(p: string): boolean {
