@@ -1,52 +1,54 @@
-# Backup Strategy
+# Backup-Strategie
 
-Back up PostgreSQL, object storage (SeaweedFS/S3), and non-secret configuration. Test restores with a dry-run before relying on any schedule.
+> Sprache: Deutsch (primär) · [English](en/BACKUP.md)
 
-## What to back up
+PostgreSQL, Objektspeicher (SeaweedFS/S3) und nicht-geheime Konfiguration sichern. Restores vor dem Verlassen auf einen Zeitplan mit einem Dry-Run testen.
 
-| Asset | Method |
-|-------|--------|
-| PostgreSQL | `pg_dump` custom format (`scripts/backup.sh`) |
-| Configuration | Compose/Stack/monitoring YAML + `.env.example` snapshot |
-| Object storage | S3 sync (`aws s3 sync` / rclone) against SeaweedFS S3 API |
-| Uploaded / crawl objects | Included in object-storage bucket sync |
+## Was sichern
 
-Never commit real `.env` or Swarm secret material into backup archives shared outside the ops boundary.
+| Asset | Methode |
+|-------|---------|
+| PostgreSQL | `pg_dump` Custom-Format (`scripts/backup.sh`) |
+| Konfiguration | Compose-/Stack-/Monitoring-YAML + Snapshot von `.env.example` |
+| Objektspeicher | S3-Sync (`aws s3 sync` / rclone) gegen die SeaweedFS-S3-API |
+| Upload-/Crawl-Objekte | Enthalten im Objektspeicher-Bucket-Sync |
 
-## Create a backup
+Niemals echte `.env`- oder Swarm-Secret-Inhalte in Backup-Archive schreiben, die die Ops-Grenze verlassen.
+
+## Backup erstellen
 
 ```bash
-# Compose postgres must be healthy, or set DATABASE_URL
+# Compose-Postgres muss healthy sein, oder DATABASE_URL setzen
 ./scripts/backup.sh
 ```
 
-Archives land under `.backups/openeventhub-backup-<UTC>.tar.gz` (gitignored). Each archive contains:
+Archive landen unter `.backups/openeventhub-backup-<UTC>.tar.gz` (gitignored). Jedes Archiv enthält:
 
 - `MANIFEST.txt`
 - `postgres/openeventhub.dump`
 - `config/`
-- `object-storage/` (listing or README with sync instructions)
+- `object-storage/` (Listing oder README mit Sync-Anleitung)
 
-Schedule via cron/systemd timer calling `scripts/backup.sh`, then copy archives off-box.
+Zeitplan über cron/systemd-Timer, der `scripts/backup.sh` aufruft; Archive anschließend off-box kopieren.
 
-## Restore dry-run (required)
+## Restore-Dry-Run (pflicht)
 
-Validates archive layout and dump signature without writing to production:
+Prüft Archivlayout und Dump-Signatur, ohne in Production zu schreiben:
 
 ```bash
 npm run restore:dry-run
-# or against a real archive:
+# oder gegen ein echtes Archiv:
 BACKUP_ARCHIVE=.backups/openeventhub-backup-….tar.gz npm run restore:dry-run
 ```
 
-CI runs `restore:dry-run` with a synthetic fixture.
+CI führt `restore:dry-run` mit einem synthetischen Fixture aus.
 
-## Full restore (operator)
+## Vollständiger Restore (Operator)
 
-1. Stop writers (API/crawler/scheduler) or put the stack in maintenance.
-2. Restore Postgres: `pg_restore --clean --if-exists -d "$DATABASE_URL" postgres/openeventhub.dump`
-3. Sync object storage bucket from the backup copy.
-4. Redeploy Stack/Compose with the same secret names.
-5. Run `npm run apps:health` / probe checks and a short crawl smoke.
+1. Writer stoppen (API/Crawler/Scheduler) oder Stack in Maintenance setzen.
+2. Postgres wiederherstellen: `pg_restore --clean --if-exists -d "$DATABASE_URL" postgres/openeventhub.dump`
+3. Objektspeicher-Bucket aus der Backup-Kopie synchronisieren.
+4. Stack/Compose mit denselben Secret-Namen erneut deployen.
+5. `npm run apps:health` / Probe-Checks und einen kurzen Crawl-Smoke ausführen.
 
-Document the restore window and last successful dry-run date in your ops runbook.
+Restore-Fenster und Datum des letzten erfolgreichen Dry-Runs im Ops-Runbook dokumentieren.

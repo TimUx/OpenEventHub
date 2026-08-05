@@ -1,34 +1,36 @@
-# Cursor Development Guide
+# Cursor-Entwicklungsleitfaden
 
-How agents and contributors use Cursor with OpenEventHub (Package 10).
+> Sprache: Deutsch (primär) · [English](en/CURSOR_DEVELOPMENT.md)
 
-## Binding context
+Wie Agents und Contributors Cursor mit OpenEventHub nutzen (Paket 10).
 
-Project rules live in `.cursor/rules/`:
+## Verbindlicher Kontext
 
-| Rule | Scope |
-|------|-------|
-| `openeventhub-core.mdc` | Always — product, architecture, milestone discipline |
-| `quality-gates.mdc` | Always — CI/local gates |
+Projektregeln liegen in `.cursor/rules/`:
+
+| Regel | Scope |
+|-------|-------|
+| `openeventhub-core.mdc` | Always — Produkt, Architektur, Milestone-Disziplin |
+| `quality-gates.mdc` | Always — CI-/lokale Gates |
 | `typescript-standards.mdc` | `*.ts` / `*.tsx` |
 | `docker-conventions.mdc` | `docker/**` |
 | `plugins.mdc` | `plugins/**` |
 | `prisma-database.mdc` | `packages/database/**` |
-| `nestjs-services.mdc` | Backend services |
+| `nestjs-services.mdc` | Backend-Services |
 | `nextjs-ui.mdc` | Frontend + Admin |
 | `prompts.mdc` | `prompts/**` |
 | `documentation.mdc` | `docs/**`, `architecture/**` |
-| `testing.mdc` | Tests and fixtures |
+| `testing.mdc` | Tests und Fixtures |
 
-Root `AGENTS.md` summarizes the same expectations for any coding agent.
+Root-`AGENTS.md` fasst dieselben Erwartungen für jeden Coding-Agent zusammen.
 
-## Workflow for agents
+## Workflow für Agents
 
-1. Read the active milestone in `docs/ROADMAP.md` — implement **one** at a time
-2. Read binding docs for the area before coding
-3. Inspect existing code; propose approach; then implement
-4. Run quality gates; update docs + CHANGELOG + review note on milestone completion
+1. Aktiven Milestone in `docs/ROADMAP.md` lesen — **einen** gleichzeitig umsetzen
+2. Verbindliche Docs zum Bereich vor dem Coding lesen
+3. Bestehenden Code inspizieren; Ansatz vorschlagen; dann implementieren
+4. Quality Gates ausführen; Docs + CHANGELOG + Review-Note bei Milestone-Abschluss aktualisieren
 
-## Docs win
+## Docs gewinnen
 
-If implementation shortcuts conflict with `docs/`, fix the code — never dilute the docs.
+Wenn Implementierungs-Shortcuts mit `docs/` kollidieren, den Code reparieren — Docs nie verwässern.

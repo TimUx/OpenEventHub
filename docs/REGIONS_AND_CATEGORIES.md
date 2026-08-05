@@ -1,7 +1,8 @@
+# Regionen
 
-# Regions
+> Sprache: Deutsch (primär) · [English](en/REGIONS_AND_CATEGORIES.md)
 
-Hierarchy:
+Hierarchie:
 
 Country
 → State
@@ -10,5 +11,5 @@ Country
 → City
 → District/Suburb
 
-Categories are hierarchical and configurable.
-Events may belong to multiple categories.
+Kategorien sind hierarchisch und konfigurierbar.
+Veranstaltungen können mehreren Kategorien angehören.

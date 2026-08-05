@@ -1,14 +1,16 @@
-# LLM Extraction
+# LLM-Extraktion
 
-The LLM receives normalized source content.
+> Sprache: Deutsch (primär) · [English](en/LLM_EXTRACTION.md)
 
-Tasks:
+Das LLM erhält normalisierten Quellinhalt.
 
-- determine whether the content is an event
-- extract structured fields
-- identify recurring events
-- identify organizer
-- identify venue
-- estimate confidence
+Aufgaben:
 
-Output is deterministic JSON validated against a schema.
+- feststellen, ob der Inhalt eine Veranstaltung ist
+- strukturierte Felder extrahieren
+- wiederkehrende Veranstaltungen erkennen
+- Organisator identifizieren
+- Venue identifizieren
+- Confidence schätzen
+
+Die Ausgabe ist deterministisches JSON, validiert gegen ein Schema.

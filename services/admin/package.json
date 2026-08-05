@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/admin",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "description": "OpenEventHub admin center",
   "scripts": {
@@ -11,7 +11,7 @@
     "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts"
   },
   "dependencies": {
-    "@openeventhub/shared": "0.1.0",
+    "@openeventhub/shared": "0.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.484.0",

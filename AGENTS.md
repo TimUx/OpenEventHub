@@ -1,21 +1,23 @@
 # AGENTS.md
 
-OpenEventHub agent brief. Full rules: `.cursor/rules/` and `docs/CURSOR_DEVELOPMENT.md`.
+Kurzbriefing für Agenten. Vollständige Regeln: `.cursor/rules/` und `docs/CURSOR_DEVELOPMENT.md`.
+English docs: [`docs/en/`](docs/en/).
 
-## Non-negotiables
+## Nicht verhandelbar
 
-- `docs/` is binding; change code to match docs
-- One milestone at a time (`docs/ROADMAP.md`)
-- Container First — platform runs in Docker Compose / Stack
-- New sources = plugins only (`docs/PLUGIN_SDK.md`)
-- Prompts only under `prompts/`
+- `docs/` (Deutsch) ist verbindlich; Code an Docs anpassen — nicht umgekehrt
+- Ein Milestone nach dem anderen (`docs/ROADMAP.md`)
+- Container First — Plattform läuft in Docker Compose / Stack
+- Neue Quellen = nur Plugins (`docs/PLUGIN_SDK.md`)
+- Prompts nur unter `prompts/`
 - Conventional Commits + SemVer (`docs/RELEASE.md`)
+- Dokumentation primär auf Deutsch; Englisch unter `docs/en/`
 
 ## Stack
 
 NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ, Next.js, SeaweedFS (S3), Traefik.
 
-## Quality gates
+## Quality Gates
 
 ```bash
 npm run tools:check

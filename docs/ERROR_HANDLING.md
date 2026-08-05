@@ -1,11 +1,13 @@
-# Error Handling
+# Fehlerbehandlung
 
-Retry with exponential backoff
+> Sprache: Deutsch (primär) · [English](en/ERROR_HANDLING.md)
 
-Source status:
+Retry mit exponentiellem Backoff
+
+Quellenstatus:
 - Healthy
 - Warning
 - Failed
 - Disabled
 
-Failures never stop the global scheduler.
+Fehler stoppen den globalen Scheduler nie.

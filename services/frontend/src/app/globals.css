@@ -2,22 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flat design tokens inspired by FestSchmiede (primary blue + teal/green accents). */
 :root {
-  --background: #f3f6f4;
-  --foreground: #10221f;
-  --accent: #0f766e;
-  --muted: #5b6e69;
-  --border: #d5e0db;
+  --background: #f5f7fa;
+  --foreground: #1a1a1a;
+  --muted: #5f6b7a;
+  --border: #dde3ea;
   --card: #ffffff;
+  --primary: #1565c0;
+  --primary-bright: #1e88e5;
+  --primary-soft: #e3f2fd;
+  --primary-contrast: #ffffff;
+  --secondary: #00838f;
+  --secondary-soft: #e0f7fa;
+  --success: #2e7d32;
+  --success-soft: #e8f5e9;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
 }
 
 .dark {
-  --background: #0c1614;
-  --foreground: #e7efec;
-  --accent: #2dd4bf;
-  --muted: #9db0aa;
-  --border: #243532;
-  --card: #13201d;
+  --background: #12181f;
+  --foreground: #eef2f6;
+  --muted: #9aa6b5;
+  --border: #2a3441;
+  --card: #1a222c;
+  --primary: #42a5f5;
+  --primary-bright: #64b5f6;
+  --primary-soft: #16324d;
+  --primary-contrast: #0b1520;
+  --secondary: #26c6da;
+  --secondary-soft: #12333a;
+  --success: #66bb6a;
+  --success-soft: #1b3320;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 html {
@@ -30,20 +48,56 @@ html.dark {
 
 body {
   @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
-  background-image:
-    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 40%),
-    radial-gradient(circle at 90% 10%, rgba(214, 199, 168, 0.18), transparent 35%);
   min-height: 100vh;
-}
-
-.dark body {
-  background-image:
-    radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 42%),
-    radial-gradient(circle at 85% 0%, rgba(214, 199, 168, 0.06), transparent 30%);
 }
 
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
-  @apply outline-none ring-2 ring-teal-bright ring-offset-2 ring-offset-[var(--background)];
+input:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--background)];
+}
+
+/* Flat map markers (Leaflet) */
+.oeh-map-marker {
+  background: transparent;
+  border: none;
+}
+
+.oeh-map-marker__dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 3px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.oeh-map-marker__dot--active {
+  background: var(--secondary);
+  width: 18px;
+  height: 18px;
+  margin: 2px;
+}
+
+.leaflet-container {
+  font: inherit;
+  background: var(--primary-soft);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  font-size: 0.875rem;
+}
+
+.leaflet-popup-content a {
+  color: var(--primary);
+  font-weight: 600;
 }

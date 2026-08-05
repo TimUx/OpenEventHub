@@ -1,73 +1,75 @@
-# Release process
+# Release-Prozess
 
-OpenEventHub uses **Semantic Versioning** and **Keep a Changelog**.
-Milestone 10 automates GitHub Releases and GHCR image publish for SemVer tags.
+> Sprache: Deutsch (primär) · [English](en/RELEASE.md)
 
-## Sources of truth
+OpenEventHub nutzt **Semantic Versioning** und **Keep a Changelog**.
+Milestone 10 automatisiert GitHub Releases und GHCR-Image-Publish für SemVer-Tags.
 
-| Artifact | Role |
-|----------|------|
-| `CHANGELOG.md` | Human-readable release notes (Keep a Changelog) |
-| Root `package.json` `version` | Platform SemVer for the milestone |
-| Service `package.json` versions | Bumped with the milestone that ships them |
-| `docs/ROADMAP.md` | Milestone status (`planned` → `done`) |
-| `architecture/reviews/mN-*.md` | Architecture / code review note for the milestone |
-| `docs/VERSIONING.md` | **EventVersion** domain history — not package SemVer |
+## Quellen der Wahrheit
 
-## When to cut a release
+| Artefakt | Rolle |
+|----------|-------|
+| `CHANGELOG.md` | Menschenlesbare Release-Notes (Keep a Changelog) |
+| Root-`package.json` `version` | Plattform-SemVer für den Milestone |
+| Service-`package.json`-Versionen | Mit dem Milestone, der sie ausliefert, angehoben |
+| `docs/ROADMAP.md` | Milestone-Status (`planned` → `done`) |
+| `architecture/reviews/mN-*.md` | Architecture-/Code-Review-Note zum Milestone |
+| `docs/VERSIONING.md` | **EventVersion**-Domain-Historie — nicht Paket-SemVer |
 
-After a roadmap milestone meets its exit criteria:
+## Wann ein Release schneiden
 
-1. Code and tests green (`tools:check` / CI)
-2. Binding docs updated
-3. Review note under `architecture/reviews/`
-4. `CHANGELOG.md` section for the new version
-5. Version fields bumped (root + touched services)
-6. Conventional Commit on `main` (or PR merge), e.g. `feat(scope): … (vX.Y.Z)`
-7. Annotated tag and push:
+Nachdem ein Roadmap-Milestone seine Exit-Kriterien erfüllt:
+
+1. Code und Tests grün (`tools:check` / CI)
+2. Verbindliche Docs aktualisiert
+3. Review-Note unter `architecture/reviews/`
+4. `CHANGELOG.md`-Abschnitt für die neue Version
+5. Versionsfelder angehoben (Root + berührte Services)
+6. Conventional Commit auf `main` (oder PR-Merge), z. B. `feat(scope): … (vX.Y.Z)`
+7. Annotiertes Tag und Push:
    ```bash
    git tag -a "v$(node -p "require('./package.json').version")" -m "v$(node -p "require('./package.json').version")"
    git push origin "v$(node -p "require('./package.json').version")"
    ```
 
-`release.yml` creates the GitHub Release body from the matching `CHANGELOG.md` section and publishes container images.
+`release.yml` erzeugt den GitHub-Release-Body aus dem passenden `CHANGELOG.md`-Abschnitt und veröffentlicht Container-Images.
 
-## SemVer mapping (Conventional Commits)
+## SemVer-Zuordnung (Conventional Commits)
 
-| Commit type | Typical bump |
-|-------------|--------------|
+| Commit-Typ | Typischer Bump |
+|------------|----------------|
 | `feat` | MINOR |
 | `fix` | PATCH |
-| Breaking change (`BREAKING CHANGE:` / `!`) | MAJOR |
-| Docs/chore-only milestone packaging | MINOR if it ships a roadmap package; else PATCH |
+| Breaking Change (`BREAKING CHANGE:` / `!`) | MAJOR |
+| Nur Docs/Chore-Milestone-Packaging | MINOR, wenn es ein Roadmap-Paket ausliefert; sonst PATCH |
 
-Milestones M1–M11 normally advance the **MINOR** (or MAJOR when breaking) as
-named packages (`v0.10.0` for M10, etc.).
+Milestones M1–M11 erhöhen normalerweise die **MINOR**- (oder MAJOR bei Breaking) als
+benannte Pakete (`v0.10.0` für M10 usw.).
 
-## Changelog discipline
+## Changelog-Disziplin
 
-For each version section under `CHANGELOG.md`:
+Für jeden Versionsabschnitt in `CHANGELOG.md`:
 
-- Date the release (`YYYY-MM-DD`)
-- Group under `### Added` / `### Changed` / `### Fixed` / `### Removed`
-- Write for operators and contributors (what landed and why it matters)
-- Link behavior to docs when non-obvious (API routes, env keys, plugins)
+- Release datieren (`YYYY-MM-DD`)
+- Gruppieren unter `### Added` / `### Changed` / `### Fixed` / `### Removed`
+- Für Operatoren und Contributors schreiben (was gelandet ist und warum es zählt)
+- Verhalten an Docs knüpfen, wenn nicht offensichtlich (API-Routen, Env-Keys, Plugins)
 
-Do **not** weaken docs to match incomplete code — fix the code.
+Docs **nicht** abschwächen, um unvollständigen Code abzubilden — den Code reparieren.
 
-## Release notes checklist
+## Release-Notes-Checkliste
 
-- [ ] `CHANGELOG.md` updated
-- [ ] Root + relevant service versions match
-- [ ] `docs/ROADMAP.md` milestone marked `done`
-- [ ] Review file present
-- [ ] README “Current status” points at the new milestone
-- [ ] Compose default image tags updated when services ship
-- [ ] `npm run validate:compose` (and `validate:stack` when Stack changed)
-- [ ] CI green on `main`
-- [ ] Tag `vX.Y.Z` pushed (triggers image publish)
+- [ ] `CHANGELOG.md` aktualisiert
+- [ ] Root- + relevante Service-Versionen stimmen überein
+- [ ] Milestone in `docs/ROADMAP.md` als `done` markiert
+- [ ] Review-Datei vorhanden
+- [ ] README „Current status“ zeigt auf den neuen Milestone
+- [ ] Compose-Default-Image-Tags aktualisiert, wenn Services ausgeliefert werden
+- [ ] `npm run validate:compose` (und `validate:stack`, wenn Stack geändert)
+- [ ] CI auf `main` grün
+- [ ] Tag `vX.Y.Z` gepusht (löst Image-Publish aus)
 
-## Image registry
+## Image-Registry
 
-Published by `.github/workflows/release.yml` to `ghcr.io/<owner>/openeventhub-<service>`.
+Veröffentlicht durch `.github/workflows/release.yml` nach `ghcr.io/<owner>/openeventhub-<service>`.
 Details: `docs/CI_CD.md`.

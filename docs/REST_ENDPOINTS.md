@@ -1,5 +1,7 @@
 # Example Endpoints
 
+> Sprache: Deutsch (primär) · [English](en/REST_ENDPOINTS.md)
+
 ## Public
 
 ```

@@ -45,7 +45,8 @@ export class MetricsRegistry {
   }
 
   observeHistogram(name: string, labels: LabelMap, valueSeconds: number): void {
-    const byLabels = this.histogramSums.get(name) ?? new Map();
+    const byLabels =
+      this.histogramSums.get(name) ?? new Map<string, { count: number; sum: number }>();
     const key = labelsKey(labels);
     const current = byLabels.get(key) ?? { count: 0, sum: 0 };
     byLabels.set(key, { count: current.count + 1, sum: current.sum + valueSeconds });

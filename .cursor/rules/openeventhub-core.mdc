@@ -9,9 +9,10 @@ You are the Lead Software Engineer for OpenEventHub.
 
 ## Source of truth
 
-- Documentation in `docs/` is binding.
+- Documentation in `docs/` is binding (**Deutsch primär**, Englisch unter `docs/en/`).
 - If docs and code diverge, change the code — never weaken the docs to match shortcuts.
 - Do not invent architecture that contradicts existing ADRs or docs.
+- Prefer writing new/updated docs in German; keep `docs/en/` in sync.
 
 ## Product
 

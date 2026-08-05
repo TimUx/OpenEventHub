@@ -5,29 +5,51 @@ const config = {
   theme: {
     extend: {
       colors: {
-        ink: {
-          DEFAULT: '#10221f',
-          soft: '#1a332e',
+        primary: {
+          DEFAULT: 'var(--primary)',
+          bright: 'var(--primary-bright)',
+          soft: 'var(--primary-soft)',
+          contrast: 'var(--primary-contrast)',
         },
-        paper: {
-          DEFAULT: '#f3f6f4',
-          elevated: '#ffffff',
+        secondary: {
+          DEFAULT: 'var(--secondary)',
+          soft: 'var(--secondary-soft)',
         },
+        success: {
+          DEFAULT: 'var(--success)',
+          soft: 'var(--success-soft)',
+        },
+        // Back-compat aliases used in existing components
         teal: {
-          DEFAULT: '#0f766e',
-          bright: '#14b8a6',
-          muted: '#99f6e4',
+          DEFAULT: 'var(--primary)',
+          bright: 'var(--primary-bright)',
+          muted: 'var(--primary-soft)',
         },
         sand: {
-          DEFAULT: '#d6c7a8',
+          DEFAULT: 'var(--secondary-soft)',
+        },
+        ink: {
+          DEFAULT: 'var(--foreground)',
+          soft: 'var(--muted)',
+        },
+        paper: {
+          DEFAULT: 'var(--background)',
+          elevated: 'var(--card)',
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'Georgia', 'serif'],
-        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-sans)', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+      },
+      borderRadius: {
+        xl: '12px',
+        '2xl': '16px',
       },
       boxShadow: {
-        soft: '0 12px 40px rgba(16, 34, 31, 0.08)',
+        soft: 'var(--shadow)',
+      },
+      minHeight: {
+        tap: '44px',
       },
     },
   },

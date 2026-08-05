@@ -1,9 +1,11 @@
-# Health Checks
+# Healthchecks
 
-Every service exposes:
+> Sprache: Deutsch (primär) · [English](en/HEALTHCHECKS.md)
+
+Jeder Service stellt bereit:
 
 - /health
 - /ready
 - /metrics
 
-Health information is aggregated in the admin dashboard.
+Health-Informationen werden im Admin-Dashboard aggregiert.

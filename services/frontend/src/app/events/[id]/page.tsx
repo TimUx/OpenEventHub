@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 
 import { EventJsonLd } from '../../../components/event-json-ld';
 import { Badge } from '../../../components/ui/badge';
+import { getDictionary, translate } from '../../../i18n/get-dictionary';
+import { getRequestLocale } from '../../../i18n/request-locale';
 import { formatEventDate, getEvent, getSiteUrl } from '../../../lib/api';
 
 type PageProps = {
@@ -11,11 +13,13 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  const locale = await getRequestLocale();
+  const dictionary = getDictionary(locale);
   try {
     const event = await getEvent(id);
     return {
       title: event.title,
-      description: event.summary ?? event.description ?? 'Event on OpenEventHub',
+      description: event.summary ?? event.description ?? dictionary.detail.fallbackDescription,
       alternates: { canonical: `/events/${event.id}` },
       openGraph: {
         title: event.title,
@@ -25,12 +29,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       },
     };
   } catch {
-    return { title: 'Event not found' };
+    return { title: dictionary.detail.notFound };
   }
 }
 
 export default async function EventDetailPage({ params }: PageProps) {
   const { id } = await params;
+  const locale = await getRequestLocale();
+  const dictionary = getDictionary(locale);
   let event;
   try {
     event = await getEvent(id);
@@ -43,8 +49,8 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <article className="mx-auto max-w-3xl space-y-6">
       <EventJsonLd event={event} url={pageUrl} />
-      <Badge>{formatEventDate(event.startAt)}</Badge>
-      <h1 className="font-display text-4xl leading-tight">{event.title}</h1>
+      <Badge>{formatEventDate(event.startAt, locale)}</Badge>
+      <h1 className="font-bold text-4xl leading-tight">{event.title}</h1>
       {event.summary ? <p className="text-lg text-[var(--muted)]">{event.summary}</p> : null}
       {event.description ? (
         <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-wrap text-[var(--foreground)]">
@@ -52,7 +58,9 @@ export default async function EventDetailPage({ params }: PageProps) {
         </div>
       ) : null}
       {event.endAt ? (
-        <p className="text-sm text-[var(--muted)]">Ends {formatEventDate(event.endAt)}</p>
+        <p className="text-sm text-[var(--muted)]">
+          {translate(dictionary, 'detail.ends', { date: formatEventDate(event.endAt, locale) })}
+        </p>
       ) : null}
     </article>
   );

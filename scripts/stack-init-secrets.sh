@@ -50,5 +50,5 @@ echo
 echo "Label a storage node before deploy:"
 echo "  docker node update --label-add oeh.storage=true <node-id>"
 echo "Deploy:"
-echo "  export SERVICE_VERSION=0.11.0 GITHUB_OWNER=timux"
+echo "  export SERVICE_VERSION=0.12.0 GITHUB_OWNER=timux"
 echo "  docker stack deploy -c docker/stack/docker-stack.yml openeventhub"

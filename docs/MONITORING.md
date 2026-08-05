@@ -1,19 +1,21 @@
 # Monitoring
 
-OpenEventHub ships a Compose overlay for Prometheus, Grafana, Loki, and Promtail.
+> Sprache: Deutsch (primär) · [English](en/MONITORING.md)
+
+OpenEventHub liefert ein Compose-Overlay für Prometheus, Grafana, Loki und Promtail.
 
 ## Stack
 
-| Component | Role |
+| Komponente | Rolle |
 |-----------|------|
-| Prometheus | Scrapes Nest `/metrics` |
-| Grafana | Dashboards (Prometheus + Loki datasources provisioned) |
-| Loki | Log aggregation |
-| Promtail | Ships Docker container logs to Loki |
+| Prometheus | Scraped Nest `/metrics` |
+| Grafana | Dashboards (Prometheus- + Loki-Datasources provisioniert) |
+| Loki | Log-Aggregation |
+| Promtail | Leitet Docker-Container-Logs an Loki weiter |
 
-## Start (Compose)
+## Starten (Compose)
 
-Requires infra + apps networks from the main Compose project:
+Benötigt infra- + apps-Netzwerke aus dem Haupt-Compose-Projekt:
 
 ```bash
 docker compose -f docker/compose/docker-compose.yml \
@@ -22,38 +24,38 @@ docker compose -f docker/compose/docker-compose.yml \
   --env-file .env up -d
 ```
 
-Validate config without starting containers:
+Konfiguration validieren ohne Container zu starten:
 
 ```bash
 npm run validate:monitoring
 ```
 
-Defaults: Prometheus `:9090`, Grafana `:3300` (`grafana.${DOMAIN}` via Traefik), Loki `:3100`.
+Defaults: Grafana unter `http://grafana.${DOMAIN}:${TRAEFIK_HTTP_PORT}` (Traefik). Prometheus und Loki haben **keine** Host-Ports — nur im `internal`-Netz.
 
-Change `GRAFANA_ADMIN_PASSWORD` in `.env` before any non-local use.
+`GRAFANA_ADMIN_PASSWORD` in `.env` vor jeder nicht-lokalen Nutzung ändern.
 
 ## Metrics
 
-Every Nest service exposes Prometheus text at `GET /metrics`.
+Jeder Nest-Service exponiert Prometheus-Text unter `GET /metrics`.
 
-| Metric | Source | Meaning |
+| Metric | Quelle | Bedeutung |
 |--------|--------|---------|
-| `process_uptime_seconds` | all | Process uptime |
+| `process_uptime_seconds` | all | Process-Uptime |
 | `process_resident_memory_bytes` | all | RSS |
-| `oeh_service_info` | all | Service name + version |
-| `oeh_http_requests_total` | all | HTTP request count (excludes probes) |
-| `oeh_http_request_duration_seconds` | all | HTTP latency histogram |
-| `oeh_crawl_duration_seconds` | crawler | Crawl job duration |
-| `oeh_failed_imports_total` | crawler | Failed crawl/import count |
-| `oeh_ai_processing_duration_seconds` | ai-service | AI pipeline duration |
-| `oeh_queue_length` / `oeh_queue_failed` | api | BullMQ depth (refreshed ~15s) |
+| `oeh_service_info` | all | Service-Name + Version |
+| `oeh_http_requests_total` | all | HTTP-Request-Zähler (ohne Probes) |
+| `oeh_http_request_duration_seconds` | all | HTTP-Latenz-Histogramm |
+| `oeh_crawl_duration_seconds` | crawler | Dauer des Crawl-Jobs |
+| `oeh_failed_imports_total` | crawler | Fehlgeschlagene Crawl-/Import-Zähler |
+| `oeh_ai_processing_duration_seconds` | ai-service | Dauer der AI-Pipeline |
+| `oeh_queue_length` / `oeh_queue_failed` | api | BullMQ-Tiefe (Aktualisierung ~15s) |
 
-Scrape targets are defined in `docker/monitoring/prometheus.yml`.
+Scrape-Targets sind in `docker/monitoring/prometheus.yml` definiert.
 
 ## Logs
 
-Promtail discovers Compose containers via the Docker socket and forwards stdout/stderr to Loki. Query in Grafana Explore with `{service="api"}` (when Compose service labels are present).
+Promtail entdeckt Compose-Container über den Docker-Socket und leitet stdout/stderr an Loki weiter. Abfragen in Grafana Explore mit `{service="api"}` (wenn Compose-Service-Labels vorhanden sind).
 
 ## Swarm
 
-Attach the same monitoring images to the Swarm `openeventhub_internal` / `openeventhub_edge` overlay networks, or run the Compose monitoring overlay against those external networks after `docker stack deploy`. Keep Grafana admin credentials in Swarm secrets for production.
+Dieselben Monitoring-Images an die Swarm-Overlay-Netzwerke `openeventhub_internal` / `openeventhub_edge` anbinden, oder das Compose-Monitoring-Overlay gegen diese externen Netzwerke nach `docker stack deploy` betreiben. Grafana-Admin-Credentials in Production in Swarm Secrets halten.

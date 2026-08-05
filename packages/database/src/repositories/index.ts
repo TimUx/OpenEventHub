@@ -1,4 +1,9 @@
-export { EventRepository } from './event.repository.js';
+export {
+  EventRepository,
+  type EventListOptions,
+  type EventSearchOptions,
+  type EventWithRelations,
+} from './event.repository.js';
 export { SourceRepository, type SourceUpdateInput } from './source.repository.js';
 export { AiSettingsRepository, type PublicAiProviderProfile } from './ai-settings.repository.js';
 export { CrawlJobRepository } from './crawl-job.repository.js';

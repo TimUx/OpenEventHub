@@ -24,7 +24,7 @@
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
-    "@openeventhub/shared": "0.1.0",
+    "@openeventhub/shared": "0.2.0",
     "pino": "^9.6.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"

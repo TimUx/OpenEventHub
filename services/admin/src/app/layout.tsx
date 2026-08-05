@@ -1,39 +1,42 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans, Source_Serif_4 } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { AdminShell } from '../components/admin-shell';
-import { AuthProvider } from '../components/auth-provider';
+import { Providers } from '../components/providers';
+import { getDictionary } from '../i18n/get-dictionary';
+import { getRequestLocale } from '../i18n/request-locale';
 import './globals.css';
 
-const display = Source_Serif_4({
+const sans = Roboto({
   subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-});
-
-const sans = IBM_Plex_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '700'],
   variable: '--font-sans',
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: 'OpenEventHub Admin',
-    template: '%s · Admin',
-  },
-  description: 'OpenEventHub administration center',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const dictionary = getDictionary(locale);
+  return {
+    title: {
+      default: 'OpenEventHub Admin',
+      template: '%s · Admin',
+    },
+    description: dictionary.meta.description,
+  };
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getRequestLocale();
+  const dictionary = getDictionary(locale);
+
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+    <html lang={locale} className={sans.variable}>
       <body>
-        <AuthProvider>
+        <Providers locale={locale} dictionary={dictionary}>
           <AdminShell>{children}</AdminShell>
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

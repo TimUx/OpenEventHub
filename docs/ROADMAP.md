@@ -1,250 +1,264 @@
 # Roadmap
 
-This roadmap is the binding development plan for OpenEventHub.
-It derives from the documentation packages and the current repository state
-(documentation complete; application milestones M1–M11 implemented).
+> Sprache: Deutsch (primär) · [English](en/ROADMAP.md)
 
-Status legend: `planned` · `in_progress` · `done`
+Diese Roadmap ist der verbindliche Entwicklungsplan für OpenEventHub.
+Sie leitet sich aus den Dokumentationspaketen und dem aktuellen Repository-Stand ab
+(Dokumentation vollständig; Anwendungs-Meilensteine M1–M11 umgesetzt).
+
+Status-Legende: `planned` · `in_progress` · `done`
 
 ---
 
-## Current State (2026-08-05)
+## Aktueller Stand (2026-08-05)
 
-| Area | Status |
+| Bereich | Status |
 |------|--------|
-| Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
-| Application code | M1–M11 implemented |
-| Docker Compose / Stack | Compose + production Swarm stack |
-| Prisma / Database | M3 complete (`@openeventhub/database`) |
-| AI Engine | M4 complete (`ai-service`, Admin AI Settings) |
-| Crawler Framework | M5 complete (plugin SDK, HTML/RSS/ICS, scheduler, OCR) |
-| Public API | M6 complete (`/api/v1`, GraphQL, OpenAPI, rate limits) |
-| Frontend / Admin | M7–M8 complete |
-| CI/CD | M10–M11 quality gates + SemVer release + ops validate |
-| Plugins / Prompts | first plugins + prompt catalog |
-| Developer / Cursor guidance | M9–M10 complete |
-| Ops / production hardening | M11 complete (monitoring, backup, Swarm) |
+| Vision / Architektur / Daten / KI / Plugins / API / Frontend / Ops-Docs | vollständig |
+| Anwendungscode | M1–M11 umgesetzt |
+| Docker Compose / Stack | Compose + Produktions-Swarm-Stack |
+| Prisma / Datenbank | M3 abgeschlossen (`@openeventhub/database`) |
+| AI Engine | M4 abgeschlossen (`ai-service`, Admin AI Settings) |
+| Crawler Framework | M5 abgeschlossen (Plugin-SDK, HTML/RSS/ICS, Scheduler, OCR) |
+| Public API | M6 abgeschlossen (`/api/v1`, GraphQL, OpenAPI, Rate Limits) |
+| Frontend / Admin | M7–M8 abgeschlossen |
+| CI/CD | M10–M11 Quality Gates + SemVer-Release + Ops-Validierung |
+| Plugins / Prompts | erste Plugins + Prompt-Katalog |
+| Developer- / Cursor-Guidance | M9–M10 abgeschlossen |
+| Ops / Production Hardening | M11 abgeschlossen (Monitoring, Backup, Swarm) |
 
 ---
 
-## Priority Order
+## Prioritätsreihenfolge
 
-1. Establish a container-first foundation that runs without host dependencies
-2. Codify service boundaries and shared contracts (Architecture)
-3. Persist the documented domain model (Prisma + migrations)
-4. Build AI and crawler pipelines behind queues
-5. Expose versioned public APIs
-6. Ship public frontend and admin
-7. Harden ops (monitoring, backup, moderation workflows)
-8. Complete developer / Cursor guidance for contributors
+1. Container-First-Fundament etablieren, das ohne Host-Abhängigkeiten läuft
+2. Service-Grenzen und gemeinsame Contracts festlegen (Architektur)
+3. Dokumentiertes Domänenmodell persistieren (Prisma + Migrationen)
+4. KI- und Crawler-Pipelines hinter Queues aufbauen
+5. Versionierte Public APIs bereitstellen
+6. Öffentliches Frontend und Admin ausliefern
+7. Ops härten (Monitoring, Backup, Moderations-Workflows)
+8. Developer- / Cursor-Guidance für Mitwirkende abschließen
 
-Never implement multiple large milestones in parallel.
+Niemals mehrere große Meilensteine parallel umsetzen.
 
 ---
 
-## Milestone Plan
+## Meilensteinplan
 
 ### M1 — Foundation (`Package 01`) · `done`
 
-**Goal:** Professional monorepo and infrastructure base. `docker compose up` starts core data/edge services with healthchecks. No business logic yet.
+**Ziel:** Professionelle Monorepo- und Infrastruktur-Basis. `docker compose up` startet die Kern-Daten-/Edge-Services mit Healthchecks. Noch keine Business-Logik.
 
 **Deliverables**
 
-- Git repository, Conventional Commits, SemVer (`0.1.0`)
-- Monorepo layout aligned with container architecture
-- Shared TypeScript / ESLint / Prettier baseline
+- Git-Repository, Conventional Commits, SemVer (`0.1.0`)
+- Monorepo-Layout gemäß Container-Architektur
+- Gemeinsame TypeScript- / ESLint- / Prettier-Baseline
 - Docker Compose: Traefik, PostgreSQL, Redis, SeaweedFS
-- Docker Stack skeleton for Swarm
-- Environment templates, scripts, healthcheck conventions
-- CI skeleton (lint / validate compose)
-- Cursor rules reflecting binding documentation
-- ADR-0001 (monorepo & container-first foundation)
+- Docker-Stack-Skelett für Swarm
+- Umgebungs-Templates, Skripte, Healthcheck-Konventionen
+- CI-Skelett (Lint / Compose validieren)
+- Cursor-Rules gemäß verbindlicher Dokumentation
+- ADR-0001 (Monorepo & Container-First-Fundament)
 - README / CHANGELOG / CONTRIBUTING / LICENSE
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- `docker compose` brings infra to healthy state
-- No host Node/DB required to run infrastructure
-- Docs describe how to start and extend
+- `docker compose` bringt die Infrastruktur in einen healthy-Zustand
+- Kein Host-Node/DB nötig, um die Infrastruktur zu betreiben
+- Docs beschreiben Start und Erweiterung
 
 ---
 
 ### M2 — Architecture Skeleton (`Package 02`) · `done`
 
-**Goal:** Service boundaries as runnable containers with health/ready/metrics and shared libraries — still without domain features.
+**Ziel:** Service-Grenzen als lauffähige Container mit Health/Ready/Metrics und Shared Libraries — weiterhin ohne Domänen-Features.
 
 **Deliverables**
 
-- NestJS API shell (`/health`, `/ready`, `/metrics`)
-- Worker / Scheduler / Crawler / AI / OCR / Search shells
-- Next.js Frontend + Admin shells
-- Shared packages: config, logging, messaging contracts
-- Internal Docker network wiring via Traefik
-- ADRs for communication (HTTP vs BullMQ) and hexagon ports
+- NestJS-API-Shell (`/health`, `/ready`, `/metrics`)
+- Worker- / Scheduler- / Crawler- / AI- / OCR- / Search-Shells
+- Next.js-Frontend- + Admin-Shells
+- Shared Packages: Config, Logging, Messaging-Contracts
+- Interne Docker-Netzwerk-Verdrahtung über Traefik
+- ADRs für Kommunikation (HTTP vs. BullMQ) und Hexagon-Ports
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Full stack compose starts all application containers
-- Services report healthy; no domain endpoints yet
+- Full-Stack-Compose startet alle Anwendungscontainer
+- Services melden healthy; noch keine Domänen-Endpoints
 
 ---
 
 ### M3 — Data Model (`Package 03`) · `done`
 
-**Goal:** Prisma schema matching `DATA_MODEL.md` / `DATABASE_SCHEMA.md` with migrations, versioning, and repositories.
+**Ziel:** Prisma-Schema gemäß `DATA_MODEL.md` / `DATABASE_SCHEMA.md` mit Migrationen, Versionierung und Repositories.
 
 **Deliverables**
 
-- Prisma schema for Event, EventVersion, Source, Crawl*, AIAnalysis, etc.
-- Initial migration + seed for regions/categories
-- Database package owned by API (others via API/queue contracts)
-- Unit/integration tests for repositories
+- Prisma-Schema für Event, EventVersion, Source, Crawl*, AIAnalysis usw.
+- Initiale Migration + Seed für Regionen/Kategorien
+- Database-Package im Besitz der API (andere über API-/Queue-Contracts)
+- Unit-/Integrationstests für Repositories
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Migrations apply cleanly in Compose
-- No raw SQL in application code
+- Migrationen laufen sauber in Compose
+- Kein Raw-SQL im Anwendungscode
 
 ---
 
 ### M4 — AI Engine (`Package 04`) · `done`
 
-**Goal:** Exchangeable OpenAI-compatible AI service with centralized prompts.
+**Ziel:** Austauschbarer OpenAI-kompatibler AI-Service mit zentralen Prompts.
 
 **Deliverables**
 
-- AI service with provider abstraction (OpenAI, Azure, OpenRouter, Ollama-ready)
-- Central `prompts/` catalog
-- Pipeline stages: extraction, classification, confidence
-- Queue consumer for AI jobs
-- Tests with provider fakes at the port boundary (not business mocks)
+- AI-Service mit Provider-Abstraktion (OpenAI, Azure, OpenRouter, Ollama-ready)
+- Zentraler `prompts/`-Katalog
+- Pipeline-Stufen: Extraktion, Klassifikation, Confidence
+- Queue-Consumer für AI-Jobs
+- Tests mit Provider-Fakes an der Port-Grenze (keine Business-Mocks)
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Provider switch via env only
-- No prompts embedded in application source
+- Provider-Wechsel nur über Env
+- Keine Prompts im Anwendungscode eingebettet
 
 ---
 
 ### M5 — Crawler Framework (`Package 05`) · `done`
 
-**Goal:** Plugin-first discovery/fetch/parse pipeline with Scheduler + Workers.
+**Ziel:** Plugin-First Discovery-/Fetch-/Parse-Pipeline mit Scheduler + Workers.
 
 **Deliverables**
 
-- Plugin SDK (`packages/plugin-sdk`)
-- BullMQ queues: Discovery, Crawl, OCR, AI, Geocoding, Search, Notifications
-- Scheduler service + crawler worker
-- First plugins: HTML, RSS, ICS
-- OCR service (Tesseract) + SeaweedFS/S3 raw storage
-- Plugin auto-registration
+- Plugin-SDK (`packages/plugin-sdk`)
+- BullMQ-Queues: Discovery, Crawl, OCR, AI, Geocoding, Search, Notifications
+- Scheduler-Service + Crawler-Worker
+- Erste Plugins: HTML, RSS, ICS
+- OCR-Service (Tesseract) + SeaweedFS/S3-Rohspeicher
+- Plugin-Auto-Registration
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- New source type = new plugin only (no core changes)
-- End-to-end crawl of a fixture source into raw storage
+- Neuer Quellentyp = nur neues Plugin (keine Core-Änderungen)
+- End-to-End-Crawl einer Fixture-Quelle in den Rohspeicher
 
 ---
 
 ### M6 — Public API (`Package 06`) · `done`
 
-**Goal:** Versioned REST + GraphQL with OpenAPI/Swagger, JWT, RBAC, rate limits.
+**Ziel:** Versioniertes REST + GraphQL mit OpenAPI/Swagger, JWT, RBAC, Rate Limits.
 
 **Deliverables**
 
-- `/api/v1` resources from `REST_ENDPOINTS.md`
-- GraphQL schema
-- Auth (JWT), RBAC, audit log hooks
+- `/api/v1`-Ressourcen aus `REST_ENDPOINTS.md`
+- GraphQL-Schema
+- Auth (JWT), RBAC, Audit-Log-Hooks
 - OpenAPI 3.1 + Swagger UI
-- Contract tests
+- Contract-Tests
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Documented endpoints implemented and tested
-- Rate limiting and health endpoints live
+- Dokumentierte Endpoints implementiert und getestet
+- Rate Limiting und Health-Endpoints live
 
 ---
 
 ### M7 — Frontend (`Package 07`) · `done`
 
-**Goal:** Public portal: list, calendar, map, search, SEO.
+**Ziel:** Öffentliches Portal: Liste, Kalender, Karte, Suche, SEO.
 
 **Deliverables**
 
 - Next.js + Tailwind + shadcn/ui
-- Views from `FRONTEND.md` / `SEARCH_UI.md` / `SEO.md`
-- Dark mode, a11y, Schema.org, OpenGraph
-- Integration against API
+- Views aus `FRONTEND.md` / `SEARCH_UI.md` / `SEO.md`
+- Dark Mode, a11y, Schema.org, OpenGraph
+- Integration gegen die API
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Responsive portal against real API data
-- SEO metadata on event pages
+- Responsives Portal gegen echte API-Daten
+- SEO-Metadaten auf Event-Seiten
 
 ---
 
 ### M8 — Administration (`Package 08`) · `done`
 
-**Goal:** Admin center for ops and moderation.
+**Ziel:** Admin-Center für Betrieb und Moderation.
 
 **Deliverables**
 
-- Dashboard, sources, crawler, scheduler, AI, users/roles, moderation
-- Logs / queue visibility
-- RBAC-protected admin routes
+- Dashboard, Quellen, Crawler, Scheduler, KI, Benutzer/Rollen, Moderation
+- Logs / Queue-Sichtbarkeit
+- RBAC-geschützte Admin-Routen
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Operators can manage sources and moderation without DB access
+- Operatoren können Quellen und Moderation ohne DB-Zugriff verwalten
 
 ---
 
 ### M9 — Developer Experience (`Package 09`) · `done`
 
-**Goal:** Contributor-ready developer guide matching the running system.
+**Ziel:** Contributor-tauglicher Developer Guide passend zum laufenden System.
 
 **Deliverables**
 
-- Updated `DEVELOPER_GUIDE.md`, plugin guides, local (compose) workflows
-- Example plugin walkthrough verified against code
-- Changelog discipline and release notes process
+- Aktualisierte `DEVELOPER_GUIDE.md`, Plugin-Guides, lokale (Compose-)Workflows
+- Beispiel-Plugin-Walkthrough gegen Code verifiziert
+- Changelog-Disziplin und Release-Notes-Prozess
 
 ---
 
 ### M10 — Cursor & Quality Gates (`Package 10`) · `done`
 
-**Goal:** Enforce documentation-driven development in the IDE and CI.
+**Ziel:** Dokumentationsgetriebene Entwicklung in IDE und CI durchsetzen.
 
 **Deliverables**
 
-- Complete Cursor rule set
-- CI: lint, unit, integration, docker build, security scan
-- Release workflow (SemVer tags, image publish)
+- Vollständiges Cursor-Rule-Set
+- CI: Lint, Unit, Integration, Docker-Build, Security-Scan
+- Release-Workflow (SemVer-Tags, Image-Publish)
 
 ---
 
 ### M11 — Production Hardening · `done`
 
-**Goal:** Production-ready Swarm deployment and operability.
+**Ziel:** Produktionsreife Swarm-Deployment und Betriebsfähigkeit.
 
 **Deliverables**
 
-- Docker Stack with secrets, configs, rolling updates
-- Monitoring (Prometheus/Grafana/Loki) per `MONITORING.md`
-- Backup/restore per `BACKUP.md`
-- Performance and E2E suites
+- Docker Stack mit Secrets, Configs, Rolling Updates
+- Monitoring (Prometheus/Grafana/Loki) gemäß `MONITORING.md`
+- Backup/Restore gemäß `BACKUP.md`
+- Performance- und E2E-Suites
 
-**Exit criteria**
+**Exit-Kriterien**
 
-- Swarm deploy documented and verified
-- Backup restore tested
-- Platform considered production-ready
+- Swarm-Deploy dokumentiert und verifiziert
+- Backup-Restore getestet
+- Plattform als produktionsreif betrachtet
 
 ---
 
-## Package Mapping
+## Post-M11 — Portal- und Ops-Nachzüge
 
-| Package | Milestone |
+Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.12.0):
+
+- Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert)
+- Eingebettete Karte mit Suche, Filtern und Auto-Zoom
+- Öffentliche Einreichung von Veranstaltungen und Quellen
+- Strikte Docker-Netztrennung (`edge` / `internal`) mit minimalen Host-Ports
+- UI-i18n (`de`/`en`) und erweiterte Anzeigemodi (Events/Kalender)
+
+---
+
+## Package-Mapping
+
+| Package | Meilenstein |
 |---------|-----------|
 | 01 Foundation | M1 |
 | 02 Architecture | M2 |
@@ -260,10 +274,10 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-## Working Rules
+## Arbeitsregeln
 
-1. Documentation always wins over code.
-2. One milestone at a time.
-3. After each milestone: architecture review, code review, docs, tests.
+1. Dokumentation hat immer Vorrang vor Code.
+2. Ein Meilenstein nach dem anderen.
+3. Nach jedem Meilenstein: Architektur-Review, Code-Review, Docs, Tests.
 4. Conventional Commits + SemVer.
-5. No TODOs, placeholders, or dead code in merged work.
+5. Keine TODOs, Platzhalter oder toter Code in gemergter Arbeit.

@@ -1,3 +1,20 @@
+export type ApiEventVenue = {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly address: string | null;
+  readonly city: string | null;
+  readonly regionId: string | null;
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+};
+
+export type ApiEventCategory = {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+};
+
 export type ApiEvent = {
   readonly id: string;
   readonly slug: string;
@@ -9,6 +26,8 @@ export type ApiEvent = {
   readonly status: string;
   readonly venueId?: string | null;
   readonly organizerId?: string | null;
+  readonly venue?: ApiEventVenue | null;
+  readonly categories?: readonly ApiEventCategory[];
 };
 
 export type ApiCategory = {
@@ -47,17 +66,22 @@ export function getSiteUrl(): string {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const base = typeof window === 'undefined' ? getServerApiBase() : getPublicApiBase();
+  const method = init?.method?.toUpperCase() ?? 'GET';
   const response = await fetch(`${base}${path}`, {
     ...init,
     headers: {
       Accept: 'application/json',
       ...(init?.headers ?? {}),
     },
-    next: { revalidate: 30 },
+    ...(method === 'GET' ? { next: { revalidate: 30 } } : { cache: 'no-store' as const }),
   });
 
   if (!response.ok) {
     throw new Error(`API ${path} failed with ${response.status}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return (await response.json()) as T;
@@ -76,6 +100,36 @@ export function searchEvents(q: string, limit = 50): Promise<ApiEvent[]> {
   return apiFetch<ApiEvent[]>(`/api/v1/search?${query.toString()}`);
 }
 
+export type SubmissionResponse = {
+  readonly id: string;
+  readonly type: string;
+  readonly status: string;
+  readonly moderationId: string;
+  readonly createdAt: string;
+};
+
+export function submitEvent(input: {
+  readonly payload: Record<string, unknown>;
+  readonly submitterEmail?: string;
+}): Promise<SubmissionResponse> {
+  return apiFetch<SubmissionResponse>('/api/v1/submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+export function submitSource(input: {
+  readonly payload: Record<string, unknown>;
+  readonly submitterEmail?: string;
+}): Promise<SubmissionResponse> {
+  return apiFetch<SubmissionResponse>('/api/v1/source-submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
 export function listCategories(): Promise<ApiCategory[]> {
   return apiFetch<ApiCategory[]>('/api/v1/categories');
 }
@@ -84,8 +138,9 @@ export function listRegions(): Promise<ApiRegion[]> {
   return apiFetch<ApiRegion[]>('/api/v1/regions');
 }
 
-export function formatEventDate(iso: string): string {
-  return new Intl.DateTimeFormat('de-DE', {
+export function formatEventDate(iso: string, locale: 'de' | 'en' = 'de'): string {
+  const tag = locale === 'de' ? 'de-DE' : 'en-GB';
+  return new Intl.DateTimeFormat(tag, {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'UTC',

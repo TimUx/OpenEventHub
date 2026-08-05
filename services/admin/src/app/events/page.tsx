@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 
 type EventRow = {
   id: string;
@@ -11,12 +12,13 @@ type EventRow = {
 };
 
 export default function EventsPage() {
+  const { t } = useI18n();
   const { data, error, loading } = useAdminQuery<EventRow[]>('/api/v1/admin/events?limit=100');
 
   return (
     <div>
-      <PageHeader title="Events" description="All events across statuses." />
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      <PageHeader title={t('events.title')} description={t('events.description')} />
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <div className="space-y-2">
         {(data ?? []).map((event) => (

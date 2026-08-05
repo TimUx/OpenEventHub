@@ -1,13 +1,14 @@
+# Datenbankschema
 
-# Database Schema
+> Sprache: Deutsch (primär) · [English](en/DATABASE_SCHEMA.md)
 
-Binding reference for the PostgreSQL schema implemented in
-`packages/database/prisma/schema.prisma`. Table names use snake_case via
-`@@map`; Prisma models use PascalCase.
+Verbindliche Referenz für das PostgreSQL-Schema, umgesetzt in
+`packages/database/prisma/schema.prisma`. Tabellennamen nutzen snake_case über
+`@@map`; Prisma-Models nutzen PascalCase.
 
 ## Enums
 
-| Enum | Values |
+| Enum | Werte |
 |------|--------|
 | `EventStatus` | `draft`, `pending_moderation`, `published`, `archived`, `rejected` |
 | `SourceStatus` | `healthy`, `warning`, `failed`, `disabled` |
@@ -21,10 +22,10 @@ Binding reference for the PostgreSQL schema implemented in
 
 ## events
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
-| id | UUID | Primary key |
-| slug | text | Unique public identifier |
+| id | UUID | Primärschlüssel |
+| slug | text | Eindeutiger öffentlicher Identifier |
 | title | text | |
 | summary | text | Nullable |
 | description | text | Nullable |
@@ -39,18 +40,18 @@ Binding reference for the PostgreSQL schema implemented in
 
 ## event_versions
 
-Append-only snapshots per `docs/VERSIONING.md`. No destructive overwrite of history.
+Append-only Snapshots gemäß `docs/VERSIONING.md`. Kein destruktives Überschreiben der Historie.
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
-| id | UUID | Primary key |
+| id | UUID | Primärschlüssel |
 | event_id | UUID | FK → events |
-| version_number | int | Unique per event |
+| version_number | int | Eindeutig pro Event |
 | title | text | Snapshot |
 | start_at | timestamptz | Snapshot |
-| end_at | timestamptz | Nullable snapshot |
-| venue_id | UUID | Nullable snapshot |
-| organizer_id | UUID | Nullable snapshot |
+| end_at | timestamptz | Nullable Snapshot |
+| venue_id | UUID | Nullable Snapshot |
+| organizer_id | UUID | Nullable Snapshot |
 | confidence_score | decimal(5,4) | Snapshot |
 | status | EventStatus | Snapshot |
 | change_reason | text | Nullable |
@@ -58,30 +59,30 @@ Append-only snapshots per `docs/VERSIONING.md`. No destructive overwrite of hist
 
 ## event_sources
 
-Maps one logical event to many origin sources.
+Ordnet eine logische Veranstaltung vielen Ursprungsquellen zu.
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
 | id | UUID | |
 | event_id | UUID | FK → events |
 | source_id | UUID | FK → sources |
-| external_id | text | Nullable; unique per source |
+| external_id | text | Nullable; eindeutig pro Quelle |
 | source_url | text | Nullable |
 | confidence_score | decimal(5,4) | Nullable |
 | created_at / updated_at | timestamptz | |
 
 ## sources
 
-Crawler configuration and health metadata.
+Crawler-Konfiguration und Health-Metadaten.
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
 | id | UUID | |
 | name | text | |
-| plugin_type | text | Plugin identifier |
-| url | text | Entry URL |
-| schedule_cron | text | Nullable cron expression |
-| config | jsonb | Plugin-specific settings |
+| plugin_type | text | Plugin-Identifier |
+| url | text | Einstiegs-URL |
+| schedule_cron | text | Nullable Cron-Ausdruck |
+| config | jsonb | Plugin-spezifische Einstellungen |
 | status | SourceStatus | Default `healthy` |
 | last_crawl_at | timestamptz | Nullable |
 | last_error | text | Nullable |
@@ -89,7 +90,7 @@ Crawler configuration and health metadata.
 
 ## crawl_jobs
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
 | id | UUID | |
 | source_id | UUID | FK → sources |
@@ -102,13 +103,13 @@ Crawler configuration and health metadata.
 
 ## crawl_results
 
-Raw fetch output references (object storage / S3) and content hash for change detection.
+Referenzen auf Raw-Fetch-Ausgaben (Objektspeicher / S3) und Content-Hash zur Änderungskennung.
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
 | id | UUID | |
 | crawl_job_id | UUID | FK → crawl_jobs |
-| object_key | text | Object key in S3-compatible storage |
+| object_key | text | Object Key im S3-kompatiblen Speicher |
 | content_hash | text | |
 | status | CrawlResultStatus | |
 | mime_type | text | Nullable |
@@ -118,44 +119,44 @@ Raw fetch output references (object storage / S3) and content hash for change de
 
 ## organizers / venues
 
-Standard entity tables with slug, contact/location fields. Venues optionally link
-to `regions` via `region_id`.
+Standard-Entity-Tabellen mit Slug sowie Kontakt-/Standortfeldern. Venues können optional
+über `region_id` mit `regions` verknüpft werden.
 
 ## regions
 
-Hierarchical geography (`parent_id` self-reference). Types follow
+Hierarchische Geografie (`parent_id` Selbstreferenz). Typen folgen
 `docs/REGIONS_AND_CATEGORIES.md`.
 
 ## categories / tags
 
-Categories are hierarchical (`parent_id`). Tags are flat. Events link via
-`event_categories` and `event_tags` join tables (many-to-many).
+Kategorien sind hierarchisch (`parent_id`). Tags sind flach. Events verknüpfen über
+Join-Tabellen `event_categories` und `event_tags` (Many-to-Many).
 
 ## media
 
-Event-attached assets with `MediaType`, optional URL or object storage key, sort order.
+An Events angehängte Assets mit `MediaType`, optionaler URL oder Objektspeicher-Key, Sortierreihenfolge.
 
 ## ai_analyses
 
-| Column | Type | Notes |
+| Spalte | Typ | Hinweise |
 |--------|------|-------|
 | id | UUID | |
 | event_id | UUID | FK → events |
 | crawl_result_id | UUID | Nullable FK → crawl_results |
-| prompt_id | text | From `prompts/` catalog |
+| prompt_id | text | Aus dem Katalog `prompts/` |
 | prompt_version | text | |
 | model | text | |
 | provider | text | |
-| extracted_fields | jsonb | Structured LLM output |
+| extracted_fields | jsonb | Strukturierte LLM-Ausgabe |
 | confidence | decimal(5,4) | |
 | created_at | timestamptz | |
 
 ## moderation_items / user_submissions
 
-Moderation workflow entities per `docs/MODERATION.md`. Submissions carry
-`SubmissionType`, JSON payload, and processing status.
+Moderations-Workflow-Entitäten gemäß `docs/MODERATION.md`. Submissions tragen
+`SubmissionType`, JSON-Payload und Verarbeitungsstatus.
 
-## Migrations and seed
+## Migrationen und Seed
 
 ```bash
 cp .env.example .env
@@ -163,5 +164,5 @@ npm run db:migrate          # or: bash scripts/db-migrate.sh
 npm run db:seed             # or: bash scripts/db-seed.sh
 ```
 
-Seed data: Germany → Bayern → München; Music/Sports/Culture with sample child
-categories.
+Seed-Daten: Germany → Bayern → München; Music/Sports/Culture mit beispielhaften
+Unterkategorien.

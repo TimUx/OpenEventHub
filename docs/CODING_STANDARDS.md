@@ -1,8 +1,10 @@
 # Coding Standards
 
-- TypeScript strict mode
+> Sprache: Deutsch (primär) · [English](en/CODING_STANDARDS.md)
+
+- TypeScript Strict Mode
 - ESLint
 - Prettier
 - Conventional Commits
 - Semantic Versioning
-- 100% documented public APIs
+- Öffentliche APIs zu 100 % dokumentiert

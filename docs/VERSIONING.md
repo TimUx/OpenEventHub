@@ -1,22 +1,24 @@
-# Versioning
+# Versionierung
 
-## Event history (domain)
+> Sprache: Deutsch (primär) · [English](en/VERSIONING.md)
 
-Every relevant update creates an EventVersion.
+## Event-Historie (Domain)
 
-Track:
+Jedes relevante Update erzeugt eine EventVersion.
 
-- title changes
-- date changes
-- venue changes
-- organizer changes
-- media changes
-- source additions
-- AI confidence changes
+Erfasst werden:
 
-No destructive overwrite.
+- Titeländerungen
+- Datumsänderungen
+- Venue-Änderungen
+- Organizer-Änderungen
+- Medienänderungen
+- Quellen-Ergänzungen
+- Änderungen der AI-Confidence
 
-## Platform SemVer
+Kein destruktives Überschreiben.
 
-Package / milestone SemVer and changelog discipline are documented in
-`docs/RELEASE.md`. This file is **not** the release runbook.
+## Plattform-SemVer
+
+Paket-/Milestone-SemVer und Changelog-Disziplin sind in
+`docs/RELEASE.md` dokumentiert. Diese Datei ist **nicht** das Release-Runbook.

@@ -1,14 +1,16 @@
-# Testing Strategy
+# Teststrategie
+
+> Sprache: Deutsch (primär) · [English](en/TESTING.md)
 
 - Unit Tests
-- Integration Tests (Compose/Stack/monitoring validate, plugin loader verify, restore dry-run)
-- Contract Tests (API GraphQL/REST service-level)
-- End-to-End smoke (`scripts/e2e-smoke.sh` against a running stack)
-- Performance smoke (`scripts/perf-smoke.sh` latency budget against public API)
+- Integration Tests (Compose-/Stack-/Monitoring-Validate, Plugin-Loader-Verify, Restore-Dry-Run)
+- Contract Tests (API GraphQL/REST auf Service-Ebene)
+- End-to-End-Smoke (`scripts/e2e-smoke.sh` gegen einen laufenden Stack)
+- Performance-Smoke (`scripts/perf-smoke.sh` Latenzbudget gegen die öffentliche API)
 
-Every plugin must be loadable via `npm run verify:plugins`.
+Jedes Plugin muss über `npm run verify:plugins` ladbar sein.
 
-## Local
+## Lokal
 
 ```bash
 npm test
@@ -20,19 +22,17 @@ npm run validate:monitoring
 npm run restore:dry-run
 ```
 
-## Running stack smokes
+## Smokes gegen laufenden Stack
 
-With Compose or Swarm published and DNS/`Host` headers resolving:
+Mit veröffentlichtem Compose oder Swarm und auflösenden DNS-/`Host`-Headern:
 
 ```bash
 API_BASE=http://api.localhost ./scripts/e2e-smoke.sh
 API_BASE=http://api.localhost ./scripts/perf-smoke.sh
 ```
 
-These are intentional smokes (probes + HTTP latency), not full browser E2E or capacity benchmarks.
+Das sind bewusst Smokes (Probes + HTTP-Latenz), keine vollständigen Browser-E2E- oder Kapazitätsbenchmarks.
 
 ## CI
 
-Quality Gates workflow (`.github/workflows/ci.yml`) runs lint, typecheck, workspace
-tests, plugin verify, compose/stack/monitoring validation, restore dry-run,
-representative Docker builds, and security scans. See `docs/CI_CD.md`.
+Der Quality-Gates-Workflow (`.github/workflows/ci.yml`) führt Lint, Typecheck, Workspace-Tests, Plugin-Verify, Compose-/Stack-/Monitoring-Validation, Restore-Dry-Run, repräsentative Docker-Builds und Security-Scans aus. Siehe `docs/CI_CD.md`.

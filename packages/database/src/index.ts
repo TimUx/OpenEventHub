@@ -42,6 +42,7 @@ export {
 export {
   AiSettingsRepository,
   EventRepository,
+  type EventWithRelations,
   SourceRepository,
   CrawlJobRepository,
   CrawlResultRepository,

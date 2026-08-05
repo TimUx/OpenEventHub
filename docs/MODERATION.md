@@ -1,11 +1,13 @@
 # Moderation
 
+> Sprache: Deutsch (primär) · [English](en/MODERATION.md)
+
 Workflow
 
-Submission
-→ AI Validation
-→ Duplicate Check
-→ Manual Review (if required)
-→ Publish / Reject
+Einreichung
+→ KI-Validierung
+→ Duplikatprüfung
+→ Manuelle Prüfung (falls erforderlich)
+→ Veröffentlichen / Ablehnen
 
-Every decision is logged.
+Jede Entscheidung wird protokolliert.

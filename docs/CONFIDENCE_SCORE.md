@@ -1,17 +1,19 @@
 # Confidence Score
 
-The confidence score rates data quality.
+> Sprache: Deutsch (primär) · [English](en/CONFIDENCE_SCORE.md)
 
-Example criteria
+Der Confidence Score bewertet die Datenqualität.
 
-| Field | Weight |
+Beispielkriterien
+
+| Feld | Gewicht |
 |------|------:|
-| Date | 20 |
-| Venue | 15 |
-| Organizer | 10 |
-| Address | 10 |
-| Images | 10 |
-| Multiple Sources | 15 |
-| AI Agreement | 20 |
+| Datum | 20 |
+| Veranstaltungsort | 15 |
+| Organisator | 10 |
+| Adresse | 10 |
+| Bilder | 10 |
+| Mehrere Quellen | 15 |
+| KI-Übereinstimmung | 20 |
 
-Score range: 0-100
+Score-Bereich: 0–100

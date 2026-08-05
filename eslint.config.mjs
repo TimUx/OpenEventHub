@@ -15,6 +15,9 @@ export default tseslint.config(
       'plugins/**/*.js',
       // Optional dependency shims (lazy-loaded SDKs).
       '**/src/shims/**',
+      // Playwright root config/tests are not in tsconfig.eslint.json.
+      'playwright.config.ts',
+      'tests/**',
     ],
   },
   eslint.configs.recommended,

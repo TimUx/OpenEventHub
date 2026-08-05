@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-08-05
+
+### Added
+
+- Embedded OpenStreetMap map (Leaflet) with search/filters and auto-fitBounds
+- Public submission UI (`/submit`) for events and sources → moderation queue
+- Flat FestSchmiede-inspired UI tokens (primary blue, teal, green; Roboto; solid app bar)
+- Optional Compose overlay `docker-compose.dev-ports.yml` for local host tooling ports
+- Event list/API payloads include venue coordinates and categories for map filtering
+- Bilingual docs under `docs/` (DE primary) and `docs/en/`; UI screenshots refreshed
+
+### Changed
+
+- Docker networking: `internal` (`internal: true`) for data plane; host publishes only Traefik HTTP/HTTPS
+- Workers/crawler/AI/OCR/search no longer attach to the public `edge` network
+- Postgres, Redis, SeaweedFS, Prometheus, Loki no longer publish host ports by default
+- Migrate/seed scripts attach to the internal Docker network instead of host networking
+- Traefik dashboard reachable via `traefik.${DOMAIN}` on the main HTTP port (no dedicated dashboard port)
+- Frontend views: calendar day/week/month/year; events list/details/tiles; i18n `de`/`en`
+
 ## [0.11.0] - 2026-08-05
 
 ### Added

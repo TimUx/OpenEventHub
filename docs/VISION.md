@@ -1,24 +1,25 @@
-
 # Vision
+
+> Sprache: Deutsch (primär) · [English](en/VISION.md)
 
 ## Problem
 
-Regional events are published across many disconnected sources.
+Regionale Veranstaltungen werden über viele voneinander getrennte Quellen veröffentlicht.
 
 ## Mission
 
-Create one intelligent platform that automatically discovers, understands and consolidates events.
+Eine intelligente Plattform schaffen, die Veranstaltungen automatisch entdeckt, versteht und konsolidiert.
 
 ## Scope
 
-OpenEventHub does **not** manage events for organizers.
+OpenEventHub verwaltet **keine** Veranstaltungen für Organisatoren.
 
-Instead, it builds an intelligent searchable index of public events.
+Stattdessen baut es einen intelligenten, durchsuchbaren Index öffentlicher Veranstaltungen auf — inkl. Karte, Kalender und öffentlicher Einreichung zur Moderation.
 
-## Guiding Principles
+## Leitprinzipien
 
-1. Every event originates from one or more sources.
-2. Multiple sources become one event.
-3. AI assists but humans can moderate.
-4. All processing is traceable.
-5. Everything is extensible through plugins.
+1. Jede Veranstaltung stammt aus einer oder mehreren Quellen.
+2. Mehrere Quellen werden zu einer Veranstaltung.
+3. KI unterstützt, Menschen können moderieren.
+4. Die gesamte Verarbeitung ist nachvollziehbar.
+5. Alles ist über Plugins erweiterbar.

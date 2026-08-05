@@ -1,30 +1,31 @@
+# Anforderungen
 
-# Requirements
+> Sprache: Deutsch (primär) · [English](en/REQUIREMENTS.md)
 
-## Functional
+## Funktional
 
-- Daily automatic crawling
-- Configurable schedules
-- Plugin-based source connectors
-- OCR for PDFs and images
-- LLM-based extraction
-- Duplicate detection
-- Categorisation
+- Tägliches automatisches Crawling
+- Konfigurierbare Zeitpläne
+- Plugin-basierte Quellen-Connectoren
+- OCR für PDFs und Bilder
+- LLM-basierte Extraktion
+- Duplikaterkennung
+- Kategorisierung
 - Geocoding
-- Public event submission
-- Public source submission
-- Moderation queue
-- REST + GraphQL API
+- Öffentliche Veranstaltungseinreichung
+- Öffentliche Quelleneinreichung
+- Moderationswarteschlange
+- REST- + GraphQL-API
 
-## Non Functional
+## Nicht-funktional
 
 - Docker Compose
 - Docker Stack
 - PostgreSQL
 - Redis
-- SeaweedFS (S3-compatible object storage)
-- Scalable workers
-- Health checks
+- SeaweedFS (S3-kompatibler Objektspeicher)
+- Skalierbare Worker
+- Health Checks
 - Logging
 - Monitoring
 - Tests

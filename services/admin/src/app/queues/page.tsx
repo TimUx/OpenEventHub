@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
+import { useI18n } from '../../i18n/i18n-provider';
 
 type QueueRow = {
   name: string;
@@ -15,29 +16,30 @@ type QueueRow = {
 };
 
 export default function QueuesPage() {
+  const { t } = useI18n();
   const { data, error, loading, reload } = useAdminQuery<QueueRow[]>('/api/v1/admin/queues');
 
   return (
     <div>
       <PageHeader
-        title="Queues"
-        description="BullMQ visibility across discovery, crawl, OCR, AI, and more."
+        title={t('queues.title')}
+        description={t('queues.description')}
         action={
           <button
             type="button"
             className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm"
             onClick={() => void reload()}
           >
-            Refresh
+            {t('common.refresh')}
           </button>
         }
       />
-      {loading ? <p className="text-sm text-[var(--muted)]">Loading…</p> : null}
+      {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {(data ?? []).map((queue) => (
           <Panel key={queue.name}>
-            <h2 className="font-display text-lg">{queue.name}</h2>
+            <h2 className="font-bold text-lg">{queue.name}</h2>
             <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {Object.entries(queue.counts).map(([key, value]) => (
                 <div

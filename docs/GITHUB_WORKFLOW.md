@@ -1,21 +1,23 @@
-# GitHub Workflow
+# GitHub-Workflow
+
+> Sprache: Deutsch (primär) · [English](en/GITHUB_WORKFLOW.md)
 
 ## Branches
 
-- `main` — stable integration line
-- `develop` — optional staging line for multi-contributor flows
-- `feature/*` — new work
-- `bugfix/*` — fixes
-- `hotfix/*` — urgent production fixes from `main`
+- `main` — stabile Integrationslinie
+- `develop` — optionale Staging-Linie für Multi-Contributor-Flows
+- `feature/*` — neue Arbeit
+- `bugfix/*` — Fixes
+- `hotfix/*` — dringende Production-Fixes von `main`
 
-## Pull requests
+## Pull Requests
 
-Every change lands via Pull Request with review when collaborators are involved.
-Solo milestone commits on `main` still follow Conventional Commits and
+Jede Änderung landet über einen Pull Request mit Review, wenn Collaborators beteiligt sind.
+Solo-Milestone-Commits auf `main` folgen trotzdem Conventional Commits und
 `docs/RELEASE.md`.
 
-CI (lint, tests, image build, security) is expanded in Milestone 10. Until then
-run local gates:
+CI (Lint, Tests, Image-Build, Security) wird in Milestone 10 ausgebaut. Bis dahin
+lokale Gates ausführen:
 
 ```bash
 npm run tools:check
@@ -25,5 +27,5 @@ npm run validate:compose
 
 ## Commits
 
-Use Conventional Commits (`feat`, `fix`, `docs`, `chore`, …). Milestone releases
-bump SemVer and `CHANGELOG.md` as described in `docs/RELEASE.md`.
+Conventional Commits nutzen (`feat`, `fix`, `docs`, `chore`, …). Milestone-Releases
+heben SemVer und `CHANGELOG.md` wie in `docs/RELEASE.md` beschrieben an.

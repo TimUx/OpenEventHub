@@ -1,6 +1,8 @@
 # Geocoding
 
-Resolve:
+> Sprache: Deutsch (primär) · [English](en/GEOCODING.md)
+
+Aufgelöst werden:
 
 - address
 - city
@@ -11,4 +13,6 @@ Resolve:
 - latitude
 - longitude
 
-Results are cached.
+Ergebnisse werden gecacht.
+
+Die öffentlichen Event-APIs (`/api/v1/events`, `/api/v1/search`) liefern Venue-Koordinaten mit, damit die Frontend-Karte Marker setzen und automatisch zoomen kann.

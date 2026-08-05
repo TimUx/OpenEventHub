@@ -1,9 +1,11 @@
 # Plugin Development
 
-New source types are **plugins only**. Never require crawler/core service changes
-for a new connector.
+> Sprache: Deutsch (primär) · [English](en/PLUGIN_DEVELOPMENT.md)
 
-## Lifecycle
+Neue Quelltypen sind **nur Plugins**. Für einen neuen Connector dürfen niemals
+Änderungen an Crawler-/Core-Services nötig sein.
+
+## Lebenszyklus
 
 ```
 Register (plugin.json + createPlugin)
@@ -16,35 +18,35 @@ Register (plugin.json + createPlugin)
   → healthCheck
 ```
 
-See `docs/PLUGIN_SDK.md` for types and field contracts.
+Typen und Feldverträge: `docs/PLUGIN_SDK.md`.
 
-## Rules
+## Regeln
 
-1. No direct access to PostgreSQL or internal repositories
-2. Keep plugins ESM (`plugins/package.json` has `"type": "module"`)
-3. Shared fetch/date helpers may live under `plugins/utils/`
-4. Prefer deterministic parse/normalize so fixtures can be tested offline
-5. `Source.pluginType` in Admin/API must equal `metadata.pluginType`
+1. Kein direkter Zugriff auf PostgreSQL oder interne Repositories
+2. Plugins als ESM belassen (`plugins/package.json` hat `"type": "module"`)
+3. Gemeinsame Fetch-/Datums-Helper können unter `plugins/utils/` liegen
+4. Parse/Normalize möglichst deterministisch halten, damit Fixtures offline testbar sind
+5. `Source.pluginType` in Admin/API muss `metadata.pluginType` entsprechen
 
-## Add a plugin
+## Plugin hinzufügen
 
-1. Create `plugins/<name>/plugin.json` and `plugins/<name>/index.js`
-2. Export `createPlugin` (and optionally `default = createPlugin`)
-3. Implement all `CrawlPlugin` methods (stubs are fine for unused steps)
-4. Run `npm run verify:plugins`
-5. Rebuild the crawler image so Compose picks up the new files:
+1. `plugins/<name>/plugin.json` und `plugins/<name>/index.js` anlegen
+2. `createPlugin` exportieren (optional auch `default = createPlugin`)
+3. Alle `CrawlPlugin`-Methoden implementieren (Stubs für ungenutzte Schritte sind ok)
+4. `npm run verify:plugins` ausführen
+5. Crawler-Image neu bauen, damit Compose die neuen Dateien übernimmt:
    ```bash
    npm run apps:up
    ```
-6. In Admin → Sources, create a source with `pluginType=<name>`, URL, optional cron
-7. Use **Crawl now** or wait for the scheduler
+6. In Admin → Sources eine Quelle mit `pluginType=<name>`, URL und optionalem Cron anlegen
+7. **Crawl now** nutzen oder auf den Scheduler warten
 
-## Testing tips
+## Tipps zum Testen
 
-- Use fixtures under `services/crawler/src/fixtures/` as models
-- `fetch-url` supports `file://` for local HTML/RSS/ICS during development
-- Keep confidence scores honest (`extractionConfidence` when title+start exist)
+- Fixtures unter `services/crawler/src/fixtures/` als Vorbild nutzen
+- `fetch-url` unterstützt `file://` für lokales HTML/RSS/ICS in der Entwicklung
+- Confidence-Scores ehrlich halten (`extractionConfidence`, wenn Title+Start vorhanden)
 
-## Worked example
+## Ausgearbeitetes Beispiel
 
-`docs/PLUGIN_EXAMPLE.md` walks through the HTML table plugin in `plugins/html/`.
+`docs/PLUGIN_EXAMPLE.md` führt durch das HTML-Tabellen-Plugin in `plugins/html/`.

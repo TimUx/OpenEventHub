@@ -1,35 +1,38 @@
 # OpenEventHub
 
-> AI-powered Open Source Event Intelligence Platform
+> KI-gestützte Open-Source **Event-Intelligence-Plattform**
+
+[English README](README.en.md)
 
 ## Vision
 
-OpenEventHub is **not** a traditional event calendar.
+OpenEventHub ist **kein** klassischer Veranstaltungskalender.
 
-It continuously discovers, crawls, analyzes, deduplicates and enriches events from distributed sources such as websites, RSS, ICS, social media, PDFs, images (OCR), open data portals, and APIs.
+Die Plattform entdeckt, crawlt, analysiert, dedupliziert und anreichert Veranstaltungen aus verteilten Quellen (Websites, RSS, ICS, Social Media, PDFs, Bilder/OCR, Open-Data-Portale, APIs).
 
-Multiple sources become **one** high-quality event record.
+Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
-## Current status
+## Aktueller Stand
 
-**Milestone 10 — Cursor & Quality Gates (`v0.10.0`)**
+**v0.12.0 — Portal UX, Map, Submit, Network Hardening** (post-M11)
 
-- Cursor rules + AGENTS.md; CI quality gates; SemVer release/image publish
-- Contributor DX, Admin, public portal, API, crawler plugins
-- Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
+Vorher: Milestone 11 — Production Hardening (`v0.11.0`)
 
-Next: **Milestone 11 — Production Hardening**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
+- Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates
 
-## Quick start
+Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md) · [English](docs/en/ROADMAP.md).
 
-Requirements: Docker Engine + Docker Compose v2.
+## Schnellstart
+
+Voraussetzung: Docker Engine + Docker Compose v2.
 
 ```bash
 cp .env.example .env
 npm run stack:up
 ```
 
-Or step by step:
+Oder Schritt für Schritt:
 
 ```bash
 npm run infra:bootstrap
@@ -37,49 +40,31 @@ npm run apps:up
 npm run apps:health
 ```
 
-| Entry              | URL (defaults)              |
-| ------------------ | --------------------------- |
-| Frontend           | http://localhost:8088       |
-| API                | http://api.localhost:8088   |
-| Admin              | http://admin.localhost:8088 |
-| Traefik dashboard  | http://localhost:18080      |
-| PostgreSQL (host)  | `localhost:15432`           |
-| Redis (host)       | `localhost:16379`           |
-| S3 API (SeaweedFS) | http://localhost:18333      |
-| Storage Admin UI   | http://localhost:23646      |
+| Einstieg          | URL (Defaults)                |
+| ----------------- | ----------------------------- |
+| Frontend          | http://localhost:8088         |
+| API               | http://api.localhost:8088     |
+| Admin             | http://admin.localhost:8088   |
+| Traefik-Dashboard | http://traefik.localhost:8088 |
 
-Containers reach each other via Docker DNS (`postgres`, `redis`, `object-storage`, `api`, …).
+## Dokumentation
 
-## Repository layout
+**Primärsprache: Deutsch** · Englisch unter [`docs/en/`](docs/en/)
 
-```
-architecture/     ADRs + milestone reviews
-docker/           Compose + Stack + DB init
-docs/             Binding product & engineering docs
-packages/         Shared libraries
-services/         Deployable service containers
-plugins/          Source connector plugins (from M5)
-prompts/          Central LLM prompts (from M4)
-scripts/          Bootstrap and ops helpers
-```
+- [Dokumentationsindex](docs/README.md) · [English index](docs/en/README.md)
+- [Vision](docs/VISION.md)
+- [Architektur](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Developer Guide](docs/DEVELOPER_GUIDE.md)
+- [Frontend](docs/FRONTEND.md) / [Admin Center](docs/ADMIN_CENTER.md) (inkl. Screenshots)
+- [Mitwirken](CONTRIBUTING.md)
 
-## Core principles
+## Kernprinzipien
 
 - Container First · API First · AI First · Plugin Based
 - Docker Compose + Docker Stack
-- Documentation is the source of truth
+- Dokumentation ist die Source of Truth (`docs/` verbindlich)
 
-## Documentation
+## Lizenz
 
-- [Vision](docs/VISION.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Developer Guide](docs/DEVELOPER_GUIDE.md)
-- [Cursor Development](docs/CURSOR_DEVELOPMENT.md)
-- [CI/CD](docs/CI_CD.md)
-- [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
-
-## License
-
-Apache License 2.0 — see [LICENSE](LICENSE).
+Apache-2.0 — siehe [`LICENSE`](LICENSE).
