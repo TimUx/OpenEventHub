@@ -1,7 +1,66 @@
-# OpenEventHub — Docker Stack (Swarm) skeleton
-# Production target per docs/DOCKER_STACK.md / docs/DEPLOYMENT.md.
-# Secrets and configs are placeholders for M11 hardening; do not deploy as-is
-# without replacing credentials.
+# OpenEventHub — Docker Stack (Swarm) production deploy
+# Docs: docs/DOCKER_STACK.md, docs/DEPLOYMENT.md
+#
+# Prerequisites:
+#   1. Swarm init + node label: docker node update --label-add oeh.storage=true <node>
+#   2. External secrets via scripts/stack-init-secrets.sh
+#   3. Images available (GHCR from release workflow or local tags)
+#
+# Deploy:
+#   export SERVICE_VERSION=0.11.0 GITHUB_OWNER=timux
+#   docker stack deploy -c docker/stack/docker-stack.yml openeventhub
+#
+# Validate without Swarm:
+#   npm run validate:stack
+
+x-rolling: &rolling
+  parallelism: 1
+  delay: 10s
+  order: start-first
+  failure_action: rollback
+  monitor: 30s
+
+x-rollback: &rollback
+  parallelism: 1
+  order: stop-first
+
+x-resources-api: &resources-api
+  limits:
+    cpus: '1.0'
+    memory: 512M
+  reservations:
+    cpus: '0.10'
+    memory: 128M
+
+x-resources-worker: &resources-worker
+  limits:
+    cpus: '1.0'
+    memory: 768M
+  reservations:
+    cpus: '0.10'
+    memory: 128M
+
+x-resources-ui: &resources-ui
+  limits:
+    cpus: '0.50'
+    memory: 384M
+  reservations:
+    cpus: '0.05'
+    memory: 64M
+
+x-app-env: &app-env
+  NODE_ENV: production
+  SERVICE_VERSION: ${SERVICE_VERSION:-0.11.0}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT_INTERNAL: '5432'
+  REDIS_HOST: redis
+  REDIS_PORT_INTERNAL: '6379'
+  OBJECT_STORAGE_HOST: object-storage
+  OBJECT_STORAGE_PORT_INTERNAL: '8333'
+  S3_ENDPOINT: http://object-storage:8333
+  S3_ACCESS_KEY: openeventhub
+  S3_BUCKET: openeventhub
+  LOG_LEVEL: ${LOG_LEVEL:-info}
 
 networks:
   edge:
@@ -17,12 +76,22 @@ volumes:
   redis_data:
   object_storage_data:
 
+configs:
+  postgres_init_extensions:
+    file: ../postgres/init/01-extensions.sql
+
 secrets:
   postgres_password:
     external: true
   redis_password:
     external: true
   s3_secret_key:
+    external: true
+  auth_jwt_secret:
+    external: true
+  settings_encryption_key:
+    external: true
+  database_url:
     external: true
 
 services:
@@ -37,13 +106,15 @@ services:
       - --entrypoints.websecure.address=:443
       - --ping=true
       - --api.dashboard=true
+      - --log.level=INFO
+      - --accesslog=true
     ports:
       - target: 80
-        published: 80
+        published: ${TRAEFIK_HTTP_PORT:-80}
         protocol: tcp
         mode: host
       - target: 443
-        published: 443
+        published: ${TRAEFIK_HTTPS_PORT:-443}
         protocol: tcp
         mode: host
     volumes:
@@ -58,9 +129,12 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-      update_config:
-        parallelism: 1
-        order: start-first
+      update_config: *rolling
+      rollback_config: *rollback
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
     healthcheck:
       test: ['CMD', 'traefik', 'healthcheck', '--ping']
       interval: 10s
@@ -75,6 +149,9 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     secrets:
       - postgres_password
+    configs:
+      - source: postgres_init_extensions
+        target: /docker-entrypoint-initdb.d/01-extensions.sql
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -87,6 +164,12 @@ services:
           - node.labels.oeh.storage == true
       restart_policy:
         condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U openeventhub -d openeventhub']
       interval: 10s
@@ -110,8 +193,18 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test:
+        [
+          'CMD-SHELL',
+          'redis-cli -a "$$(cat /run/secrets/redis_password)" --no-auth-warning ping | grep -q PONG',
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -123,7 +216,7 @@ services:
       - -c
       - |
         export AWS_SECRET_ACCESS_KEY="$$(cat /run/secrets/s3_secret_key)"
-        exec /entrypoint.sh
+        exec /entrypoint.sh weed mini
     environment:
       AWS_ACCESS_KEY_ID: openeventhub
       S3_BUCKET: openeventhub
@@ -142,8 +235,229 @@ services:
           - node.labels.oeh.storage == true
       restart_policy:
         condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
     healthcheck:
       test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:9333/cluster/status || exit 1']
       interval: 15s
       timeout: 10s
       retries: 10
+
+  api:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-api:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3000'
+      SERVICE_NAME: api
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-120}
+      API_RATE_LIMIT_TTL_MS: ${API_RATE_LIMIT_TTL_MS:-60000}
+    secrets:
+      - database_url
+      - redis_password
+      - s3_secret_key
+      - auth_jwt_secret
+      - settings_encryption_key
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: ${API_REPLICAS:-2}
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-api
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=openeventhub_edge
+        - traefik.http.routers.api.rule=Host(`api.${DOMAIN:-localhost}`)
+        - traefik.http.routers.api.entrypoints=web
+        - traefik.http.services.api.loadbalancer.server.port=3000
+
+  scheduler:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-scheduler:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3001'
+      SERVICE_NAME: scheduler
+    secrets:
+      - database_url
+      - redis_password
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  worker:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-worker:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3002'
+      SERVICE_NAME: worker
+    secrets:
+      - redis_password
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  crawler:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-crawler:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3003'
+      SERVICE_NAME: crawler
+      PLUGINS_DIR: /app/plugins
+      OBJECT_STORAGE_ADAPTER: s3
+    secrets:
+      - database_url
+      - redis_password
+      - s3_secret_key
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: ${CRAWLER_REPLICAS:-1}
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  ai-service:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ai-service:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3004'
+      SERVICE_NAME: ai-service
+    secrets:
+      - database_url
+      - redis_password
+      - settings_encryption_key
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  ocr-service:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ocr-service:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3005'
+      SERVICE_NAME: ocr-service
+      OBJECT_STORAGE_ADAPTER: s3
+    secrets:
+      - redis_password
+      - s3_secret_key
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  search:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-search:${SERVICE_VERSION:-0.11.0}
+    environment:
+      <<: *app-env
+      PORT: '3006'
+      SERVICE_NAME: search
+    secrets:
+      - redis_password
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-worker
+
+  frontend:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-frontend:${SERVICE_VERSION:-0.11.0}
+    environment:
+      NODE_ENV: production
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.11.0}
+      PORT: '3100'
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.localhost}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://localhost}
+      API_INTERNAL_URL: http://api:3000
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: ${FRONTEND_REPLICAS:-2}
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-ui
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=openeventhub_edge
+        - traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`) || Host(`www.${DOMAIN:-localhost}`)
+        - traefik.http.routers.frontend.entrypoints=web
+        - traefik.http.services.frontend.loadbalancer.server.port=3100
+
+  admin:
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-admin:${SERVICE_VERSION:-0.11.0}
+    environment:
+      NODE_ENV: production
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.11.0}
+      PORT: '3101'
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.localhost}
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config: *rolling
+      rollback_config: *rollback
+      resources: *resources-ui
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=openeventhub_edge
+        - traefik.http.routers.admin.rule=Host(`admin.${DOMAIN:-localhost}`)
+        - traefik.http.routers.admin.entrypoints=web
+        - traefik.http.services.admin.loadbalancer.server.port=3101

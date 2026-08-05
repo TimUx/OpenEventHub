@@ -10,6 +10,7 @@ import {
   SourceRepository,
 } from '@openeventhub/database';
 import type { CrawlPlugin } from '@openeventhub/plugin-sdk';
+import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, CrawlJobPayload, OcrJobPayload } from '@openeventhub/shared';
 
 import { ObjectStorageService } from '../object-storage/object-storage.service.js';
@@ -37,6 +38,8 @@ export class CrawlProcessingService {
 
     const plugin = this.plugins.getPlugin(source.pluginType);
     this.assertPluginSupportsSource(plugin, source.url);
+    const pluginType = plugin.metadata.pluginType;
+    const startedHr = process.hrtime.bigint();
 
     const scheduledAt = new Date();
     const startedAt = new Date();
@@ -99,6 +102,7 @@ export class CrawlProcessingService {
         });
 
         await this.finishSuccess(crawlJob.id, source.id);
+        this.recordCrawlMetrics(pluginType, 'skipped', startedHr);
         this.logger.log(
           `Crawl skipped unchanged content source=${source.id} contentHash=${contentHash}`,
         );
@@ -136,6 +140,7 @@ export class CrawlProcessingService {
         content: fetchResult.content,
       });
 
+      this.recordCrawlMetrics(pluginType, 'success', startedHr);
       this.logger.log(
         `Crawl completed source=${source.id} plugin=${plugin.metadata.pluginType} objectKey=${objectKey}`,
       );
@@ -155,9 +160,24 @@ export class CrawlProcessingService {
           lastError: message,
         },
       });
+      this.recordCrawlMetrics(pluginType, 'failed', startedHr);
+      metricsRegistry.incrementCounter('oeh_failed_imports_total', { plugin: pluginType });
       this.logger.error(`Crawl job failed source=${source.id}: ${message}`);
       throw err;
     }
+  }
+
+  private recordCrawlMetrics(
+    pluginType: string,
+    status: 'success' | 'skipped' | 'failed',
+    startedHr: bigint,
+  ): void {
+    const seconds = Number(process.hrtime.bigint() - startedHr) / 1e9;
+    metricsRegistry.observeHistogram(
+      'oeh_crawl_duration_seconds',
+      { plugin: pluginType, status },
+      seconds,
+    );
   }
 
   private async finishSuccess(crawlJobId: string, sourceId: string): Promise<void> {

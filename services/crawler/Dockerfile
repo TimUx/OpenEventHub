@@ -32,9 +32,12 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/plugins ./plugins
 COPY --from=build /app/services/crawler ./services/crawler
+COPY docker/scripts/load-secrets-entrypoint.sh /usr/local/bin/load-secrets-entrypoint.sh
+RUN chmod 755 /usr/local/bin/load-secrets-entrypoint.sh
 USER oeh
 WORKDIR /app/services/crawler
 EXPOSE 3003
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=20s \
   CMD node -e "fetch('http://127.0.0.1:3003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+ENTRYPOINT ["/usr/local/bin/load-secrets-entrypoint.sh"]
 CMD ["node", "dist/main.js"]

@@ -1,5 +1,6 @@
 import { Controller, Get, Header, Inject } from '@nestjs/common';
 
+import { metricsRegistry } from '../metrics/metrics-registry.js';
 import { escapePrometheusLabel, formatNodeVersionInfo } from '../prometheus.js';
 import {
   SERVICE_RUNTIME_OPTIONS,
@@ -21,11 +22,15 @@ export class MetricsController {
     const uptimeSeconds = (Date.now() - this.startTimeMs) / 1000;
     const service = escapePrometheusLabel(this.options.serviceName);
     const version = escapePrometheusLabel(this.options.version);
+    const memory = process.memoryUsage();
 
-    return [
+    const base = [
       '# HELP process_uptime_seconds Uptime of the process in seconds.',
       '# TYPE process_uptime_seconds gauge',
       `process_uptime_seconds ${uptimeSeconds.toFixed(3)}`,
+      '# HELP process_resident_memory_bytes Resident memory size in bytes.',
+      '# TYPE process_resident_memory_bytes gauge',
+      `process_resident_memory_bytes ${memory.rss}`,
       '# HELP nodejs_version_info Node.js version info.',
       '# TYPE nodejs_version_info gauge',
       formatNodeVersionInfo(process.version),
@@ -34,5 +39,7 @@ export class MetricsController {
       `oeh_service_info{service="${service}",version="${version}"} 1`,
       '',
     ].join('\n');
+
+    return `${base}${metricsRegistry.render()}`;
   }
 }

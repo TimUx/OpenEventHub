@@ -28,9 +28,12 @@ COPY --from=build /app/package.json /app/package-lock.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/services/api ./services/api
+COPY docker/scripts/load-secrets-entrypoint.sh /usr/local/bin/load-secrets-entrypoint.sh
+RUN chmod 755 /usr/local/bin/load-secrets-entrypoint.sh
 USER oeh
 WORKDIR /app/services/api
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=20s \
   CMD node -e "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+ENTRYPOINT ["/usr/local/bin/load-secrets-entrypoint.sh"]
 CMD ["node", "dist/main.js"]

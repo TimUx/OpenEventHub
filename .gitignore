@@ -51,6 +51,7 @@ redis-data/
 .prettiercache
 tmp/
 temp/
+.backups/
 
 # Prisma
 prisma/*.db

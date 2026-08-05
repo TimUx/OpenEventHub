@@ -79,6 +79,12 @@ jobs:
       - name: Validate Docker Stack
         run: npm run validate:stack
 
+      - name: Validate monitoring overlay
+        run: npm run validate:monitoring
+
+      - name: Backup restore dry-run
+        run: npm run restore:dry-run
+
       - name: Verify plugin loader contract
         run: npm run verify:plugins
 

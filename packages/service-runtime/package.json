@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --import reflect-metadata --test src/**/*.test.ts"
+    "test": "node --import tsx --import reflect-metadata --test 'src/**/*.test.ts'"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.12",

@@ -31,9 +31,12 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/prompts ./prompts
 COPY --from=build /app/services/ai-service ./services/ai-service
+COPY docker/scripts/load-secrets-entrypoint.sh /usr/local/bin/load-secrets-entrypoint.sh
+RUN chmod 755 /usr/local/bin/load-secrets-entrypoint.sh
 USER oeh
 WORKDIR /app/services/ai-service
 EXPOSE 3004
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=20s \
   CMD node -e "fetch('http://127.0.0.1:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+ENTRYPOINT ["/usr/local/bin/load-secrets-entrypoint.sh"]
 CMD ["node", "dist/main.js"]

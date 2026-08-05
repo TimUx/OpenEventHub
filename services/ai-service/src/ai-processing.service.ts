@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult } from '@openeventhub/shared';
 import { Prisma, PrismaClient } from '@prisma/client';
 
@@ -19,8 +20,21 @@ export class AiProcessingService {
   }
 
   async processJob(payload: AiJobPayload): Promise<AiJobResult> {
-    const result = await this.pipeline.process(payload);
+    const startedHr = process.hrtime.bigint();
+    let status: 'success' | 'failed' = 'success';
+    try {
+      const result = await this.pipeline.process(payload);
+      return await this.persistAnalysis(payload, result);
+    } catch (err) {
+      status = 'failed';
+      throw err;
+    } finally {
+      const seconds = Number(process.hrtime.bigint() - startedHr) / 1e9;
+      metricsRegistry.observeHistogram('oeh_ai_processing_duration_seconds', { status }, seconds);
+    }
+  }
 
+  private async persistAnalysis(payload: AiJobPayload, result: AiJobResult): Promise<AiJobResult> {
     if (!payload.eventId) {
       return result;
     }

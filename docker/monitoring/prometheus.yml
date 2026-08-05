@@ -1,0 +1,60 @@
+# Scrape NestJS /metrics endpoints on the Compose/Swarm edge+internal networks.
+# Job names match MONITORING.md metric families.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: openeventhub-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['api:3000']
+        labels:
+          service: api
+
+  - job_name: openeventhub-scheduler
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['scheduler:3001']
+        labels:
+          service: scheduler
+
+  - job_name: openeventhub-worker
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['worker:3002']
+        labels:
+          service: worker
+
+  - job_name: openeventhub-crawler
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['crawler:3003']
+        labels:
+          service: crawler
+
+  - job_name: openeventhub-ai
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['ai-service:3004']
+        labels:
+          service: ai-service
+
+  - job_name: openeventhub-ocr
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['ocr-service:3005']
+        labels:
+          service: ocr-service
+
+  - job_name: openeventhub-search
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['search:3006']
+        labels:
+          service: search
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']

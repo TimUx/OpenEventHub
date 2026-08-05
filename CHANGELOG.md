@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-08-05
+
+### Added
+
+- Production Docker Swarm stack with secrets, configs, rolling updates, placement, and resource limits
+- Secrets entrypoint for Nest images (`docker/scripts/load-secrets-entrypoint.sh`)
+- Monitoring overlay: Prometheus, Grafana, Loki, Promtail (`docker/monitoring/`)
+- Backup + restore dry-run scripts; E2E and performance smoke scripts
+- Domain Prometheus metrics: HTTP latency, crawl/AI duration, failed imports, queue depth
+- Ops docs: DEPLOYMENT, DOCKER_STACK, MONITORING, BACKUP, TESTING updates
+
+### Changed
+
+- CI integration job validates monitoring compose and restore dry-run
+
 ## [0.10.0] - 2026-08-05
 
 ### Added

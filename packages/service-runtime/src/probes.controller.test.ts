@@ -77,6 +77,8 @@ describe('ServiceRuntimeModule probes', () => {
       assert.match(response.headers['content-type'] ?? '', /text\/plain/);
       assert.match(response.text, /^# TYPE process_uptime_seconds gauge/m);
       assert.match(response.text, /^process_uptime_seconds \d+\.\d{3}$/m);
+      assert.match(response.text, /^# TYPE process_resident_memory_bytes gauge/m);
+      assert.match(response.text, /^process_resident_memory_bytes \d+$/m);
       assert.match(response.text, /^# TYPE nodejs_version_info gauge/m);
       assert.match(response.text, /^nodejs_version_info\{version="/m);
       assert.match(response.text, /^# TYPE oeh_service_info gauge/m);

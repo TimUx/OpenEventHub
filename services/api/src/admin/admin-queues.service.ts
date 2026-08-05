@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 
+import { metricsRegistry } from '@openeventhub/service-runtime';
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
 type QueueCounts = {
@@ -14,7 +15,9 @@ type QueueCounts = {
 };
 
 @Injectable()
-export class AdminQueuesService {
+export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
+  private refreshTimer: ReturnType<typeof setInterval> | undefined;
+
   constructor(
     @InjectQueue(QUEUE_NAMES.crawl) private readonly crawl: Queue,
     @InjectQueue(QUEUE_NAMES.ocr) private readonly ocr: Queue,
@@ -25,7 +28,44 @@ export class AdminQueuesService {
     @InjectQueue(QUEUE_NAMES.notifications) private readonly notifications: Queue,
   ) {}
 
+  onModuleInit(): void {
+    void this.refreshQueueMetrics();
+    this.refreshTimer = setInterval(() => {
+      void this.refreshQueueMetrics();
+    }, 15_000);
+    this.refreshTimer.unref?.();
+  }
+
+  onModuleDestroy(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+  }
+
   async listCounts(): Promise<Array<{ name: string; counts: QueueCounts }>> {
+    const counts = await this.collectCounts();
+    this.publishQueueMetrics(counts);
+    return counts;
+  }
+
+  private async refreshQueueMetrics(): Promise<void> {
+    try {
+      const counts = await this.collectCounts();
+      this.publishQueueMetrics(counts);
+    } catch {
+      // Metrics refresh must not crash the API process.
+    }
+  }
+
+  private publishQueueMetrics(entries: Array<{ name: string; counts: QueueCounts }>): void {
+    for (const entry of entries) {
+      const length = entry.counts.waiting + entry.counts.active + entry.counts.delayed;
+      metricsRegistry.setGauge('oeh_queue_length', { queue: entry.name }, length);
+      metricsRegistry.setGauge('oeh_queue_failed', { queue: entry.name }, entry.counts.failed);
+    }
+  }
+
+  private async collectCounts(): Promise<Array<{ name: string; counts: QueueCounts }>> {
     const entries: Array<[string, Queue]> = [
       [QUEUE_NAMES.discovery, this.discovery],
       [QUEUE_NAMES.crawl, this.crawl],

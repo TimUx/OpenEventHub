@@ -2,7 +2,7 @@
 
 This roadmap is the binding development plan for OpenEventHub.
 It derives from the documentation packages and the current repository state
-(documentation complete, implementation not started).
+(documentation complete; application milestones M1–M11 implemented).
 
 Status legend: `planned` · `in_progress` · `done`
 
@@ -13,16 +13,17 @@ Status legend: `planned` · `in_progress` · `done`
 | Area | Status |
 |------|--------|
 | Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
-| Application code | M1–M10 implemented |
-| Docker Compose / Stack | infra + apps |
+| Application code | M1–M11 implemented |
+| Docker Compose / Stack | Compose + production Swarm stack |
 | Prisma / Database | M3 complete (`@openeventhub/database`) |
 | AI Engine | M4 complete (`ai-service`, Admin AI Settings) |
 | Crawler Framework | M5 complete (plugin SDK, HTML/RSS/ICS, scheduler, OCR) |
 | Public API | M6 complete (`/api/v1`, GraphQL, OpenAPI, rate limits) |
 | Frontend / Admin | M7–M8 complete |
-| CI/CD | M10 quality gates + SemVer release workflow |
+| CI/CD | M10–M11 quality gates + SemVer release + ops validate |
 | Plugins / Prompts | first plugins + prompt catalog |
 | Developer / Cursor guidance | M9–M10 complete |
+| Ops / production hardening | M11 complete (monitoring, backup, Swarm) |
 
 ---
 
@@ -222,7 +223,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M11 — Production Hardening · `planned`
+### M11 — Production Hardening · `done`
 
 **Goal:** Production-ready Swarm deployment and operability.
 
