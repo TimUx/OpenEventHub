@@ -43,5 +43,7 @@ export {
   AiSettingsRepository,
   EventRepository,
   SourceRepository,
+  CrawlJobRepository,
+  CrawlResultRepository,
   type PublicAiProviderProfile,
 } from './repositories/index.js';

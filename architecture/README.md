@@ -20,3 +20,4 @@ Follow `docs/ADR_GUIDE.md`.
 | [m2-architecture-skeleton.md](reviews/m2-architecture-skeleton.md) | M2        |
 | [m3-data-model.md](reviews/m3-data-model.md)                       | M3        |
 | [m4-ai-engine.md](reviews/m4-ai-engine.md)                         | M4        |
+| [m5-crawler-framework.md](reviews/m5-crawler-framework.md)         | M5        |

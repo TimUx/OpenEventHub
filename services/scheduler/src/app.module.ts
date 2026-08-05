@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 
+import { SourceRepository, PrismaClient } from '@openeventhub/database';
+import { QUEUE_NAMES } from '@openeventhub/shared';
+
+import { CrawlSchedulerService } from './crawl-scheduler.service.js';
 import { probeTcp } from './probe-tcp.js';
 
 const SERVICE_NAME = 'scheduler';
-const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.1.0';
+const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.5.0';
 
 @Module({
   imports: [
@@ -22,6 +27,26 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.1.0';
         ),
       }),
     }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST ?? '127.0.0.1',
+        port: Number(process.env.REDIS_PORT_INTERNAL ?? process.env.REDIS_PORT ?? 6379),
+        password: process.env.REDIS_PASSWORD || undefined,
+      },
+    }),
+    BullModule.registerQueue({ name: QUEUE_NAMES.crawl }),
+  ],
+  providers: [
+    {
+      provide: PrismaClient,
+      useFactory: () => new PrismaClient(),
+    },
+    {
+      provide: SourceRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new SourceRepository(prisma),
+    },
+    CrawlSchedulerService,
   ],
 })
 export class AppModule {}

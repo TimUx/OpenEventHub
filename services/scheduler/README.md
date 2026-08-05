@@ -1,9 +1,19 @@
-# scheduler
+# Scheduler
 
-OpenEventHub `scheduler` service container.
+Creates crawl jobs for configured sources.
 
-- Runtime: NestJS + `@openeventhub/service-runtime`
-- Probes: `/health`, `/ready`, `/metrics`
-- Default port: `3001`
+## Responsibilities
 
-Domain features arrive in later milestones.
+- On startup, load sources with `scheduleCron`
+- Register BullMQ repeatable jobs on the `crawl` queue
+
+## Probes
+
+- `/health`, `/ready`, `/metrics`
+
+## Configuration
+
+| Variable | Purpose |
+|----------|---------|
+| `REDIS_*` | BullMQ connection |
+| `DATABASE_URL` / `POSTGRES_*` | Source schedules |

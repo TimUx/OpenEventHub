@@ -18,6 +18,10 @@ Steps
 5. Event field extraction
 6. Structured JSON output
 
+In the running system (M5+): steps 1–3 are handled by `ocr-service` (Tesseract).
+Steps 4–6 are handled by `ai-service` after OCR enqueues an `ai` job with the
+extracted text. Image-only PDF rasterization (poppler) is a follow-up.
+
 Output fields:
 
 - title

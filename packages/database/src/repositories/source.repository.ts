@@ -14,4 +14,23 @@ export class SourceRepository {
   list(): Promise<Source[]> {
     return this.prisma.source.findMany({ orderBy: { name: 'asc' } });
   }
+
+  updateLastCrawlAt(sourceId: string, lastCrawlAt: Date): Promise<Source> {
+    return this.prisma.source.update({
+      where: { id: sourceId },
+      data: {
+        lastCrawlAt,
+        lastError: null,
+      },
+    });
+  }
+
+  updateLastError(sourceId: string, lastError: string): Promise<Source> {
+    return this.prisma.source.update({
+      where: { id: sourceId },
+      data: {
+        lastError,
+      },
+    });
+  }
 }

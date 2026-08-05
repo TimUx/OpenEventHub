@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>OpenEventHub Fixture</title>
+    <item>
+      <title>Open Air</title>
+      <description>Music in the park</description>
+      <pubDate>Wed, 05 Aug 2026 10:00:00 GMT</pubDate>
+      <link>https://example.test/events/1</link>
+    </item>
+  </channel>
+</rss>
+

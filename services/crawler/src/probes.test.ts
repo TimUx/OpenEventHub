@@ -5,7 +5,7 @@ import { type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
-import { AppModule } from './app.module.js';
+import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 
 interface HealthBody {
   service: string;
@@ -17,7 +17,12 @@ describe('crawler probes', () => {
 
   before(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [
+        ServiceRuntimeModule.register({
+          serviceName: 'crawler',
+          version: '0.1.0',
+        }),
+      ],
     }).compile();
     app = moduleRef.createNestApplication();
     await app.init();

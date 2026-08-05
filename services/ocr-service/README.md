@@ -1,9 +1,22 @@
-# ocr-service
+# OCR Service
 
-OpenEventHub `ocr-service` service container.
+Tesseract-based OCR worker for crawled images (and PDF validation gate).
 
-- Runtime: NestJS + `@openeventhub/service-runtime`
-- Probes: `/health`, `/ready`, `/metrics`
-- Default port: `3005`
+## Responsibilities
 
-Domain features arrive in later milestones.
+- Consume BullMQ `ocr` jobs
+- Validate mime types from `docs/OCR_PIPELINE.md`
+- Extract text via Tesseract.js
+- Store OCR text object (`*.ocr.txt`)
+- Enqueue BullMQ `ai` jobs with extracted text
+
+## Probes
+
+- `/health`, `/ready`, `/metrics`
+
+## Configuration
+
+| Variable | Purpose |
+|----------|---------|
+| `REDIS_*` | BullMQ connection |
+| `S3_*` / `OBJECT_STORAGE_ADAPTER` | Read raw crawl objects / write OCR text |

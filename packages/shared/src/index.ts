@@ -14,6 +14,10 @@ export {
   type ExtractedEventFields,
 } from './ai-jobs.js';
 
+export { type CrawlJobPayload } from './crawl-jobs.js';
+
+export { type OcrJobPayload, type OcrJobResult } from './ocr-jobs.js';
+
 export {
   createHealthResult,
   createReadinessResult,

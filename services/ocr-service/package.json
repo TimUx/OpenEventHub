@@ -1,24 +1,29 @@
 {
   "name": "@openeventhub/ocr-service",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
-  "description": "OpenEventHub ocr-service service shell",
+  "description": "OpenEventHub OCR service (Tesseract)",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --import reflect-metadata --test src/**/*.test.ts"
+    "test": "node --import tsx --import reflect-metadata --test src/probes.test.ts src/ocr-processing.service.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
     "@openeventhub/service-runtime": "0.1.0",
     "@openeventhub/shared": "0.1.0",
+    "bullmq": "^5.44.0",
+    "ioredis": "^5.6.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "tesseract.js": "^6.0.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.0.12",

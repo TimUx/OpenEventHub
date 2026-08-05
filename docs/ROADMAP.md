@@ -8,16 +8,18 @@ Status legend: `planned` · `in_progress` · `done`
 
 ---
 
-## Current State (2026-07-31)
+## Current State (2026-08-05)
 
 | Area | Status |
 |------|--------|
 | Vision / Architecture / Data / AI / Plugins / API / Frontend / Ops docs | complete |
-| Application code | none |
-| Docker Compose / Stack | none |
+| Application code | M1–M5 implemented |
+| Docker Compose / Stack | infra + apps |
 | Prisma / Database | M3 complete (`@openeventhub/database`) |
-| CI/CD | none |
-| Plugins / Prompts | directories only |
+| AI Engine | M4 complete (`ai-service`, Admin AI Settings) |
+| Crawler Framework | M5 complete (plugin SDK, HTML/RSS/ICS, scheduler, OCR) |
+| CI/CD | skeleton |
+| Plugins / Prompts | first plugins + prompt catalog |
 
 ---
 
@@ -120,7 +122,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M5 — Crawler Framework (`Package 05`) · `planned`
+### M5 — Crawler Framework (`Package 05`) · `done`
 
 **Goal:** Plugin-first discovery/fetch/parse pipeline with Scheduler + Workers.
 

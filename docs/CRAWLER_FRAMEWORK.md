@@ -13,10 +13,31 @@
 
 ```mermaid
 flowchart LR
-    Scheduler-->Queue
-    Queue-->Worker
-    Worker-->Plugin
-    Plugin-->Parser
-    Parser-->AI
-    AI-->Database
+    Scheduler-->CrawlQueue
+    CrawlQueue-->Crawler
+    Crawler-->Plugin
+    Plugin-->ObjectStorage
+    Crawler-->OcrQueue
+    Crawler-->AiQueue
+    OcrQueue-->OcrService
+    OcrService-->AiQueue
+    AiQueue-->AiService
 ```
+
+## Runtime (M5)
+
+| Component | Role |
+|-----------|------|
+| `scheduler` | Loads `Source.scheduleCron` and registers BullMQ repeatable jobs on `crawl` |
+| `crawler` | Consumes `crawl`, runs plugin lifecycle, stores raw payloads, skips unchanged hashes |
+| `ocr-service` | Consumes `ocr` for image/PDF-marked payloads, writes `.ocr.txt`, enqueues `ai` |
+| `ai-service` | Consumes `ai` (Event Intelligence Engine) |
+| `plugins/*` | Independently deployable connectors (`html`, `rss`, `ics`) via Plugin SDK |
+
+New source types are added as plugins under `plugins/` with a `plugin.json` manifest.
+Core services discover them at startup (`PLUGINS_DIR`); no core code changes required.
+
+## Change detection
+
+When a crawl produces the same `contentHash` as a prior successful result for the same
+source, the job is marked `skipped` and downstream OCR/AI jobs are not enqueued.

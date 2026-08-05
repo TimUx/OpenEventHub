@@ -3,9 +3,8 @@ import { after, before, describe, it } from 'node:test';
 
 import { type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 import request from 'supertest';
-
-import { AppModule } from './app.module.js';
 
 interface HealthBody {
   service: string;
@@ -17,7 +16,12 @@ describe('ocr-service probes', () => {
 
   before(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [
+        ServiceRuntimeModule.register({
+          serviceName: 'ocr-service',
+          version: '0.5.0',
+        }),
+      ],
     }).compile();
     app = moduleRef.createNestApplication();
     await app.init();

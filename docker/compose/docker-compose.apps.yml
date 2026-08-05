@@ -52,7 +52,7 @@ services:
 
   scheduler:
     <<: *nestjs-service
-    image: openeventhub/scheduler:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/scheduler:${SERVICE_VERSION:-0.5.0}
     build:
       context: ../..
       dockerfile: services/scheduler/Dockerfile
@@ -61,6 +61,7 @@ services:
       <<: *nestjs-env
       PORT: 3001
       SERVICE_NAME: scheduler
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.5.0}
 
   worker:
     <<: *nestjs-service
@@ -79,7 +80,7 @@ services:
 
   crawler:
     <<: *nestjs-service
-    image: openeventhub/crawler:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/crawler:${SERVICE_VERSION:-0.5.0}
     build:
       context: ../..
       dockerfile: services/crawler/Dockerfile
@@ -88,8 +89,13 @@ services:
       <<: *nestjs-env
       PORT: 3003
       SERVICE_NAME: crawler
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.5.0}
+      PLUGINS_DIR: /app/plugins
+      OBJECT_STORAGE_ADAPTER: s3
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
       object-storage:
         condition: service_healthy
@@ -115,7 +121,7 @@ services:
 
   ocr-service:
     <<: *nestjs-service
-    image: openeventhub/ocr-service:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/ocr-service:${SERVICE_VERSION:-0.5.0}
     build:
       context: ../..
       dockerfile: services/ocr-service/Dockerfile
@@ -124,6 +130,8 @@ services:
       <<: *nestjs-env
       PORT: 3005
       SERVICE_NAME: ocr-service
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.5.0}
+      OBJECT_STORAGE_ADAPTER: s3
     depends_on:
       redis:
         condition: service_healthy
