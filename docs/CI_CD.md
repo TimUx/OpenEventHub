@@ -1,8 +1,9 @@
 # CI/CD
 
-GitHub Actions
+GitHub Actions pipelines are expanded in **Milestone 10**. Until then, contributors
+run local gates (`docs/DEVELOPER_GUIDE.md`, `docs/RELEASE.md`).
 
-Pipelines
+## Planned pipelines (M10+)
 
 - Lint
 - Unit Tests
@@ -10,4 +11,13 @@ Pipelines
 - Docker Build
 - Security Scan
 - Publish Images
-- Release
+- Release (SemVer tags)
+
+## Local stand-ins (M9)
+
+```bash
+npm run tools:check
+npm run verify:plugins
+npm run validate:compose
+npm run validate:stack
+```

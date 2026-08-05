@@ -12,13 +12,13 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**Milestone 8 — Administration (`v0.8.0`)**
+**Milestone 9 — Developer Experience (`v0.9.0`)**
 
-- Admin center: sources, moderation, crawler/scheduler/queues, users, AI settings
-- Public portal with SEO; REST `/api/v1`, GraphQL, OpenAPI
+- Contributor guides, plugin walkthrough, Compose workflows, release discipline
+- Admin center, public portal, REST/GraphQL API, crawler plugins
 - Infrastructure: Traefik, PostgreSQL, Redis, SeaweedFS
 
-Next: **Milestone 9 — Developer Experience**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Next: **Milestone 10 — Cursor & Quality Gates**. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Quick start
 

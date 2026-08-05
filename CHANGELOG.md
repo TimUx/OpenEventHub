@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-08-05
+
+### Added
+
+- Contributor Developer Guide aligned with Compose stack, packages, and services
+- Plugin SDK / development / HTML example docs verified against `plugins/` and crawler loader
+- `npm run verify:plugins` smoke check for manifests and `createPlugin` factories
+- Release process doc (`docs/RELEASE.md`) for SemVer + Keep a Changelog discipline
+
+### Changed
+
+- Compose, Contributing, GitHub workflow, and plugins README updated for M5–M8 reality
+
 ## [0.8.0] - 2026-08-05
 
 ### Added

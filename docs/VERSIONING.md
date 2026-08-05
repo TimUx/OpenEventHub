@@ -1,9 +1,11 @@
-
 # Versioning
+
+## Event history (domain)
 
 Every relevant update creates an EventVersion.
 
 Track:
+
 - title changes
 - date changes
 - venue changes
@@ -13,3 +15,8 @@ Track:
 - AI confidence changes
 
 No destructive overwrite.
+
+## Platform SemVer
+
+Package / milestone SemVer and changelog discipline are documented in
+`docs/RELEASE.md`. This file is **not** the release runbook.

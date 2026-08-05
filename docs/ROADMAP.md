@@ -196,7 +196,7 @@ Never implement multiple large milestones in parallel.
 
 ---
 
-### M9 — Developer Experience (`Package 09`) · `planned`
+### M9 — Developer Experience (`Package 09`) · `done`
 
 **Goal:** Contributor-ready developer guide matching the running system.
 
