@@ -246,11 +246,13 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 
 ## Post-M11 — Portal- und Ops-Nachzüge
 
-Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.12.0):
+Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.13.0):
 
-- Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert)
-- Eingebettete Karte mit Suche, Filtern und Auto-Zoom
+- Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA)
+- Event-Aktionen: Karte anzeigen, `.ics` für lokale Kalender
+- Eingebettete Karte mit Suche, Filtern und Auto-Zoom; Deep-Link `?event=`
 - Öffentliche Einreichung von Veranstaltungen und Quellen
+- Admin AI Settings: Provider-Profile CRUD; Default **Local Ollama** (Compose/Stack)
 - Strikte Docker-Netztrennung (`edge` / `internal`) mit minimalen Host-Ports
 - UI-i18n (`de`/`en`) und erweiterte Anzeigemodi (Events/Kalender)
 

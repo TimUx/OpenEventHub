@@ -141,19 +141,35 @@ async function main(): Promise<void> {
     update: {},
   });
 
+  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://ollama:11434/v1';
+  const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.2';
+
   const existingOllama = await prisma.aiProviderProfile.findFirst({
     where: { name: 'Local Ollama' },
   });
-  if (!existingOllama) {
-    const ollama = await prisma.aiProviderProfile.create({
-      data: {
-        name: 'Local Ollama',
-        type: 'ollama',
-        baseUrl: 'http://host.docker.internal:11434/v1',
-        model: 'llama3.2',
-        enabled: true,
-      },
-    });
+
+  const ollama = existingOllama
+    ? await prisma.aiProviderProfile.update({
+        where: { id: existingOllama.id },
+        data: {
+          type: 'ollama',
+          baseUrl: ollamaBaseUrl,
+          model: ollamaModel,
+          enabled: true,
+        },
+      })
+    : await prisma.aiProviderProfile.create({
+        data: {
+          name: 'Local Ollama',
+          type: 'ollama',
+          baseUrl: ollamaBaseUrl,
+          model: ollamaModel,
+          enabled: true,
+        },
+      });
+
+  const runtime = await prisma.aiRuntimeSettings.findUnique({ where: { id: 'singleton' } });
+  if (!runtime?.activeProviderProfileId) {
     await prisma.aiRuntimeSettings.update({
       where: { id: 'singleton' },
       data: { activeProviderProfileId: ollama.id },

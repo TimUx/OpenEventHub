@@ -17,7 +17,7 @@
 - Regions
 - Moderation
 - Users & Roles
-- AI Settings
+- AI Settings (create / edit / delete provider profiles; default: Local Ollama)
 - Scheduler
 
 ## UI languages

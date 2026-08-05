@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
 import { Card } from './ui/card';
@@ -37,11 +38,13 @@ async function fetchEvents(errorMessage: string): Promise<ApiEvent[]> {
 
 export function MapBrowser() {
   const { t, locale } = useI18n();
+  const searchParams = useSearchParams();
+  const eventFromUrl = searchParams.get('event');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [regionId, setRegionId] = useState('');
   const [date, setDate] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(eventFromUrl);
 
   const {
     data: events = [],
@@ -74,10 +77,19 @@ export function MapBrowser() {
   );
 
   useEffect(() => {
-    if (selectedId && !filtered.some((event) => event.id === selectedId)) {
-      setSelectedId(null);
+    if (eventFromUrl) {
+      setSelectedId(eventFromUrl);
     }
-  }, [filtered, selectedId]);
+  }, [eventFromUrl]);
+
+  useEffect(() => {
+    if (selectedId && !filtered.some((event) => event.id === selectedId)) {
+      // Keep deep-linked selection until events finish loading.
+      if (events.length > 0) {
+        setSelectedId(null);
+      }
+    }
+  }, [filtered, selectedId, events.length]);
 
   function clearFilters() {
     setQuery('');

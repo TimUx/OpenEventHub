@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Flat design tokens inspired by FestSchmiede (primary blue + teal/green accents). */
+/* Flat design tokens inspired by FestSchmiede.
+   Accent palettes: only WCAG-AA-safe primary ↔ primary-contrast pairs (see accent-theme.ts). */
 :root {
   --background: #f5f7fa;
   --foreground: #1a1a1a;
@@ -36,6 +37,104 @@
   --success: #66bb6a;
   --success-soft: #1b3320;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+html[data-accent='blue'] {
+  --primary: #1565c0;
+  --primary-bright: #1e88e5;
+  --primary-soft: #e3f2fd;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='blue'] {
+  --primary: #42a5f5;
+  --primary-bright: #64b5f6;
+  --primary-soft: #16324d;
+  --primary-contrast: #0b1520;
+}
+
+html[data-accent='teal'] {
+  --primary: #00838f;
+  --primary-bright: #00acc1;
+  --primary-soft: #e0f7fa;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='teal'] {
+  --primary: #26c6da;
+  --primary-bright: #4dd0e1;
+  --primary-soft: #12333a;
+  --primary-contrast: #061418;
+}
+
+html[data-accent='green'] {
+  --primary: #2e7d32;
+  --primary-bright: #43a047;
+  --primary-soft: #e8f5e9;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='green'] {
+  --primary: #66bb6a;
+  --primary-bright: #81c784;
+  --primary-soft: #1b3320;
+  --primary-contrast: #0a160c;
+}
+
+html[data-accent='navy'] {
+  --primary: #1a237e;
+  --primary-bright: #303f9f;
+  --primary-soft: #e8eaf6;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='navy'] {
+  --primary: #7986cb;
+  --primary-bright: #9fa8da;
+  --primary-soft: #1c2248;
+  --primary-contrast: #0a0d1c;
+}
+
+html[data-accent='orange'] {
+  --primary: #bf360c;
+  --primary-bright: #e65100;
+  --primary-soft: #fbe9e7;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='orange'] {
+  --primary: #ffb74d;
+  --primary-bright: #ffcc80;
+  --primary-soft: #3d2a14;
+  --primary-contrast: #1a1208;
+}
+
+html[data-accent='crimson'] {
+  --primary: #b71c1c;
+  --primary-bright: #c62828;
+  --primary-soft: #ffebee;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='crimson'] {
+  --primary: #ef5350;
+  --primary-bright: #e57373;
+  --primary-soft: #3a1616;
+  --primary-contrast: #1a0808;
+}
+
+html[data-accent='slate'] {
+  --primary: #37474f;
+  --primary-bright: #546e7a;
+  --primary-soft: #eceff1;
+  --primary-contrast: #ffffff;
+}
+
+html.dark[data-accent='slate'] {
+  --primary: #90a4ae;
+  --primary-bright: #b0bec5;
+  --primary-soft: #243036;
+  --primary-contrast: #0b1215;
 }
 
 html {

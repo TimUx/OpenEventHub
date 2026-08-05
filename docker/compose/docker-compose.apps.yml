@@ -37,7 +37,7 @@ x-nestjs-worker: &nestjs-worker
 services:
   api:
     <<: *nestjs-worker
-    image: openeventhub/api:${SERVICE_VERSION:-0.12.0}
+    image: openeventhub/api:${SERVICE_VERSION:-0.13.0}
     build:
       context: ../..
       dockerfile: services/api/Dockerfile
@@ -49,7 +49,7 @@ services:
       <<: *nestjs-env
       PORT: 3000
       SERVICE_NAME: api
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.12.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.13.0}
       API_RATE_LIMIT: ${API_RATE_LIMIT:-120}
       API_RATE_LIMIT_TTL_MS: ${API_RATE_LIMIT_TTL_MS:-60000}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8088,http://admin.localhost:8088}
@@ -134,6 +134,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      ollama:
+        condition: service_started
 
   ocr-service:
     <<: *nestjs-worker
@@ -170,7 +172,7 @@ services:
       SERVICE_NAME: search
 
   frontend:
-    image: openeventhub/frontend:${SERVICE_VERSION:-0.12.0}
+    image: openeventhub/frontend:${SERVICE_VERSION:-0.13.0}
     build:
       context: ../..
       dockerfile: services/frontend/Dockerfile
@@ -181,7 +183,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.12.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.13.0}
       PORT: 3100
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}
@@ -200,7 +202,7 @@ services:
         condition: service_healthy
 
   admin:
-    image: openeventhub/admin:${SERVICE_VERSION:-0.12.0}
+    image: openeventhub/admin:${SERVICE_VERSION:-0.13.0}
     build:
       context: ../..
       dockerfile: services/admin/Dockerfile
@@ -210,7 +212,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.12.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.13.0}
       PORT: 3101
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}

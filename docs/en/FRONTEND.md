@@ -12,11 +12,13 @@ Stack:
 ## Visual language
 
 Flat UI (FestSchmiede-inspired):
-- solid primary (`#1565c0`), secondary/teal (`#00838f`), success green (`#2e7d32`)
+- solid primary/accent (default blue `#1565c0`), secondary/teal (`#00838f`), success green (`#2e7d32`)
+- selectable accent colors in the header (only WCAG AA-safe pairs with contrast text for light/dark)
+- light/dark mode and accent persist in the browser (`oeh-theme`, `oeh-accent`)
 - no background gradients; light grey + white surfaces
 - Roboto / sans, bold headings
 - rounded buttons (`12px`), flat icons, soft card shadows
-- solid primary app bar (white on blue)
+- solid primary app bar (contrast text on accent)
 
 Views:
 - Home
@@ -26,6 +28,10 @@ Views:
 - Event detail
 - Search results
 - Public submission (event / source → moderation queue)
+
+Event actions (list, tiles, details, and detail page):
+- **Show on map** — deep link `/map?event=<id>` (enabled when venue coordinates exist)
+- **Add to calendar** — downloads an `.ics` file for local calendars (phone, Outlook, Thunderbird, …)
 
 ## UI languages
 
@@ -53,6 +59,7 @@ Selected modes persist in the browser (`oeh_view_*`).
 - Markers for all published events with venue coordinates
 - Search + filters (category, region, date); markers and list follow the filter
 - Auto-zoom (`fitBounds`) to current matches, with padding and max zoom
+- Deep link: `/map?event=<id>` selects the marker (from list/detail actions)
 
 ## Submit
 

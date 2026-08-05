@@ -36,7 +36,7 @@ NestJS-Services laden `/run/secrets/*` über `docker/scripts/load-secrets-entryp
 ## Deploy
 
 ```bash
-export SERVICE_VERSION=0.12.0
+export SERVICE_VERSION=0.13.0
 export GITHUB_OWNER=timux   # GHCR namespace
 docker stack deploy -c docker/stack/docker-stack.yml openeventhub
 docker stack services openeventhub

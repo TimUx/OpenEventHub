@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-08-05
+
+### Added
+
+- Event actions on lists and detail pages: **Show on map** (`/map?event=<id>`) and **Add to calendar** (`.ics` download)
+- Selectable portal accent colors (WCAG AA-safe light/dark pairs) next to light/dark mode
+- Admin AI Settings: edit (PATCH) and delete provider profiles
+- Compose/Stack **Ollama** service on the internal network plus one-shot `ollama-pull` for the default model
+- Seed keeps **Local Ollama** (`http://ollama:11434/v1`) and activates it when no provider is active
+
+### Changed
+
+- Locale switcher on primary app bars uses a solid light chip for readable native dropdowns
+- Default AI catalog/seed Ollama base URL points at the Compose service DNS name `ollama`
+- Docs: AI configuration, Admin Center, Frontend appearance, Compose service list, REST AI endpoints
+
+### Fixed
+
+- Provider profiles could not be edited or deleted in the Admin UI (API already supported both)
+
 ## [0.12.0] - 2026-08-05
 
 ### Added

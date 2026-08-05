@@ -2,18 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, List, MapPinned, Moon, PlusCircle, Search, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { CalendarDays, List, MapPinned, PlusCircle, Search } from 'lucide-react';
 
 import { useI18n } from '../i18n/i18n-provider';
 import { LocaleSwitcher } from '../i18n/locale-switcher';
 import { cn } from '../lib/utils';
-import { Button } from './ui/button';
+import { AppearanceControls } from './appearance-controls';
 
 export function SiteHeader() {
   const pathname = usePathname();
   const { t } = useI18n();
-  const [dark, setDark] = useState(false);
 
   const links = [
     { href: '/events', label: t('nav.events'), icon: List },
@@ -22,20 +20,6 @@ export function SiteHeader() {
     { href: '/search', label: t('nav.search'), icon: Search },
     { href: '/submit', label: t('nav.submit'), icon: PlusCircle },
   ];
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem('oeh-theme');
-    const enabled = stored === 'dark';
-    setDark(enabled);
-    document.documentElement.classList.toggle('dark', enabled);
-  }, []);
-
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle('dark', next);
-    window.localStorage.setItem('oeh-theme', next ? 'dark' : 'light');
-  }
 
   return (
     <header className="sticky top-0 z-40 bg-primary text-primary-contrast shadow-soft">
@@ -65,20 +49,7 @@ export function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <LocaleSwitcher className="inline-flex items-center" variant="onPrimary" />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-primary-contrast hover:bg-primary-contrast/15 hover:text-primary-contrast"
-            aria-label={dark ? t('nav.lightMode') : t('nav.darkMode')}
-            onClick={toggleTheme}
-          >
-            {dark ? (
-              <Sun className="h-4 w-4" strokeWidth={2} />
-            ) : (
-              <Moon className="h-4 w-4" strokeWidth={2} />
-            )}
-          </Button>
+          <AppearanceControls />
         </div>
       </div>
       <nav
