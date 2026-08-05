@@ -26,6 +26,7 @@ volumes:
   redis_data:
   object_storage_data:
   traefik_letsencrypt:
+  ollama_data:
 
 services:
   traefik:
@@ -133,3 +134,41 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+
+  # Local LLM for AI Settings default profile (Admin → Local Ollama).
+  # On edge+internal so model pulls can reach the registry; no Traefik / host ports.
+  ollama:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.9.0}
+    container_name: oeh-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - edge
+      - internal
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    healthcheck:
+      test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # One-shot model pull for the seeded default (llama3.2 unless overridden).
+  ollama-pull:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.9.0}
+    container_name: oeh-ollama-pull
+    networks:
+      - edge
+      - internal
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: 'no'
+    entrypoint:
+      - /bin/sh
+      - -c
+      - ollama pull ${OLLAMA_MODEL:-llama3.2}

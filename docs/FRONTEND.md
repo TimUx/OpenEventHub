@@ -12,11 +12,13 @@ Stack:
 ## Visuelle Sprache
 
 Flaches UI (an FestSchmiede angelehnt):
-- solide Primärfarbe (`#1565c0`), Sekundär/Teal (`#00838f`), Erfolg grün (`#2e7d32`)
+- solide Primär-/Akzentfarbe (Default Blau `#1565c0`), Sekundär/Teal (`#00838f`), Erfolg grün (`#2e7d32`)
+- wählbare Akzentfarben in der Kopfzeile (nur WCAG-AA-sichere Paare mit Kontrastschrift für Light/Dark)
+- Light/Dark-Modus und Akzent werden lokal im Browser gespeichert (`oeh-theme`, `oeh-accent`)
 - keine Hintergrund-Farbverläufe; helles Grau + weiße Flächen
 - Roboto / Sans, fette Überschriften
 - abgerundete Buttons (`12px`), flache Icons, leichte Kartenschatten
-- solide Primär-AppBar (weiß auf Blau)
+- solide Primär-AppBar (Kontrastschrift auf Akzent)
 
 Ansichten:
 - Startseite
@@ -26,6 +28,10 @@ Ansichten:
 - Veranstaltungsdetail
 - Suchergebnisse
 - Öffentliche Einreichung (Veranstaltung / Quelle → Moderationswarteschlange)
+
+Event-Aktionen (Liste, Kacheln, Details und Detailseite):
+- **Auf Karte anzeigen** — Deep-Link `/map?event=<id>` (nur mit Venue-Koordinaten aktiv)
+- **In Kalender eintragen** — Download einer `.ics`-Datei für lokale Kalender (Smartphone, Outlook, Thunderbird, …)
 
 ## Mehrsprachigkeit (UI)
 
@@ -53,6 +59,7 @@ Gewählte Modi werden lokal im Browser gespeichert (`oeh_view_*`).
 - Marker für alle veröffentlichten Events mit Venue-Koordinaten
 - Suche + Filter (Kategorie, Region, Datum); Marker und Liste folgen dem Filter
 - Auto-Zoom (`fitBounds`) auf die aktuellen Treffer, mit begrenztem Zoom und Padding
+- Deep-Link: `/map?event=<id>` wählt den Marker (aus Listen/Detail-Aktionen)
 
 ## Einreichen
 

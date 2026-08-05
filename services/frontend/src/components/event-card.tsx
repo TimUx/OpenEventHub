@@ -4,6 +4,7 @@ import type { Locale } from '@openeventhub/shared';
 
 import type { ApiEvent } from '../lib/api';
 import { formatEventDate } from '../lib/api';
+import { EventActions } from './event-actions';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 
@@ -22,20 +23,20 @@ export function EventCard({
 }) {
   if (mode === 'list') {
     return (
-      <Link
-        href={`/events/${event.id}`}
-        className="flex items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 transition-colors hover:bg-primary-soft"
-      >
-        <div className="min-w-0 flex-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 transition-colors hover:bg-primary-soft">
+        <Link href={`/events/${event.id}`} className="min-w-0 flex-1">
           <p className="truncate font-medium">{event.title}</p>
           <p className="mt-0.5 text-xs text-[var(--muted)]">
             {formatEventDate(event.startAt, locale)}
           </p>
+        </Link>
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          <span className="text-xs uppercase tracking-wide text-[var(--muted)]">
+            {event.status}
+          </span>
+          <EventActions event={event} />
         </div>
-        <span className="shrink-0 text-xs uppercase tracking-wide text-[var(--muted)]">
-          {event.status}
-        </span>
-      </Link>
+      </div>
     );
   }
 
@@ -66,6 +67,7 @@ export function EventCard({
                 {endsLabel.replace('{date}', formatEventDate(event.endAt, locale))}
               </p>
             ) : null}
+            <EventActions event={event} className="pt-1" />
           </div>
           <Link href={`/events/${event.id}`} className="shrink-0 text-sm text-primary">
             →
@@ -87,6 +89,7 @@ export function EventCard({
         </Link>
       </h2>
       {event.summary ? <p className="mt-2 text-sm text-[var(--muted)]">{event.summary}</p> : null}
+      <EventActions event={event} className="mt-4" />
     </Card>
   );
 }

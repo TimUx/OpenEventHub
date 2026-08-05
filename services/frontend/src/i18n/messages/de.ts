@@ -15,6 +15,16 @@ export const de = {
     lightMode: 'Hellmodus',
     darkMode: 'Dunkelmodus',
     language: 'Sprache',
+    accentColor: 'Akzentfarbe',
+    accent: {
+      blue: 'Blau',
+      teal: 'Petrol',
+      green: 'Grün',
+      navy: 'Navy',
+      orange: 'Orange',
+      crimson: 'Karmesin',
+      slate: 'Schiefer',
+    },
   },
   footer: 'OpenEventHub — Event Intelligence, kein reiner Kalender.',
   home: {
@@ -52,6 +62,13 @@ export const de = {
     ends: 'Ende {date}',
     notFound: 'Veranstaltung nicht gefunden',
     fallbackDescription: 'Veranstaltung auf OpenEventHub',
+  },
+  eventActions: {
+    showOnMap: 'Auf Karte anzeigen',
+    showOnMapUnavailable: 'Keine Koordinaten für diese Veranstaltung hinterlegt.',
+    addToCalendar: 'In Kalender eintragen',
+    addToCalendarHint:
+      'Lädt eine .ics-Datei — öffnen mit Smartphone-Kalender, Outlook, Thunderbird u. a.',
   },
   search: {
     title: 'Suche',

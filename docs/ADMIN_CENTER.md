@@ -17,7 +17,7 @@
 - Regionen
 - Moderation
 - Benutzer & Rollen
-- AI-Einstellungen
+- AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama)
 - Scheduler
 
 ## Mehrsprachigkeit (UI)

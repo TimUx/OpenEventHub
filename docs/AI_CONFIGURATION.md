@@ -9,6 +9,20 @@
 - Prompts bleiben zentral unter `prompts/` und sind versioniert.
 - Der aktive Provider kann ohne Codeänderungen oder Redeploys gewechselt werden.
 
+## Standard: Local Ollama
+
+Compose und Swarm Stack starten einen **Ollama**-Dienst (`http://ollama:11434`,
+kein Host-Port; Netz `edge`+`internal` für Modell-Pulls, ohne Traefik-Exposure).
+
+Beim Seed (`db:seed`) wird das Profil **Local Ollama** angelegt bzw. aktualisiert
+(`baseUrl=http://ollama:11434/v1`, Modell `llama3.2` bzw. `OLLAMA_MODEL`) und als
+aktiver Provider gesetzt, sofern noch keiner aktiv ist.
+
+Compose zieht das Default-Modell einmalig über den One-Shot-Service `ollama-pull`.
+Override: `OLLAMA_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_IMAGE` in `.env`.
+
+Admin → KI-Einstellungen: Profile **anlegen, bearbeiten, löschen**, aktiv setzen und testen.
+
 ## Unterstützte Provider
 
 | Type | Product examples | API style |
@@ -18,14 +32,15 @@
 | `google` | Gemini | Google Generative Language |
 | `azure_openai` | Azure OpenAI | OpenAI-compatible |
 | `openrouter` | OpenRouter | OpenAI-compatible |
-| `ollama` | Local Ollama | OpenAI-compatible (`/v1`) |
+| `ollama` | Local Ollama (Compose/Stack) | OpenAI-compatible (`/v1`) |
 | `custom_openai` | Any OpenAI-compatible gateway | OpenAI-compatible |
 
 ## Admin-Einstellungen
 
 Betreiber konfigurieren:
 
-- Benannte Provider-Profile (Base URL, API-Key, Modell, Timeouts)
+- Benannte Provider-Profile (Base URL, API-Key, Modell, Timeouts, enabled)
+- CRUD im Admin Center (`/ai-settings`)
 - Welches Profil für die Event Intelligence Engine **aktiv** ist
 - Optionale Header / Organization-IDs pro Profil
 

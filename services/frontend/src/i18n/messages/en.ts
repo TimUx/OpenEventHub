@@ -16,6 +16,16 @@ export const en = {
     lightMode: 'Switch to light mode',
     darkMode: 'Switch to dark mode',
     language: 'Language',
+    accentColor: 'Accent color',
+    accent: {
+      blue: 'Blue',
+      teal: 'Teal',
+      green: 'Green',
+      navy: 'Navy',
+      orange: 'Orange',
+      crimson: 'Crimson',
+      slate: 'Slate',
+    },
   },
   footer: 'OpenEventHub — Event Intelligence, not just a calendar.',
   home: {
@@ -53,6 +63,13 @@ export const en = {
     ends: 'Ends {date}',
     notFound: 'Event not found',
     fallbackDescription: 'Event on OpenEventHub',
+  },
+  eventActions: {
+    showOnMap: 'Show on map',
+    showOnMapUnavailable: 'No coordinates are available for this event.',
+    addToCalendar: 'Add to calendar',
+    addToCalendarHint:
+      'Downloads an .ics file — open with your phone calendar, Outlook, Thunderbird, etc.',
   },
   search: {
     title: 'Search',

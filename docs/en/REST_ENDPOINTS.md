@@ -36,7 +36,14 @@ GET    /api/v1/admin/crawler/jobs
 GET|POST /api/v1/admin/scheduler*
 GET    /api/v1/admin/queues
 
-GET    /api/v1/admin/ai/*                      (admin|moderator)
+GET    /api/v1/admin/ai/providers              (admin|moderator)
+GET    /api/v1/admin/ai/providers/catalog      (admin|moderator)
+POST   /api/v1/admin/ai/providers              (admin|moderator)
+PATCH  /api/v1/admin/ai/providers/:id          (admin|moderator)
+DELETE /api/v1/admin/ai/providers/:id          (admin|moderator)
+GET    /api/v1/admin/ai/settings               (admin|moderator)
+PUT    /api/v1/admin/ai/settings               (admin|moderator)
+POST   /api/v1/admin/ai/providers/:id/test     (admin|moderator)
 ```
 
 ## GraphQL

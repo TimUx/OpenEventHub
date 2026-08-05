@@ -42,6 +42,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html lang={locale} suppressHydrationWarning className={sans.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('oeh-theme');if(t==='dark')document.documentElement.classList.add('dark');var a=localStorage.getItem('oeh-accent');var ok=['blue','teal','green','navy','orange','crimson','slate'];if(a&&ok.indexOf(a)!==-1)document.documentElement.dataset.accent=a;else document.documentElement.dataset.accent='blue';}catch(e){document.documentElement.dataset.accent='blue';}})();`,
+          }}
+        />
+      </head>
       <body>
         <Providers locale={locale} dictionary={dictionary}>
           <SiteHeader />

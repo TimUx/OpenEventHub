@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.12.0 — Portal UX, Map, Submit, Network Hardening** (post-M11)
+**v0.13.0 — Event actions, accents, AI CRUD, Local Ollama** (post-M11)
 
-Previous: Milestone 11 — Production Hardening (`v0.11.0`)
+Previous: v0.12.0 — Portal UX, Map, Submit, Network Hardening
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

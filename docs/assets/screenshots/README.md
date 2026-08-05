@@ -4,6 +4,8 @@
 
 Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flaches UI.
 
+Akzentfarben und Light/Dark im Portal-Header; Event-Aktionen (Karte / Kalender) auf Listen und Detailseiten; Admin KI-Einstellungen mit Bearbeiten/Löschen.
+
 ## Frontend
 
 | Datei | Inhalt |

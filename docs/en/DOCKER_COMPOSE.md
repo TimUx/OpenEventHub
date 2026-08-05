@@ -28,6 +28,7 @@ Details: `docs/COMMUNICATION.md`.
 - postgres
 - redis
 - object-storage (SeaweedFS S3; bucket via `S3_BUCKET`)
+- ollama (+ one-shot `ollama-pull` for the default model; `edge`+`internal`, no host port; see `docs/AI_CONFIGURATION.md`)
 
 ## Application services
 

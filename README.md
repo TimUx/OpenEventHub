@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.12.0 — Portal UX, Map, Submit, Network Hardening** (post-M11)
+**v0.13.0 — Event actions, accents, AI CRUD, Local Ollama** (post-M11)
 
-Vorher: Milestone 11 — Production Hardening (`v0.11.0`)
+Vorher: v0.12.0 — Portal UX, Map, Submit, Network Hardening
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

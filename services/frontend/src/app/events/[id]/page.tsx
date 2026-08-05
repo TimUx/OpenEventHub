@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
+import { EventActions } from '../../../components/event-actions';
 import { EventJsonLd } from '../../../components/event-json-ld';
 import { Badge } from '../../../components/ui/badge';
 import { getDictionary, translate } from '../../../i18n/get-dictionary';
@@ -52,6 +53,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       <Badge>{formatEventDate(event.startAt, locale)}</Badge>
       <h1 className="font-bold text-4xl leading-tight">{event.title}</h1>
       {event.summary ? <p className="text-lg text-[var(--muted)]">{event.summary}</p> : null}
+      <EventActions event={event} size="default" />
       {event.description ? (
         <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-wrap text-[var(--foreground)]">
           {event.description}

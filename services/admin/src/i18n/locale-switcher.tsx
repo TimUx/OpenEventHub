@@ -20,16 +20,22 @@ export function LocaleSwitcher({
       <select
         className={cn(
           'h-9 rounded-xl border px-2 text-sm font-semibold',
+          // Solid light control: native <option> lists ignore translucent/white text
+          // and become unreadable on system dropdown backgrounds.
           variant === 'onPrimary'
-            ? 'border-primary-contrast/30 bg-primary-contrast/10 text-primary-contrast'
+            ? 'border-white/50 bg-white text-primary'
             : 'border-[var(--border)] bg-[var(--card)] text-[var(--foreground)]',
         )}
         value={locale}
         aria-label={t('nav.language')}
         onChange={(event) => setLocale(event.target.value as Locale)}
       >
-        <option value="de">DE</option>
-        <option value="en">EN</option>
+        <option value="de" className="bg-white text-[var(--foreground)]">
+          DE
+        </option>
+        <option value="en" className="bg-white text-[var(--foreground)]">
+          EN
+        </option>
       </select>
     </label>
   );
