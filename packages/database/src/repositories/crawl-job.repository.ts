@@ -33,6 +33,20 @@ export class CrawlJobRepository {
     });
   }
 
+  listFailedRecent(
+    limit = 20,
+  ): Promise<Array<CrawlJob & { source: { id: string; name: string } }>> {
+    const take = Math.min(Math.max(limit, 1), 100);
+    return this.prisma.crawlJob.findMany({
+      where: { status: CrawlJobStatus.failed },
+      orderBy: { createdAt: 'desc' },
+      take,
+      include: {
+        source: { select: { id: true, name: true } },
+      },
+    });
+  }
+
   countByStatus(): Promise<Record<string, number>> {
     return this.prisma.crawlJob
       .groupBy({ by: ['status'], _count: { _all: true } })

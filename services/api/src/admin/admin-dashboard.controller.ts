@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   AdminRole,
@@ -51,6 +51,7 @@ export class AdminDashboardController {
       activeAi,
       categories,
       regions,
+      sources,
     ] = await Promise.all([
       this.sources.countByStatus(),
       this.crawlJobs.countByStatus(),
@@ -63,9 +64,12 @@ export class AdminDashboardController {
       this.ai.getRuntimeSettings(),
       this.categories.list(),
       this.regions.list(),
+      this.sources.list(),
     ]);
 
     const failedQueues = queueCounts.filter((q) => q.counts.failed > 0);
+    const sourcesWithErrors = sources.filter((source) => Boolean(source.lastError)).length;
+
     return {
       system: {
         users: userCount,
@@ -88,24 +92,9 @@ export class AdminDashboardController {
       recentImports: recentJobs,
       recentSubmissions,
       errors: {
-        sourcesWithErrors: (await this.sources.list()).filter((s) => Boolean(s.lastError)).length,
+        sourcesWithErrors,
         failedQueues: failedQueues.map((q) => ({ name: q.name, failed: q.counts.failed })),
       },
     };
-  }
-
-  @Get('events')
-  listEvents(@Query('limit') limit?: string) {
-    return this.events.listAll({ limit: limit ? Number(limit) : 50 });
-  }
-
-  @Get('categories')
-  listCategories() {
-    return this.categories.list();
-  }
-
-  @Get('regions')
-  listRegions() {
-    return this.regions.list();
   }
 }

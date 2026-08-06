@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../components/ui';
 import { useI18n } from '../i18n/i18n-provider';
 
@@ -150,7 +152,12 @@ export default function DashboardPage() {
               </ul>
             </Panel>
             <Panel>
-              <h2 className="mb-3 font-bold text-lg">{t('dashboard.errorSummary')}</h2>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-bold text-lg">{t('dashboard.errorSummary')}</h2>
+                <Link href="/logs" className="text-xs font-semibold text-primary hover:underline">
+                  {t('dashboard.viewErrorLog')}
+                </Link>
+              </div>
               <p className="text-sm">
                 {t('dashboard.sourcesWithErrors', { count: data.errors.sourcesWithErrors })}
               </p>

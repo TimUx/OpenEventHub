@@ -71,4 +71,65 @@ describe('EventRepository', () => {
       'findBySlug:sample-event',
     ]);
   });
+
+  it('updates an event and appends an EventVersion', async () => {
+    const sampleEvent = {
+      id: '11111111-1111-4111-8111-111111111111',
+      slug: 'sample-event',
+      title: 'Updated Title',
+      summary: 'New summary',
+      description: null,
+      startAt: new Date('2026-08-01T18:00:00.000Z'),
+      endAt: null,
+      confidenceScore: 0.85,
+      status: EventStatus.published,
+      venueId: null,
+      organizerId: null,
+      createdAt: new Date('2026-07-31T12:00:00.000Z'),
+      updatedAt: new Date('2026-07-31T13:00:00.000Z'),
+    };
+
+    const calls: string[] = [];
+    const prisma = {
+      $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma),
+      event: {
+        update: (args: { where: { id: string }; data: { title?: string; status?: EventStatus } }) => {
+          calls.push(`update:${args.where.id}:${args.data.title}:${args.data.status}`);
+          return Promise.resolve({ ...sampleEvent, ...args.data });
+        },
+        delete: (args: { where: { id: string } }) => {
+          calls.push(`delete:${args.where.id}`);
+          return Promise.resolve(sampleEvent);
+        },
+      },
+      eventVersion: {
+        findFirst: () => {
+          calls.push('version:findFirst');
+          return Promise.resolve({ versionNumber: 1 });
+        },
+        create: (args: { data: { versionNumber: number; changeReason: string | null } }) => {
+          calls.push(`version:create:${args.data.versionNumber}:${args.data.changeReason}`);
+          return Promise.resolve(args.data);
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const repository = new EventRepository(prisma);
+    const updated = await repository.updateWithVersion(sampleEvent.id, {
+      title: 'Updated Title',
+      status: EventStatus.published,
+      changeReason: 'admin.status',
+    });
+    assert.equal(updated.status, EventStatus.published);
+
+    const removed = await repository.delete(sampleEvent.id);
+    assert.equal(removed.id, sampleEvent.id);
+
+    assert.deepEqual(calls, [
+      `update:${sampleEvent.id}:Updated Title:published`,
+      'version:findFirst',
+      'version:create:2:admin.status',
+      `delete:${sampleEvent.id}`,
+    ]);
+  });
 });

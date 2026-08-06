@@ -10,11 +10,11 @@ Flaches UI (Primärblau-AppBar, abgerundete Buttons, keine Hintergrund-Verläufe
 +--------------------------------------------------+
 | OpenEventHub   Events  Kalender  Karte  Suche  + |
 +--------------------------------------------------+
-| Event Intelligence                               |
-| OpenEventHub                                     |
-| Lead-Text                                        |
+| Veranstaltungen aus vielen Quellen — an einem Ort|
+| Kurzer Nutzen-Text                               |
 | [ Suche…                              ] [Suchen] |
-| [ Durchsuchen ] [ Kalender ] [ Einreichen ]      |
++--------------------------------------------------+
+| [Liste · …] [Kalender · …] [Karte · …] [Einr. ·]|
 +--------------------------------------------------+
 | Demnächst                         Alle anzeigen  |
 | [ Event-Karte ] [ Event-Karte ]                  |

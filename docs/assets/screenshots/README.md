@@ -28,6 +28,7 @@ Header-Icons; Event-Liste mit aufklappbaren Filtern und Kalender-Export/Abonneme
 | `admin-sources.png` | Quellenverwaltung |
 | `admin-moderation.png` | Moderation |
 | `admin-ai-settings.png` | KI-Einstellungen |
+| `admin-logs.png` | Fehler-Log |
 
 ## Neu erzeugen
 

@@ -5,6 +5,28 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-08-06
+
+### Added
+
+- Optional / external Ollama: `OLLAMA_DEPLOY`, `OLLAMA_EXTERNAL_NETWORK`, GPU overlay; Swarm Ollama as optional stack files
+- Admin **Error log** (`/logs`) and `GET /api/v1/admin/logs/errors` (queues, crawl jobs, source errors)
+- Admin CRUD for categories, regions, and events (event updates write `EventVersion`)
+- Schedule presets (shared) for sources / public submit; one scheduler tick per distinct cron; serial crawls
+- AI ingest creates `pending_moderation` events from extraction; taxonomy **find-or-create** linking
+- Content preparation for large HTML before LLM calls; extraction/classification prompts 1.0.1
+
+### Changed
+
+- Brand mark (calendar binders + hub); quieter homepage hero
+- Bundled Ollama no longer required in Compose/Swarm base; seed/profile still default to Local Ollama URL from env
+- Docs (DE/EN) and UI screenshots refreshed
+
+### Fixed
+
+- Unchanged content-hash crawls still re-enqueue OCR/AI for recovery
+- Admin `logs` route was blocked by root `logs/` gitignore; ignore narrowed to `/logs/`
+
 ## [0.16.1] - 2026-08-06
 
 ### Changed

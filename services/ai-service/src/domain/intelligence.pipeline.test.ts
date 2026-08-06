@@ -48,7 +48,8 @@ describe('EventIntelligencePipeline', () => {
     assert.equal(result.extraction.title, 'Open Air');
     assert.deepEqual(result.classification.categories, ['Music']);
     assert.equal(result.prompts.extraction.id, 'event-extraction');
-    assert.equal(result.prompts.classification.version, '1.0.0');
+    assert.equal(result.prompts.extraction.version, '1.0.1');
+    assert.equal(result.prompts.classification.version, '1.0.1');
     assert.ok(result.confidenceScore > 0.5);
     assert.equal(llm.calls.length, 2);
     assert.match(llm.calls[0]?.messages[0]?.content ?? '', /Event Intelligence Engine extractor/);

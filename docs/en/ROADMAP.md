@@ -246,14 +246,17 @@ Never implement multiple large milestones in parallel.
 
 ## Post-M11 — Portal and ops follow-ups
 
-After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.16.1):
+After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.17.0):
 
-- Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark
+- Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list
 - Calendar subscription (`/calendar.ics`) and bulk `.ics` export of filtered events
 - Embedded map with search, filters, auto-zoom; deep link `?event=`
-- Public submission of events and sources
-- Admin AI Settings: provider profile CRUD; default **Local Ollama** (Compose/Stack)
+- Public submission of events and sources (schedule presets)
+- Admin: categories/regions/events CRUD; error log; AI Settings provider CRUD
+- Optional Ollama: `OLLAMA_DEPLOY`, external network (`ownai-net`), NVIDIA GPU overlay; Swarm Ollama as separate overlay
+- AI ingest: create events from extraction; taxonomy find-or-create
+- Scheduler: one tick per distinct cron; serial crawls
 - Strict Docker network separation (`edge` / `internal`) with minimal host ports
 - UI i18n (`de`/`en`) and extended display modes (events/calendar)
 - SEO (sitemap, robots, JSON-LD, canonicals) and PWA (manifest, service worker, install icons)

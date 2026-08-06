@@ -3,7 +3,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 
 import { SourceRepository } from '@openeventhub/database';
-import { QUEUE_NAMES, type CrawlJobPayload } from '@openeventhub/shared';
+import {
+  QUEUE_NAMES,
+  crawlScheduleRepeatableJobId,
+  uniqueEnabledScheduleCrons,
+  type CrawlJobPayload,
+} from '@openeventhub/shared';
 
 const SERVICE_NAME = 'scheduler';
 
@@ -22,29 +27,36 @@ export class CrawlSchedulerService implements OnModuleInit {
 
   private async scheduleExistingSources(): Promise<void> {
     const sources = await this.sources.list();
+    const patterns = uniqueEnabledScheduleCrons(sources);
 
-    const repeatable = sources.filter((source) => Boolean(source.scheduleCron));
-    if (repeatable.length === 0) {
+    if (patterns.length === 0) {
       this.logger.log('No sources with scheduleCron found; scheduler will stay idle.');
       return;
     }
 
-    // Remove stale repeatable jobs for this scheduler, then re-register from DB.
+    // Remove stale repeatable jobs, then register one tick per distinct cron.
     const existing = await this.crawlQueue.getRepeatableJobs();
     await Promise.all(existing.map((job) => this.crawlQueue.removeRepeatableByKey(job.key)));
 
     await Promise.all(
-      repeatable.map(async (source) => {
-        await this.crawlQueue.add('crawl', { sourceId: source.id } satisfies CrawlJobPayload, {
-          repeat: {
-            pattern: source.scheduleCron as string,
-            tz: 'UTC',
+      patterns.map(async (scheduleCron) => {
+        await this.crawlQueue.add(
+          'crawl',
+          { scheduleCron } satisfies CrawlJobPayload,
+          {
+            jobId: crawlScheduleRepeatableJobId(scheduleCron),
+            repeat: {
+              pattern: scheduleCron,
+              tz: 'UTC',
+            },
+            removeOnComplete: true,
           },
-          removeOnComplete: true,
-        });
+        );
       }),
     );
 
-    this.logger.log(`Scheduled crawl jobs for ${repeatable.length} source(s)`);
+    this.logger.log(
+      `Scheduled ${patterns.length} crawl schedule tick(s) covering ${sources.filter((s) => s.scheduleCron && s.status !== 'disabled').length} source(s)`,
+    );
   }
 }

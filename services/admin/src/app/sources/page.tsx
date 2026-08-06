@@ -1,11 +1,18 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import {
+  cronFromSchedulePreset,
+  DEFAULT_SCHEDULE_PRESET,
+  SCHEDULE_PRESET_IDS,
+  type SchedulePresetId,
+} from '@openeventhub/shared';
 
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { adminFetch } from '../../lib/api';
 import { useAuth } from '../../components/auth-provider';
 import { useI18n } from '../../i18n/i18n-provider';
+import { formatScheduleLabel } from '../../lib/schedule-label';
 
 type Source = {
   id: string;
@@ -26,18 +33,22 @@ export default function SourcesPage() {
   const [name, setName] = useState('');
   const [pluginType, setPluginType] = useState('rss');
   const [url, setUrl] = useState('');
-  const [scheduleCron, setScheduleCron] = useState('0 */6 * * *');
+  const [schedulePreset, setSchedulePreset] = useState<SchedulePresetId>(DEFAULT_SCHEDULE_PRESET);
+  const [customCron, setCustomCron] = useState('');
 
   async function onCreate(event: FormEvent) {
     event.preventDefault();
     if (!token) return;
     setMessage(null);
+    const scheduleCron = cronFromSchedulePreset(schedulePreset, customCron);
     await adminFetch('/api/v1/admin/sources', token, {
       method: 'POST',
-      body: JSON.stringify({ name, pluginType, url, scheduleCron: scheduleCron || null }),
+      body: JSON.stringify({ name, pluginType, url, scheduleCron }),
     });
     setName('');
     setUrl('');
+    setSchedulePreset(DEFAULT_SCHEDULE_PRESET);
+    setCustomCron('');
     setMessage(t('sources.created'));
     await reload();
   }
@@ -98,13 +109,37 @@ export default function SourcesPage() {
             onChange={(e) => setUrl(e.target.value)}
             required
           />
-          <input
-            className="h-10 rounded-md border border-[var(--border)] px-3"
-            placeholder={t('sources.cronUtc')}
-            value={scheduleCron}
-            onChange={(e) => setScheduleCron(e.target.value)}
-          />
-          <button type="submit" className="h-10 rounded-xl bg-primary text-white">
+          <label className="text-sm md:col-span-2">
+            <span className="mb-1 block font-medium">{t('sources.scheduleLabel')}</span>
+            <select
+              className="h-10 w-full rounded-md border border-[var(--border)] px-3"
+              value={schedulePreset}
+              onChange={(e) => setSchedulePreset(e.target.value as SchedulePresetId)}
+              aria-describedby="sources-schedule-hint"
+            >
+              {SCHEDULE_PRESET_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {t(`schedule.${id}`)}
+                </option>
+              ))}
+            </select>
+            <span id="sources-schedule-hint" className="mt-1 block text-xs text-[var(--muted)]">
+              {t('sources.scheduleHint')}
+            </span>
+          </label>
+          {schedulePreset === 'custom' ? (
+            <label className="text-sm md:col-span-2">
+              <span className="mb-1 block font-medium">{t('sources.customCron')}</span>
+              <input
+                className="h-10 w-full rounded-md border border-[var(--border)] px-3 font-mono text-sm"
+                placeholder="0 */6 * * *"
+                value={customCron}
+                onChange={(e) => setCustomCron(e.target.value)}
+                required
+              />
+            </label>
+          ) : null}
+          <button type="submit" className="h-10 rounded-xl bg-primary text-white md:col-span-2">
             {t('common.create')}
           </button>
         </form>
@@ -121,8 +156,8 @@ export default function SourcesPage() {
                   {source.pluginType} · {source.url}
                 </p>
                 <p className="mt-1 text-xs text-[var(--muted)]">
-                  {t('sources.cronLabel', {
-                    cron: source.scheduleCron ?? '—',
+                  {t('sources.scheduleSummary', {
+                    schedule: formatScheduleLabel(t, source.scheduleCron),
                     last: source.lastCrawlAt
                       ? new Date(source.lastCrawlAt).toLocaleString()
                       : t('common.never'),

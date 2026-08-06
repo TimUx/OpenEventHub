@@ -3,7 +3,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 
 import { SourceRepository } from '@openeventhub/database';
-import { QUEUE_NAMES, type CrawlJobPayload } from '@openeventhub/shared';
+import {
+  QUEUE_NAMES,
+  crawlScheduleRepeatableJobId,
+  uniqueEnabledScheduleCrons,
+  type CrawlJobPayload,
+} from '@openeventhub/shared';
 
 @Injectable()
 export class AdminSchedulerService {
@@ -28,28 +33,32 @@ export class AdminSchedulerService {
 
   async reloadFromSources(): Promise<{ scheduled: number }> {
     const sources = await this.sources.list();
-    const repeatable = sources.filter(
-      (source) => Boolean(source.scheduleCron) && source.status !== 'disabled',
-    );
+    const patterns = uniqueEnabledScheduleCrons(sources);
 
     const existing = await this.crawlQueue.getRepeatableJobs();
     await Promise.all(existing.map((job) => this.crawlQueue.removeRepeatableByKey(job.key)));
 
     await Promise.all(
-      repeatable.map(async (source) => {
-        await this.crawlQueue.add('crawl', { sourceId: source.id } satisfies CrawlJobPayload, {
-          jobId: `source:${source.id}`,
-          repeat: {
-            pattern: source.scheduleCron as string,
-            tz: 'UTC',
+      patterns.map(async (scheduleCron) => {
+        await this.crawlQueue.add(
+          'crawl',
+          { scheduleCron } satisfies CrawlJobPayload,
+          {
+            jobId: crawlScheduleRepeatableJobId(scheduleCron),
+            repeat: {
+              pattern: scheduleCron,
+              tz: 'UTC',
+            },
+            removeOnComplete: true,
           },
-          removeOnComplete: true,
-        });
+        );
       }),
     );
 
-    this.logger.log(`Reloaded scheduler for ${repeatable.length} source(s)`);
-    return { scheduled: repeatable.length };
+    this.logger.log(
+      `Reloaded ${patterns.length} crawl schedule tick(s) for enabled sources with cron`,
+    );
+    return { scheduled: patterns.length };
   }
 
   async enqueueCrawl(sourceId: string): Promise<{ jobId?: string }> {

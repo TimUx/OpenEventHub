@@ -2,7 +2,8 @@
 
 > Sprache: Deutsch (primär)
 
-Flaches OpenEventHub-Markenzeichen (Hub / vernetzte Quellen):
+Flaches OpenEventHub-Markenzeichen: **Kalender** (Termine/Events) mit zentralem
+**Hub** und vernetzten Quellen:
 
 | Datei | Verwendung |
 |-------|------------|

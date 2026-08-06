@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/health.test.ts src/i18n/locale.test.ts src/ics.test.ts"
+    "test": "node --import tsx --test src/health.test.ts src/i18n/locale.test.ts src/ics.test.ts src/schedule-presets.test.ts src/crawl-jobs.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.3"

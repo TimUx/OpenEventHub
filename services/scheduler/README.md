@@ -5,7 +5,8 @@ Creates crawl jobs for configured sources.
 ## Responsibilities
 
 - On startup, load sources with `scheduleCron`
-- Register BullMQ repeatable jobs on the `crawl` queue
+- Register **one** BullMQ repeatable job per distinct cron (schedule tick)
+- On each tick, the crawler processes matching sources **serially**
 
 ## Probes
 

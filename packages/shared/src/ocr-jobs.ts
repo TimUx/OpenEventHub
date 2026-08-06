@@ -10,6 +10,8 @@ export interface OcrJobPayload {
   readonly crawlResultId?: string;
   readonly sourceUrl?: string;
   readonly crawlJobId?: string;
+  /** Source that produced the crawl; forwarded to AI for EventSource linking. */
+  readonly sourceId?: string;
 }
 
 export interface OcrJobResult {

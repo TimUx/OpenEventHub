@@ -68,4 +68,9 @@ export class AdminQueuesController {
   list() {
     return this.queues.listCounts();
   }
+
+  @Get('failed')
+  listFailed(@Query('limit') limit?: string) {
+    return this.queues.listFailedJobs(limit ? Number(limit) : 15);
+  }
 }

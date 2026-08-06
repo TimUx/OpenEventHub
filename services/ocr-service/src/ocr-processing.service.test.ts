@@ -41,6 +41,7 @@ describe('OcrProcessingService', () => {
       crawlResultId: '33333333-3333-4333-8333-333333333333',
       sourceUrl: 'https://example.test/flyer.png',
       crawlJobId: '22222222-2222-4222-8222-222222222222',
+      sourceId: '11111111-1111-4111-8111-111111111111',
     });
 
     assert.equal(result.text, 'Open Air im Stadtpark');
@@ -50,6 +51,7 @@ describe('OcrProcessingService', () => {
     const stored = await storageClient.getObject({ key: result.objectKey });
     assert.equal(stored.body.toString('utf-8'), 'Open Air im Stadtpark');
     assert.equal(aiCalls.length, 1);
+    assert.equal((aiCalls[0] as { sourceId?: string }).sourceId, '11111111-1111-4111-8111-111111111111');
   });
 
   it('rejects unsupported mime types', async () => {

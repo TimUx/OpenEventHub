@@ -172,6 +172,7 @@ describe('CrawlProcessingService (milestone 5)', () => {
     assert.equal(stub.getCrawlResult().objectKey, objectKey);
     assert.equal(aiJobs.length, 1);
     assert.equal(ocrJobs.length, 0);
+    assert.equal(aiJobs[0]?.sourceId, sourceId);
     assert.match(aiJobs[0]?.content ?? '', /Open Air/);
 
     const stored = await fs.readFile(path.join(objectStorageRoot, objectKey));
@@ -237,6 +238,35 @@ describe('CrawlProcessingService (milestone 5)', () => {
 
     assert.equal(stub.getCrawlResult().status, CrawlResultStatus.skipped);
     assert.equal(stub.getCrawlResult().objectKey, priorKey);
-    assert.equal(aiJobs.length, 0);
+    assert.equal(aiJobs.length, 1);
+    assert.equal(aiJobs[0]?.sourceId, sourceId);
+    assert.match(aiJobs[0]?.content ?? '', /Open Air/);
+  });
+
+  it('runs schedule ticks serially and continues after a source failure', async () => {
+    const order: string[] = [];
+    const service = new CrawlProcessingService(
+      {
+        listByScheduleCron: async () => [{ id: 'src-a' }, { id: 'src-b' }, { id: 'src-c' }],
+      } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {
+        enqueueAi: () => Promise.resolve(),
+        enqueueOcr: () => Promise.resolve(),
+      },
+    );
+
+    (service as unknown as { processSource: (id: string) => Promise<void> }).processSource =
+      async (id: string) => {
+        order.push(id);
+        if (id === 'src-b') {
+          throw new Error('boom');
+        }
+      };
+
+    await service.process({ scheduleCron: '0 */6 * * *' });
+    assert.deepEqual(order, ['src-a', 'src-b', 'src-c']);
   });
 });

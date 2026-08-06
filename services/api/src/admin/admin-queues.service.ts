@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import type { Queue } from 'bullmq';
+import type { Job, Queue } from 'bullmq';
 
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import { QUEUE_NAMES } from '@openeventhub/shared';
@@ -14,6 +14,46 @@ type QueueCounts = {
   readonly delayed: number;
   readonly paused: number;
 };
+
+export type FailedQueueJob = {
+  readonly queue: string;
+  readonly id: string;
+  readonly name: string;
+  readonly failedReason: string;
+  readonly attemptsMade: number;
+  readonly timestamp: string | null;
+  readonly finishedOn: string | null;
+  readonly payloadSummary: string | null;
+};
+
+function summarizePayload(data: unknown): string | null {
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+  const record = data as Record<string, unknown>;
+  const parts: string[] = [];
+  for (const key of ['sourceId', 'crawlJobId', 'eventId', 'objectKey', 'jobId'] as const) {
+    const value = record[key];
+    if (typeof value === 'string' && value.length > 0) {
+      parts.push(`${key}=${value}`);
+    }
+  }
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
+function mapFailedJob(queue: string, job: Job): FailedQueueJob {
+  const reason = (job.failedReason ?? '').trim() || 'Unknown failure';
+  return {
+    queue,
+    id: String(job.id ?? ''),
+    name: job.name || 'job',
+    failedReason: reason.slice(0, 2000),
+    attemptsMade: job.attemptsMade,
+    timestamp: job.timestamp ? new Date(job.timestamp).toISOString() : null,
+    finishedOn: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+    payloadSummary: summarizePayload(job.data),
+  };
+}
 
 @Injectable()
 export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
@@ -49,6 +89,37 @@ export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
     return counts;
   }
 
+  /** Recent BullMQ failed jobs across all application queues (newest first). */
+  async listFailedJobs(limitPerQueue = 10): Promise<FailedQueueJob[]> {
+    const take = Math.min(Math.max(limitPerQueue, 1), 50);
+    const entries = this.queueEntries();
+    const batches = await Promise.all(
+      entries.map(async ([name, queue]) => {
+        const jobs = await queue.getFailed(0, take - 1);
+        return jobs.map((job) => mapFailedJob(name, job));
+      }),
+    );
+    return batches
+      .flat()
+      .sort((a, b) => {
+        const aTs = a.finishedOn ?? a.timestamp ?? '';
+        const bTs = b.finishedOn ?? b.timestamp ?? '';
+        return bTs.localeCompare(aTs);
+      });
+  }
+
+  private queueEntries(): Array<[string, Queue]> {
+    return [
+      [QUEUE_NAMES.discovery, this.discovery],
+      [QUEUE_NAMES.crawl, this.crawl],
+      [QUEUE_NAMES.ocr, this.ocr],
+      [QUEUE_NAMES.ai, this.ai],
+      [QUEUE_NAMES.geocoding, this.geocoding],
+      [QUEUE_NAMES.searchIndex, this.searchIndex],
+      [QUEUE_NAMES.notifications, this.notifications],
+    ];
+  }
+
   private async refreshQueueMetrics(): Promise<void> {
     try {
       const counts = await this.collectCounts();
@@ -67,18 +138,8 @@ export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async collectCounts(): Promise<Array<{ name: string; counts: QueueCounts }>> {
-    const entries: Array<[string, Queue]> = [
-      [QUEUE_NAMES.discovery, this.discovery],
-      [QUEUE_NAMES.crawl, this.crawl],
-      [QUEUE_NAMES.ocr, this.ocr],
-      [QUEUE_NAMES.ai, this.ai],
-      [QUEUE_NAMES.geocoding, this.geocoding],
-      [QUEUE_NAMES.searchIndex, this.searchIndex],
-      [QUEUE_NAMES.notifications, this.notifications],
-    ];
-
     return Promise.all(
-      entries.map(async ([name, queue]) => {
+      this.queueEntries().map(async ([name, queue]) => {
         const counts = await queue.getJobCounts(
           'waiting',
           'active',

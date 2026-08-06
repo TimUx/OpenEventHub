@@ -80,7 +80,7 @@ Selected modes persist in the browser (`oeh_view_*`).
 
 Public forms at `/submit`:
 - **Event** — title, time range, venue, description (optional email)
-- **Source** — name, URL, plugin type (`rss` / `html` / `ics`), optional cron
+- **Source** — name, URL, plugin type (`rss` / `html` / `ics`), update interval via dropdown (optional custom cron)
 
 Submissions go through `POST /api/v1/submissions` / `POST /api/v1/source-submissions` into the moderation queue (Admin → Moderation). They are not published immediately.
 

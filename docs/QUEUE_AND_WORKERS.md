@@ -14,3 +14,9 @@ Queues:
 - Notifications
 
 Worker sind zustandslos und horizontal skalierbar.
+
+## Crawl-Queue
+
+- Pro Cron-Muster ein Repeatable-Job (Schedule-Tick), nicht ein Job pro Quelle
+- Quellen mit gleichem Schedule werden im Tick **seriell** abgearbeitet
+- Crawl-Worker: `concurrency: 1` (globale Serialisierung der Crawl-Jobs in einer Instanz)

@@ -1,0 +1,19 @@
+# Swarm overlay: request an NVIDIA GPU for bundled Ollama.
+# Requires docker/stack/docker-stack.ollama.yml and an NVIDIA device plugin on nodes.
+#
+#   docker stack deploy -c docker/stack/docker-stack.yml \
+#     -c docker/stack/docker-stack.ollama.yml \
+#     -c docker/stack/docker-stack.ollama-gpu.yml openeventhub
+
+services:
+  ollama:
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

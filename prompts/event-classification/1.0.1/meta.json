@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.1",
+  "task": "classification",
+  "description": "Assign taxonomy labels; unknown places/categories may be created by the platform.",
+  "responseFormat": "json"
+}

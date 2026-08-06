@@ -17,6 +17,7 @@ const links = [
   { href: '/crawler', key: 'nav.crawler' },
   { href: '/scheduler', key: 'nav.scheduler' },
   { href: '/queues', key: 'nav.queues' },
+  { href: '/logs', key: 'nav.logs' },
   { href: '/moderation', key: 'nav.moderation' },
   { href: '/events', key: 'nav.events' },
   { href: '/categories', key: 'nav.categories' },

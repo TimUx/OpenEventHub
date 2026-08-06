@@ -9,6 +9,8 @@ export interface AiJobPayload {
   readonly crawlResultId?: string;
   readonly eventId?: string;
   readonly jobId?: string;
+  /** Source that produced the crawl; required to create EventSource links on ingest. */
+  readonly sourceId?: string;
 }
 
 export interface ExtractedEventFields {
