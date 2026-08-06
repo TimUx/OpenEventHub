@@ -35,6 +35,8 @@ Views:
 Event actions (list, tiles, details, and detail page):
 - **Show on map** / **Add to calendar** — icon buttons with hover tooltips (`title`/`aria-label`)
 - Public lists do not show a status like “PUBLISHED” (visible = published)
+- **Bulk export:** download filtered matches as one `.ics` file
+- **Subscription:** `/calendar.ics` (portal) or `/api/v1/calendar.ics` (API) — `webcal://` for Apple/Outlook/Thunderbird; HTTPS URL for Google Calendar “From URL”
 
 ## UI languages
 

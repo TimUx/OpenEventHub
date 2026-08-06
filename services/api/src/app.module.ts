@@ -36,6 +36,7 @@ import { AuthController } from './auth/auth.controller.js';
 import { RolesGuard } from './auth/roles.guard.js';
 import { CategoriesController } from './categories/categories.controller.js';
 import { EventsController } from './events/events.controller.js';
+import { CalendarFeedController } from './events/calendar-feed.controller.js';
 import { EventsService } from './events/events.service.js';
 import { GraphQlController } from './graphql/graphql.controller.js';
 import { RegionsController } from './regions/regions.controller.js';
@@ -107,6 +108,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminSchedulerController,
     AdminQueuesController,
     EventsController,
+    CalendarFeedController,
     CategoriesController,
     RegionsController,
     SearchController,

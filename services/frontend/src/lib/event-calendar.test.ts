@@ -3,11 +3,13 @@ import { describe, it } from 'node:test';
 
 import type { ApiEvent } from './api.js';
 import {
+  buildCalendarFeedPath,
   buildEventIcs,
   buildEventMapHref,
+  buildEventsIcs,
+  buildWebcalSubscribeUrl,
   canShowEventOnMap,
   escapeIcsText,
-  eventIcsFilename,
   toIcsUtc,
 } from './event-calendar.js';
 
@@ -77,7 +79,23 @@ describe('event-calendar', () => {
     assert.match(ics, /DTEND:20260815T200000Z/);
   });
 
-  it('uses slug for ICS filename', () => {
-    assert.equal(eventIcsFilename(baseEvent), 'jazz-nacht.ics');
+  it('builds a multi-event download calendar', () => {
+    const ics = buildEventsIcs([baseEvent, { ...baseEvent, id: 'b', title: 'Second' }], {
+      eventPageUrl: (event) => `https://example.test/events/${event.id}`,
+    });
+    assert.equal((ics.match(/BEGIN:VEVENT/g) ?? []).length, 2);
+    assert.match(ics, /X-WR-CALNAME:OpenEventHub/);
+  });
+
+  it('builds feed paths and webcal URLs', () => {
+    assert.equal(buildCalendarFeedPath(), '/calendar.ics');
+    assert.equal(
+      buildCalendarFeedPath({ category: 'c1', from: '2026-08-01' }),
+      '/calendar.ics?category=c1&from=2026-08-01',
+    );
+    assert.equal(
+      buildWebcalSubscribeUrl('https://example.test/calendar.ics'),
+      'webcal://example.test/calendar.ics',
+    );
   });
 });

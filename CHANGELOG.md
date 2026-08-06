@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-08-06
+
+### Added
+
+- Bulk calendar download: export all currently visible (filtered) events as one `.ics` file
+- Online calendar subscription feed: `GET /calendar.ics` (portal) and `GET /api/v1/calendar.ics` (API), with optional category/region/date filters
+- Shared ICS builder (`@openeventhub/shared`) used by API feed and portal downloads
+- Subscribe UI on `/events` and `/calendar` (copy HTTPS URL + `webcal://` subscribe)
+
+### Changed
+
+- Docs (`FRONTEND`, `REST_ENDPOINTS`) and UI screenshots refreshed for calendar export/subscribe
+
 ## [0.15.0] - 2026-08-06
 
 ### Added

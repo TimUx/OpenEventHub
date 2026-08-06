@@ -246,10 +246,11 @@ Never implement multiple large milestones in parallel.
 
 ## Post-M11 — Portal and ops follow-ups
 
-After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.15.0):
+After roadmap packages M1–M11, these product/ops enhancements were added (see `CHANGELOG.md` → v0.16.0):
 
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark
 - Event actions: map/calendar as icon buttons; flat filter bar on the event list
+- Calendar subscription (`/calendar.ics`) and bulk `.ics` export of filtered events
 - Embedded map with search, filters, auto-zoom; deep link `?event=`
 - Public submission of events and sources
 - Admin AI Settings: provider profile CRUD; default **Local Ollama** (Compose/Stack)

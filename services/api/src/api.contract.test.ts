@@ -14,6 +14,7 @@ import {
 import { graphql } from 'graphql';
 
 import { AuditService } from './audit/audit.service.js';
+import { filterEventsForCalendarFeed } from './events/calendar-feed.controller.js';
 import { EventsService } from './events/events.service.js';
 import { createPublicGraphQlSchema } from './graphql/public.schema.js';
 
@@ -135,6 +136,23 @@ describe('API v1 contract', () => {
     assert.equal(created.submission.type, SubmissionType.event);
     assert.equal(created.submission.status, SubmissionStatus.pending);
     assert.ok(created.moderation.id);
+  });
+
+  it('filters calendar feed events by category and date range', async () => {
+    const service = new EventsService(eventRepo, audit);
+    const listed = await service.list();
+    const withExtras = [
+      ...listed,
+      {
+        ...listed[0]!,
+        id: 'second',
+        title: 'Later',
+        startAt: '2026-09-01T10:00:00.000Z',
+        categories: [{ id: 'cat-1', name: 'Music', slug: 'music' }],
+      },
+    ];
+    assert.equal(filterEventsForCalendarFeed(withExtras, { from: '2026-09-01' }).length, 1);
+    assert.equal(filterEventsForCalendarFeed(withExtras, { category: 'music' })[0]?.id, 'second');
   });
 
   it('GraphQL events query returns published events', async () => {
