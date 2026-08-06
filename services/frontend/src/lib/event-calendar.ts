@@ -20,6 +20,7 @@ function toIcsEvent(event: ApiEvent): IcsEventInput {
     description: event.description,
     startAt: event.startAt,
     endAt: event.endAt,
+    allDay: Boolean(event.allDay),
     venue: event.venue
       ? {
           name: event.venue.name,

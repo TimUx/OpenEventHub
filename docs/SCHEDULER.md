@@ -21,3 +21,13 @@ Beim Tick crawlt der Worker alle aktivierten Quellen mit diesem Muster **seriell
 bleibt ein Einzel-Job für eine Quelle.
 
 Wo möglich, soll nur geänderter Inhalt verarbeitet werden.
+
+## Nur zukünftige Termine
+
+Crawl-Import (alle Plugins sowie AI-Ingest) behält nur Termine, deren **effektives Ende**
+(`endAt`, sonst `startAt`) noch **≥ jetzt** liegt. Abgelaufene Kandidaten werden verworfen.
+
+## Automatische Löschung
+
+Der Scheduler löscht stündlich (und beim Start) Events mit abgelaufenem effektivem Ende
+aus der Datenbank (Cascade auf Versionen, Quellen-Links, Analysen).

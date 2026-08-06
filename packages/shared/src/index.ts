@@ -50,6 +50,7 @@ export {
   eventIcsFilename,
   foldIcsLine,
   toIcsUtc,
+  toIcsUtcDate,
   toWebcalUrl,
   type BuildCalendarIcsOptions,
   type IcsEventInput,
@@ -66,3 +67,12 @@ export {
   SCHEDULE_PRESET_IDS,
   type SchedulePresetId,
 } from './schedule-presets.js';
+
+export {
+  eventEffectiveEnd,
+  filterNotExpiredEvents,
+  isEventNotExpired,
+  parseEventInstant,
+} from './event-timing.js';
+
+export { inferAllDay, temporalHasClockTime } from './temporal-all-day.js';

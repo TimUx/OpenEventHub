@@ -3,6 +3,9 @@
  * Used by the HTML plugin when a <toubiz-widget> is embedded, and by pluginType `toubiz`.
  */
 
+import { filterNotExpiredEvents, isEventNotExpired } from './is-future-event.js';
+import { inferAllDay } from './temporal-all-day.js';
+
 const DEFAULT_BASE_URI = 'https://mein.toubiz.de';
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGES = 100;
@@ -81,6 +84,7 @@ function occurrenceFromInterval(event, interval, today) {
   if (!startAt) return null;
   const endDate = interval.end && interval.end >= date ? interval.end : date;
   const endAt = interval.endAt ? toIso(endDate, interval.endAt) : null;
+  if (!isEventNotExpired(startAt, endAt)) return null;
   const loc = interval.eventLocationAddress || null;
   const venueName = loc?.name || event.location?.name || null;
   const venueAddress = addressLine(loc);
@@ -92,6 +96,7 @@ function occurrenceFromInterval(event, interval, today) {
     description: plain || null,
     startAt,
     endAt,
+    allDay: inferAllDay(startAt, endAt, !interval.startAt && !interval.endAt),
     organizerName: event.author || event.client?.name || null,
     venueName,
     venueAddress,
@@ -183,7 +188,7 @@ export async function fetchToubizFutureEvents(options) {
   }
 
   events.sort((a, b) => String(a.startAt).localeCompare(String(b.startAt)));
-  return events;
+  return filterNotExpiredEvents(events);
 }
 
 /**

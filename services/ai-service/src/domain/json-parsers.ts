@@ -9,6 +9,7 @@ export class ExtractionParseError extends Error {
 
 export function parseExtractionJson(raw: string): ExtractedEventFields {
   const parsed = parseJsonObject(raw);
+  const allDay = typeof parsed['allDay'] === 'boolean' ? parsed['allDay'] : undefined;
   return {
     isEvent: Boolean(parsed['isEvent']),
     title: asNullableString(parsed['title']),
@@ -16,6 +17,7 @@ export function parseExtractionJson(raw: string): ExtractedEventFields {
     description: asNullableString(parsed['description']),
     startAt: asNullableString(parsed['startAt']),
     endAt: asNullableString(parsed['endAt']),
+    ...(allDay !== undefined ? { allDay } : {}),
     organizerName: asNullableString(parsed['organizerName']),
     venueName: asNullableString(parsed['venueName']),
     venueAddress: asNullableString(parsed['venueAddress']),

@@ -227,7 +227,7 @@ export function MapBrowser() {
                 >
                   <p className="font-semibold hover:text-primary">{event.title}</p>
                   <p className="mt-1 text-xs text-[var(--muted)]">
-                    {formatEventDate(event.startAt, locale)}
+                    {formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}
                     {event.venue?.name ? ` · ${event.venue.name}` : ''}
                     {event.venue?.city ? `, ${event.venue.city}` : ''}
                   </p>

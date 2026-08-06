@@ -21,6 +21,7 @@ function toIcsEvent(event: PublicEvent): IcsEventInput {
     description: event.description,
     startAt: event.startAt,
     endAt: event.endAt,
+    allDay: event.allDay,
     venue: event.venue
       ? {
           name: event.venue.name,

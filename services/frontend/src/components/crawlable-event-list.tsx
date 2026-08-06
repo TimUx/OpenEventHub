@@ -30,7 +30,7 @@ export function CrawlableEventList({
             >
               {event.title}
             </Link>
-            <span className="text-[var(--muted)]"> — {formatEventDate(event.startAt, locale)}</span>
+            <span className="text-[var(--muted)]"> — {formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}</span>
           </li>
         ))}
       </ul>

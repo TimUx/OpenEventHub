@@ -17,7 +17,8 @@
 ## Verwaltung
 - Quellen (anlegen / bearbeiten / aktivieren / deaktivieren / löschen; Plugin-Typen
   `html` / `rss` / `ics` / `toubiz`; Aktualisierungsintervall per Dropdown; optional eigener Cron)
-- Veranstaltungen (bearbeiten, Status ändern, löschen; Updates erzeugen EventVersion)
+- Veranstaltungen (Checkbox-Auswahl; Status ändern / löschen in der oberen Aktionsleiste;
+  Bearbeiten je Termin; Header zeigt Anzahl `pending_moderation`)
 - Kategorien (manuell anlegen / bearbeiten / löschen; KI legt fehlende per Find-or-create an und verknüpft)
 - Regionen (manuell anlegen / bearbeiten / löschen; KI kann Orte/Hierarchie per Find-or-create ergänzen)
 - Moderation
@@ -49,6 +50,10 @@ Flaches UI analog zum öffentlichen Portal (Primärblau-AppBar, abgerundete Butt
 ![Quellenverwaltung](assets/screenshots/admin-sources.png)
 
 *Quellenverwaltung*
+
+![Events](assets/screenshots/admin-events.png)
+
+*Events (Mehrfachauswahl)*
 
 ![Moderation](assets/screenshots/admin-moderation.png)
 

@@ -63,7 +63,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <article className="mx-auto max-w-3xl space-y-6">
       <EventJsonLd event={event} url={pageUrl} />
-      <Badge>{formatEventDate(event.startAt, locale)}</Badge>
+      <Badge>{formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}</Badge>
       <h1 className="font-bold text-4xl leading-tight">{event.title}</h1>
       {event.summary ? <p className="text-lg text-[var(--muted)]">{event.summary}</p> : null}
       <EventActions event={event} />
@@ -74,7 +74,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       ) : null}
       {event.endAt ? (
         <p className="text-sm text-[var(--muted)]">
-          {translate(dictionary, 'detail.ends', { date: formatEventDate(event.endAt, locale) })}
+          {translate(dictionary, 'detail.ends', { date: formatEventDate(event.endAt, locale, { allDay: Boolean(event.allDay) }) })}
         </p>
       ) : null}
     </article>

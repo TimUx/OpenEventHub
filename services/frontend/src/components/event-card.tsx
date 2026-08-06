@@ -27,7 +27,7 @@ export function EventCard({
         <Link href={`/events/${event.id}`} className="min-w-0 flex-1">
           <p className="truncate font-medium">{event.title}</p>
           <p className="mt-0.5 text-xs text-[var(--muted)]">
-            {formatEventDate(event.startAt, locale)}
+            {formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}
           </p>
         </Link>
         <EventActions event={event} className="shrink-0" />
@@ -40,7 +40,7 @@ export function EventCard({
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-2">
-            <Badge>{formatEventDate(event.startAt, locale)}</Badge>
+            <Badge>{formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}</Badge>
             <h2 className="font-bold text-2xl leading-snug">
               <Link href={`/events/${event.id}`} className="hover:text-primary">
                 {event.title}
@@ -54,7 +54,7 @@ export function EventCard({
             ) : null}
             {event.endAt && endsLabel ? (
               <p className="text-xs text-[var(--muted)]">
-                {endsLabel.replace('{date}', formatEventDate(event.endAt, locale))}
+                {endsLabel.replace('{date}', formatEventDate(event.endAt, locale, { allDay: Boolean(event.allDay) }))}
               </p>
             ) : null}
             <EventActions event={event} className="pt-1" />
@@ -70,7 +70,7 @@ export function EventCard({
   return (
     <Card>
       <div className="mb-3">
-        <Badge>{formatEventDate(event.startAt, locale)}</Badge>
+        <Badge>{formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}</Badge>
       </div>
       <h2 className="font-bold text-xl leading-snug">
         <Link href={`/events/${event.id}`} className="hover:text-primary">

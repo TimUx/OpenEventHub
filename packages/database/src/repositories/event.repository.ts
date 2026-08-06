@@ -24,6 +24,7 @@ export type EventUpdateInput = {
   readonly description?: string | null;
   readonly startAt?: Date;
   readonly endAt?: Date | null;
+  readonly allDay?: boolean;
   readonly status?: EventStatus;
   readonly changeReason?: string | null;
 };
@@ -101,6 +102,7 @@ export class EventRepository {
           ...(data.description !== undefined ? { description: data.description } : {}),
           ...(data.startAt !== undefined ? { startAt: data.startAt } : {}),
           ...(data.endAt !== undefined ? { endAt: data.endAt } : {}),
+          ...(data.allDay !== undefined ? { allDay: data.allDay } : {}),
           ...(data.status !== undefined ? { status: data.status } : {}),
         },
       });
@@ -119,6 +121,7 @@ export class EventRepository {
           title: updated.title,
           startAt: updated.startAt,
           endAt: updated.endAt,
+          allDay: updated.allDay,
           venueId: updated.venueId,
           organizerId: updated.organizerId,
           confidenceScore: updated.confidenceScore,
@@ -133,6 +136,22 @@ export class EventRepository {
 
   delete(id: string): Promise<Event> {
     return this.prisma.event.delete({ where: { id } });
+  }
+
+  /**
+   * Deletes events whose effective end (endAt ?? startAt) is strictly before `now`.
+   * Cascades to versions, sources, analyses, and taxonomy links via Prisma relations.
+   */
+  async deleteExpired(now: Date = new Date()): Promise<number> {
+    const result = await this.prisma.event.deleteMany({
+      where: {
+        OR: [
+          { endAt: { not: null, lt: now } },
+          { AND: [{ endAt: null }, { startAt: { lt: now } }] },
+        ],
+      },
+    });
+    return result.count;
   }
 
   searchPublished(options: EventSearchOptions): Promise<EventWithRelations[]> {

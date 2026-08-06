@@ -69,7 +69,7 @@ function EventChip({ event, locale }: { readonly event: ApiEvent; readonly local
     <Link
       href={`/events/${event.id}`}
       className="block truncate rounded px-1 py-0.5 text-xs text-primary hover:bg-primary-soft dark:text-primary-bright"
-      title={`${event.title} · ${formatEventDate(event.startAt, locale)}`}
+      title={`${event.title} · ${formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}`}
     >
       {event.title}
     </Link>
@@ -363,7 +363,7 @@ function DayView({
                 {event.title}
               </Link>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                {formatEventDate(event.startAt, locale)}
+                {formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}
               </p>
               {event.summary ? <p className="mt-1 text-sm">{event.summary}</p> : null}
             </li>

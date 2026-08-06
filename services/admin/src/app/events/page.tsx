@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
@@ -26,7 +26,22 @@ type EventRow = {
   status: string;
   startAt: string;
   endAt: string | null;
+  allDay?: boolean;
 };
+
+function formatAdminEventWhen(iso: string, allDay: boolean | undefined, locale: string): string {
+  const tag = locale.startsWith('de') ? 'de-DE' : 'en-GB';
+  if (allDay) {
+    return new Intl.DateTimeFormat(tag, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+      new Date(iso),
+    );
+  }
+  return new Intl.DateTimeFormat(tag, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(iso));
+}
 
 function toDatetimeLocal(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -40,8 +55,14 @@ function fromDatetimeLocal(value: string): string {
   return new Date(value).toISOString();
 }
 
+/** Calendar date from datetime-local as UTC midnight (all-day storage). */
+function fromDatetimeLocalAllDay(value: string): string {
+  const date = new Date(value);
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString();
+}
+
 export default function EventsPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { token } = useAuth();
   const { data, error, loading, reload } = useAdminQuery<EventRow[]>(
     '/api/v1/admin/events?limit=100',
@@ -50,15 +71,52 @@ export default function EventsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [bulkStatus, setBulkStatus] = useState<EventStatus>('published');
 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<EventStatus>('draft');
+  const [allDay, setAllDay] = useState(false);
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
   const [changeReason, setChangeReason] = useState('');
+
+  const events = data ?? [];
+  const eventIds = useMemo(() => events.map((event) => event.id), [events]);
+
+  useEffect(() => {
+    setSelected((prev) => {
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (eventIds.includes(id)) next.add(id);
+      }
+      return next.size === prev.size ? prev : next;
+    });
+  }, [eventIds]);
+
+  const allSelected = events.length > 0 && selected.size === events.length;
+  const selectedCount = selected.size;
+
+  function toggleOne(id: string): void {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAll(): void {
+    setSelected(new Set(eventIds));
+  }
+
+  function clearSelection(): void {
+    setSelected(new Set());
+  }
 
   function startEdit(event: EventRow): void {
     setEditingId(event.id);
@@ -71,6 +129,7 @@ export default function EventsPage() {
         ? event.status
         : 'draft') as EventStatus,
     );
+    setAllDay(Boolean(event.allDay));
     setStartAt(toDatetimeLocal(event.startAt));
     setEndAt(toDatetimeLocal(event.endAt));
     setChangeReason('');
@@ -97,8 +156,13 @@ export default function EventsPage() {
           summary: summary.trim() || null,
           description: description.trim() || null,
           status,
-          startAt: fromDatetimeLocal(startAt),
-          endAt: endAt ? fromDatetimeLocal(endAt) : null,
+          allDay,
+          startAt: allDay ? fromDatetimeLocalAllDay(startAt) : fromDatetimeLocal(startAt),
+          endAt: endAt
+            ? allDay
+              ? fromDatetimeLocalAllDay(endAt)
+              : fromDatetimeLocal(endAt)
+            : null,
           changeReason: changeReason.trim() || null,
         }),
       });
@@ -112,37 +176,51 @@ export default function EventsPage() {
     }
   }
 
-  async function quickStatus(eventId: string, next: EventStatus): Promise<void> {
-    if (!token) return;
+  async function applyBulkStatus(): Promise<void> {
+    if (!token || selectedCount === 0) return;
+    setBulkBusy(true);
     setFormError(null);
     try {
-      await adminFetch(`/api/v1/admin/events/${eventId}`, token, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: next, changeReason: 'admin.status' }),
-      });
-      setMessage(t('events.statusUpdated'));
-      if (editingId === eventId) {
-        setStatus(next);
+      const ids = [...selected];
+      for (const id of ids) {
+        await adminFetch(`/api/v1/admin/events/${id}`, token, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: bulkStatus, changeReason: 'admin.bulk_status' }),
+        });
+      }
+      setMessage(t('events.bulkStatusUpdated', { count: ids.length }));
+      clearSelection();
+      if (editingId && ids.includes(editingId)) {
+        setStatus(bulkStatus);
       }
       await reload();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBulkBusy(false);
     }
   }
 
-  async function remove(event: EventRow): Promise<void> {
-    if (!token) return;
-    if (!window.confirm(t('events.confirmDelete', { title: event.title }))) return;
+  async function applyBulkDelete(): Promise<void> {
+    if (!token || selectedCount === 0) return;
+    if (!window.confirm(t('events.confirmBulkDelete', { count: selectedCount }))) return;
+    setBulkBusy(true);
     setFormError(null);
     try {
-      await adminFetch(`/api/v1/admin/events/${event.id}`, token, { method: 'DELETE' });
-      setMessage(t('events.deleted'));
-      if (editingId === event.id) {
+      const ids = [...selected];
+      for (const id of ids) {
+        await adminFetch(`/api/v1/admin/events/${id}`, token, { method: 'DELETE' });
+      }
+      setMessage(t('events.bulkDeleted', { count: ids.length }));
+      if (editingId && ids.includes(editingId)) {
         setEditingId(null);
       }
+      clearSelection();
       await reload();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBulkBusy(false);
     }
   }
 
@@ -153,6 +231,55 @@ export default function EventsPage() {
       {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
+
+      <Panel className="sticky top-0 z-10 space-y-3 shadow-soft">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="h-9 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold"
+            onClick={allSelected ? clearSelection : selectAll}
+            disabled={events.length === 0 || bulkBusy}
+          >
+            {allSelected ? t('events.clearSelection') : t('events.selectAll')}
+          </button>
+          <span className="text-sm text-[var(--muted)]">
+            {t('events.selectedCount', { count: selectedCount })}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.bulkStatus')}</span>
+            <select
+              className="h-9 min-w-44 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={bulkStatus}
+              disabled={bulkBusy}
+              onChange={(e) => setBulkStatus(e.target.value as EventStatus)}
+            >
+              {EVENT_STATUSES.map((value) => (
+                <option key={value} value={value}>
+                  {t(`events.status.${value}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="h-9 rounded-xl bg-primary px-4 text-sm font-semibold text-white disabled:opacity-60"
+            disabled={selectedCount === 0 || bulkBusy}
+            onClick={() => void applyBulkStatus()}
+          >
+            {t('events.applyStatus')}
+          </button>
+          <button
+            type="button"
+            className="h-9 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 disabled:opacity-60"
+            disabled={selectedCount === 0 || bulkBusy}
+            onClick={() => void applyBulkDelete()}
+          >
+            {t('events.deleteSelected')}
+          </button>
+        </div>
+      </Panel>
 
       {editingId ? (
         <Panel>
@@ -189,6 +316,15 @@ export default function EventsPage() {
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm md:col-span-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-[var(--border)]"
+                checked={allDay}
+                onChange={(e) => setAllDay(e.target.checked)}
+              />
+              {t('events.fieldAllDay')}
             </label>
             <label className="text-sm">
               {t('events.fieldStartAt')}
@@ -255,53 +391,46 @@ export default function EventsPage() {
       ) : null}
 
       <div className="space-y-2">
-        {(data ?? []).map((event) => (
-          <Panel key={event.id} className="space-y-3">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="font-medium">{event.title}</p>
-                <p className="text-xs text-[var(--muted)]">
-                  {event.slug} · {new Date(event.startAt).toLocaleString()}
-                </p>
+        {events.map((event) => {
+          const checked = selected.has(event.id);
+          return (
+            <Panel key={event.id} className="space-y-3">
+              <div className="flex flex-wrap items-start gap-3">
+                <label className="mt-1 flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-[var(--border)]"
+                    checked={checked}
+                    onChange={() => toggleOne(event.id)}
+                    aria-label={t('events.selectEvent', { title: event.title })}
+                  />
+                </label>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium">{event.title}</p>
+                      <p className="text-xs text-[var(--muted)]">
+                        {event.slug} · {formatAdminEventWhen(event.startAt, event.allDay, locale)}
+                        {event.allDay ? ` · ${t('events.allDayBadge')}` : ''}
+                      </p>
+                    </div>
+                    <StatusPill value={event.status} />
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
+                      onClick={() => startEdit(event)}
+                    >
+                      {t('events.edit')}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <StatusPill value={event.status} />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-2 text-xs text-[var(--muted)]">
-                {t('events.fieldStatus')}
-                <select
-                  className="h-8 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-xs text-[var(--foreground)]"
-                  value={
-                    EVENT_STATUSES.includes(event.status as EventStatus) ? event.status : 'draft'
-                  }
-                  onChange={(e) => void quickStatus(event.id, e.target.value as EventStatus)}
-                  aria-label={t('events.changeStatus')}
-                >
-                  {EVENT_STATUSES.map((value) => (
-                    <option key={value} value={value}>
-                      {t(`events.status.${value}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
-                onClick={() => startEdit(event)}
-              >
-                {t('events.edit')}
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-700"
-                onClick={() => void remove(event)}
-              >
-                {t('common.delete')}
-              </button>
-            </div>
-          </Panel>
-        ))}
-        {!loading && (data?.length ?? 0) === 0 ? (
+            </Panel>
+          );
+        })}
+        {!loading && events.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">{t('events.empty')}</p>
         ) : null}
       </div>

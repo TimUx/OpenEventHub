@@ -23,6 +23,7 @@ export type ApiEvent = {
   readonly description: string | null;
   readonly startAt: string;
   readonly endAt: string | null;
+  readonly allDay?: boolean;
   readonly status: string;
   readonly venueId?: string | null;
   readonly organizerId?: string | null;
@@ -138,8 +139,18 @@ export function listRegions(): Promise<ApiRegion[]> {
   return apiFetch<ApiRegion[]>('/api/v1/regions');
 }
 
-export function formatEventDate(iso: string, locale: 'de' | 'en' = 'de'): string {
+export function formatEventDate(
+  iso: string,
+  locale: 'de' | 'en' = 'de',
+  options?: { allDay?: boolean },
+): string {
   const tag = locale === 'de' ? 'de-DE' : 'en-GB';
+  if (options?.allDay) {
+    return new Intl.DateTimeFormat(tag, {
+      dateStyle: 'medium',
+      timeZone: 'UTC',
+    }).format(new Date(iso));
+  }
   return new Intl.DateTimeFormat(tag, {
     dateStyle: 'medium',
     timeStyle: 'short',
