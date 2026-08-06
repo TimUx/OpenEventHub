@@ -30,8 +30,8 @@ flowchart LR
 
 | Component | Role |
 |-----------|------|
-| `scheduler` | Registriert **einen** Repeatable-Job pro Cron-Muster; der Crawler tickt Quellen seriell |
-| `crawler` | Konsumiert `crawl`, führt den Plugin-Lebenszyklus aus, speichert Raw-Payloads, überspringt unveränderte Hashes; bei Plugin-Events **ein AI-Job pro Kandidat** |
+| `scheduler` | Registriert **einen** Repeatable-Job pro Cron-Muster; der Crawler tickt Quellen seriell; löscht stündlich abgelaufene Events |
+| `crawler` | Konsumiert `crawl`, führt den Plugin-Lebenszyklus aus, speichert Raw-Payloads, überspringt unveränderte Hashes; filtert auf **nicht abgelaufene** Plugin-Events; bei Treffern **ein AI-Job pro Kandidat** |
 | `ocr-service` | Konsumiert `ocr` für Bild-/PDF-markierte Payloads, schreibt `.ocr.txt`, enqueued `ai` |
 | `ai-service` | Konsumiert `ai` (Event Intelligence Engine) |
 | `plugins/*` | Unabhängig deploybare Connectoren (`html`, `rss`, `ics`, `toubiz`) über das Plugin SDK |

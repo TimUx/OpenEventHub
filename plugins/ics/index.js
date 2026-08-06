@@ -1,5 +1,7 @@
 import { fetchUrlToBuffer } from '../utils/fetch-url.js';
+import { filterNotExpiredEvents } from '../utils/is-future-event.js';
 import { parseDateOrNull } from '../utils/parse-date.js';
+import { inferAllDay } from '../utils/temporal-all-day.js';
 
 function unfoldIcsLines(text) {
   // ICS line folding: a newline followed by whitespace continues the previous line.
@@ -52,8 +54,10 @@ export function createPlugin() {
         const description = extractIcsValue(vevent, 'DESCRIPTION');
         const location = extractIcsValue(vevent, 'LOCATION');
 
-        const startAt = parseDateOrNull(extractIcsValue(vevent, 'DTSTART'));
-        const endAt = parseDateOrNull(extractIcsValue(vevent, 'DTEND'));
+        const startRaw = extractIcsValue(vevent, 'DTSTART');
+        const endRaw = extractIcsValue(vevent, 'DTEND');
+        const startAt = parseDateOrNull(startRaw);
+        const endAt = parseDateOrNull(endRaw);
 
         const isEvent = Boolean(title && startAt);
         const extractionConfidence = isEvent ? 0.8 : 0.2;
@@ -65,6 +69,7 @@ export function createPlugin() {
           description: description ?? null,
           startAt,
           endAt,
+          allDay: inferAllDay(startRaw, endRaw),
           organizerName: null,
           venueName: location ?? null,
           venueAddress: null,
@@ -73,7 +78,7 @@ export function createPlugin() {
         });
       }
 
-      return { events: events.filter((e) => e.isEvent) };
+      return { events: filterNotExpiredEvents(events.filter((e) => e.isEvent)) };
     },
 
     async emit(normalized) {

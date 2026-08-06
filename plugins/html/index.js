@@ -1,4 +1,6 @@
 import { fetchUrlToBuffer } from '../utils/fetch-url.js';
+import { filterNotExpiredEvents } from '../utils/is-future-event.js';
+import { inferAllDay } from '../utils/temporal-all-day.js';
 import { extractToubizWidgetConfig, fetchToubizEventsFromHtml } from '../utils/toubiz.js';
 
 const MONTHS_DE = {
@@ -81,13 +83,15 @@ function eventCandidate(fields, confidence = 0.8) {
   const title = fields.title?.trim() || null;
   const startAt = fields.startAt ?? null;
   if (!title || !startAt || !isMeaningfulTitle(title)) return null;
+  const endAt = fields.endAt ?? null;
   return {
     isEvent: true,
     title,
     summary: fields.summary?.trim() || null,
     description: fields.description?.trim() || null,
     startAt,
-    endAt: fields.endAt ?? null,
+    endAt,
+    allDay: inferAllDay(startAt, endAt, fields.allDay),
     organizerName: fields.organizerName?.trim() || null,
     venueName: fields.venueName?.trim() || null,
     venueAddress: fields.venueAddress?.trim() || null,
@@ -613,14 +617,16 @@ function parseBlockEvents(html) {
 }
 
 function extractAllEvents(html) {
-  return mergeEvents([
-    parseJsonLdEvents(html),
-    parseMarkedTableEvents(html),
-    parseTimeElementEvents(html),
-    parseGenericTableEvents(html),
-    parseBlockEvents(html),
-    parseListingEvents(html),
-  ]);
+  return filterNotExpiredEvents(
+    mergeEvents([
+      parseJsonLdEvents(html),
+      parseMarkedTableEvents(html),
+      parseTimeElementEvents(html),
+      parseGenericTableEvents(html),
+      parseBlockEvents(html),
+      parseListingEvents(html),
+    ]),
+  );
 }
 
 /** @internal exported for unit tests */
@@ -673,7 +679,7 @@ export function createPlugin() {
         emsEvents = await fetchToubizEventsFromHtml(html);
       }
 
-      return { events: mergeEvents([emsEvents, staticEvents]) };
+      return { events: filterNotExpiredEvents(mergeEvents([emsEvents, staticEvents])) };
     },
 
     async emit(normalized) {

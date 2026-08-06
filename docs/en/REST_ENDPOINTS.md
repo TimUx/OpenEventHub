@@ -22,6 +22,7 @@ POST   /api/v1/auth/login
 
 GET    /api/v1/admin/dashboard                 (admin|moderator|viewer)
 GET    /api/v1/admin/events
+GET    /api/v1/admin/events/counts             (counts by status, e.g. pending_moderation)
 GET    /api/v1/admin/events/{id}
 PATCH  /api/v1/admin/events/{id}               (admin|moderator; writes EventVersion)
 DELETE /api/v1/admin/events/{id}               (admin only)

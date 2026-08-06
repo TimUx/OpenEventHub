@@ -17,6 +17,7 @@ import type {
   ExtractedEventFields,
   OcrJobPayload,
 } from '@openeventhub/shared';
+import { filterNotExpiredEvents } from '@openeventhub/shared';
 
 import { ObjectStorageService } from '../object-storage/object-storage.service.js';
 import { PluginRegistryService } from '../plugins/plugin-registry.service.js';
@@ -107,7 +108,9 @@ export class CrawlProcessingService {
 
       const parsed = await plugin.parse(fetchResult);
       const normalized = await plugin.normalize(parsed);
-      const pluginEvents = (await plugin.emit(normalized)).filter((event) => event.isEvent);
+      const pluginEvents = filterNotExpiredEvents(
+        (await plugin.emit(normalized)).filter((event) => event.isEvent),
+      );
 
       const contentHash = crypto.createHash('sha256').update(fetchResult.content).digest('hex');
 
@@ -308,6 +311,7 @@ function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string):
     `title: ${event.title ?? ''}`,
     `startAt: ${event.startAt ?? ''}`,
     `endAt: ${event.endAt ?? ''}`,
+    `allDay: ${event.allDay ? 'true' : 'false'}`,
     `summary: ${event.summary ?? ''}`,
     `description: ${event.description ?? ''}`,
     `venueName: ${event.venueName ?? ''}`,
@@ -316,7 +320,9 @@ function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string):
     `isRecurring: ${event.isRecurring ? 'true' : 'false'}`,
     `extractionConfidence: ${event.extractionConfidence}`,
     '',
-    'This content describes exactly one public event. Preserve the given title and ISO datetimes.',
+    event.allDay
+      ? 'This content describes exactly one public all-day event (date only, no clock time). Preserve the given title and ISO dates; do not invent times.'
+      : 'This content describes exactly one public event. Preserve the given title and ISO datetimes.',
   ];
   return lines.join('\n');
 }

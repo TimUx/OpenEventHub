@@ -1,4 +1,6 @@
 import { fetchUrlToBuffer } from '../utils/fetch-url.js';
+import { filterNotExpiredEvents } from '../utils/is-future-event.js';
+import { inferAllDay } from '../utils/temporal-all-day.js';
 
 function decodeCdata(value) {
   const trimmed = String(value ?? '').trim();
@@ -73,6 +75,7 @@ export function createPlugin() {
           description: description ?? null,
           startAt,
           endAt: null,
+          allDay: inferAllDay(startAt, null),
           organizerName: null,
           venueName: null,
           venueAddress: null,
@@ -81,7 +84,7 @@ export function createPlugin() {
         });
       }
 
-      return { events: events.filter((e) => e.isEvent) };
+      return { events: filterNotExpiredEvents(events.filter((e) => e.isEvent)) };
     },
 
     async emit(normalized) {

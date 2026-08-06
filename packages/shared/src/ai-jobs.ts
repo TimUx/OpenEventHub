@@ -20,6 +20,8 @@ export interface ExtractedEventFields {
   readonly description: string | null;
   readonly startAt: string | null;
   readonly endAt: string | null;
+  /** True when the source provided a calendar date but no clock time. */
+  readonly allDay?: boolean;
   readonly organizerName: string | null;
   readonly venueName: string | null;
   readonly venueAddress: string | null;

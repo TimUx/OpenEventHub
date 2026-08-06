@@ -21,3 +21,13 @@ each tick the worker crawls all enabled sources with that pattern **serially**
 single-source job.
 
 Only changed content should be processed whenever possible.
+
+## Future events only
+
+Crawl ingest (all plugins and AI ingest) keeps only events whose **effective end**
+(`endAt`, otherwise `startAt`) is still **≥ now**. Expired candidates are dropped.
+
+## Automatic deletion
+
+The scheduler deletes events with an expired effective end hourly (and on startup),
+cascading versions, source links, and analyses.

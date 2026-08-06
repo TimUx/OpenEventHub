@@ -40,7 +40,8 @@ the `ai` queue. The EIE then:
 
 1. prepares content for the LLM (HTML → plain text, length cap),
 2. extracts and classifies,
-3. when `isEvent` + title + `startAt` are present and `eventId` is missing, creates a
+3. when `isEvent` + title + `startAt` are present (and **not expired**: effective end
+   `endAt` or `startAt` ≥ now) and `eventId` is missing, creates a
    new `Event` with status `pending_moderation` (plus `EventVersion` and optional
    `EventSource` via `sourceId`),
 4. stores `AIAnalysis`,
@@ -59,6 +60,9 @@ Multi-event listing pages:
   still returns **one** primary event per job (earliest dated entry).
 - Structured plugin candidates are persisted even if the LLM sets `isEvent=false`
   (guard in the AI service).
+- Everywhere: **only non-expired** events (plugins, crawler filter, AI ingest).
+- Without a clock time in the source: events are stored as **all-day** (`allDay`);
+  UI and ICS must not invent times (no `01:00`/`02:00` from UTC midnight).
 
 Without `eventId` and without a creatable extraction, the AI result is not persisted
 (warning in logs).

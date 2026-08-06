@@ -12,6 +12,7 @@ export type IcsEventInput = {
   readonly description?: string | null;
   readonly startAt: string;
   readonly endAt?: string | null;
+  readonly allDay?: boolean;
   readonly venue?: IcsVenueInput | null;
 };
 
@@ -36,6 +37,15 @@ export function toIcsUtc(iso: string): string {
     `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}` +
     `T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`
   );
+}
+
+/** Format an Instant as UTC ICS date (YYYYMMDD) for all-day events. */
+export function toIcsUtcDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid date for ICS: ${iso}`);
+  }
+  return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}`;
 }
 
 export function escapeIcsText(value: string): string {
@@ -88,21 +98,26 @@ export function buildVEventLines(
   eventUrl?: string | null,
 ): string[] {
   const uid = `${event.id}@openeventhub`;
-  const start = toIcsUtc(event.startAt);
-  const end = toIcsUtc(resolveEndAt(event));
   const location = venueLocation(event.venue);
   const descriptionParts = [event.summary, event.description, eventUrl].filter(
     (part): part is string => Boolean(part && part.trim()),
   );
 
-  const lines = [
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART:${start}`,
-    `DTEND:${end}`,
-    `SUMMARY:${escapeIcsText(event.title)}`,
-  ];
+  const lines = ['BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${stamp}`];
+
+  if (event.allDay) {
+    const startDay = toIcsUtcDate(event.startAt);
+    // ICS all-day DTEND is exclusive (day after the last inclusive day).
+    const exclusiveEnd = new Date(event.endAt ?? event.startAt);
+    exclusiveEnd.setUTCDate(exclusiveEnd.getUTCDate() + 1);
+    lines.push(`DTSTART;VALUE=DATE:${startDay}`);
+    lines.push(`DTEND;VALUE=DATE:${toIcsUtcDate(exclusiveEnd.toISOString())}`);
+  } else {
+    lines.push(`DTSTART:${toIcsUtc(event.startAt)}`);
+    lines.push(`DTEND:${toIcsUtc(resolveEndAt(event))}`);
+  }
+
+  lines.push(`SUMMARY:${escapeIcsText(event.title)}`);
 
   if (descriptionParts.length > 0) {
     lines.push(`DESCRIPTION:${escapeIcsText(descriptionParts.join('\n\n'))}`);

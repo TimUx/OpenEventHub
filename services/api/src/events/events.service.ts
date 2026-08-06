@@ -29,6 +29,7 @@ export type PublicEvent = {
   readonly description: string | null;
   readonly startAt: string;
   readonly endAt: string | null;
+  readonly allDay: boolean;
   readonly status: string;
   readonly venueId: string | null;
   readonly organizerId: string | null;
@@ -62,6 +63,7 @@ export function toPublicEvent(event: EventWithRelations): PublicEvent {
     description: event.description,
     startAt: event.startAt.toISOString(),
     endAt: event.endAt?.toISOString() ?? null,
+    allDay: event.allDay,
     status: event.status,
     venueId: event.venueId,
     organizerId: event.organizerId,

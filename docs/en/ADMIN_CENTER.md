@@ -17,7 +17,8 @@
 ## Management
 - Sources (create / edit / enable / disable / delete; plugin types
   `html` / `rss` / `ics` / `toubiz`; update interval via dropdown; optional custom cron)
-- Events (edit, change status, delete; updates create EventVersion)
+- Events (checkbox selection; bulk status / delete in the top action bar; edit per event;
+  header shows `pending_moderation` count)
 - Categories (manual create / edit / delete; AI find-or-creates missing labels and links them)
 - Regions (manual create / edit / delete; AI may find-or-create places/hierarchy)
 - Moderation
@@ -49,6 +50,10 @@ Flat UI matching the public portal (primary-blue app bar, rounded buttons, no ba
 ![Sources](../assets/screenshots/admin-sources.png)
 
 *Sources management*
+
+![Events](../assets/screenshots/admin-events.png)
+
+*Events (multi-select)*
 
 ![Moderation](../assets/screenshots/admin-moderation.png)
 

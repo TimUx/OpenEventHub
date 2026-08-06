@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-08-06
+
+### Added
+
+- Admin Events: checkbox multi-select, bulk status apply / bulk delete, “select all”; per-event **edit** only
+- Admin header badge for events awaiting moderation (`pending_moderation`); `GET /api/v1/admin/events/counts`
+- Future-only crawl ingest across plugins, crawler filter, and AI create (`endAt` ?? `startAt` ≥ now)
+- Scheduler hourly (and on startup) deletion of expired events
+- Event `allDay` flag: date-only sources no longer invent clock times in UI/ICS; midnight-UTC backfill migration
+
+### Changed
+
+- Docs (DE/EN): Admin, Scheduler, Crawler, EIE, REST; UI screenshots refreshed
+
+### Fixed
+
+- Date-only listings (e.g. brewery calendars) no longer display as 01:00/02:00 local from UTC midnight placeholders
+
 ## [0.18.0] - 2026-08-06
 
 ### Added

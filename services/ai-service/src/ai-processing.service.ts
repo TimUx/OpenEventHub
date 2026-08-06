@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult, ExtractedEventFields } from '@openeventhub/shared';
+import { inferAllDay, isEventNotExpired } from '@openeventhub/shared';
 import { EventStatus, Prisma, PrismaClient } from '@prisma/client';
 
 import { EventIntelligencePipeline } from './domain/intelligence.pipeline.js';
@@ -97,7 +98,12 @@ export class AiProcessingService {
   }
 
   private canCreateEvent(extraction: ExtractedEventFields): boolean {
-    return Boolean(extraction.isEvent && extraction.title?.trim() && extraction.startAt);
+    return Boolean(
+      extraction.isEvent &&
+      extraction.title?.trim() &&
+      extraction.startAt &&
+      isEventNotExpired(extraction.startAt, extraction.endAt),
+    );
   }
 
   /** Prefer plugin-structured candidates when the LLM flips isEvent off. */
@@ -105,10 +111,22 @@ export class AiProcessingService {
     payload: AiJobPayload,
     extraction: ExtractedEventFields,
   ): ExtractedEventFields {
-    if (extraction.isEvent) return extraction;
     const fromPlugin = payload.content.includes('Structured event candidate from HTML plugin');
+    if (extraction.isEvent) {
+      return {
+        ...extraction,
+        allDay: inferAllDay(extraction.startAt, extraction.endAt, extraction.allDay),
+      };
+    }
     if (fromPlugin && extraction.title?.trim() && extraction.startAt) {
-      return { ...extraction, isEvent: true };
+      const allDayMatch = /\ballDay:\s*(true|false)\b/i.exec(payload.content);
+      const explicit =
+        allDayMatch?.[1] != null ? allDayMatch[1].toLowerCase() === 'true' : extraction.allDay;
+      return {
+        ...extraction,
+        isEvent: true,
+        allDay: inferAllDay(extraction.startAt, extraction.endAt, explicit),
+      };
     }
     return extraction;
   }
@@ -127,6 +145,7 @@ export class AiProcessingService {
       extraction.endAt && !Number.isNaN(new Date(extraction.endAt).getTime())
         ? new Date(extraction.endAt)
         : null;
+    const allDay = inferAllDay(extraction.startAt, extraction.endAt, extraction.allDay);
 
     const externalId = `${title}|${startAt.toISOString()}`.slice(0, 240);
 
@@ -148,6 +167,7 @@ export class AiProcessingService {
             description: extraction.description,
             startAt,
             endAt,
+            allDay,
             confidenceScore: result.confidenceScore,
           },
         });
@@ -167,6 +187,7 @@ export class AiProcessingService {
           description: extraction.description,
           startAt,
           endAt,
+          allDay,
           confidenceScore: result.confidenceScore,
           status: EventStatus.pending_moderation,
         },
@@ -179,6 +200,7 @@ export class AiProcessingService {
           title: created.title,
           startAt: created.startAt,
           endAt: created.endAt,
+          allDay: created.allDay,
           venueId: created.venueId,
           organizerId: created.organizerId,
           confidenceScore: created.confidenceScore,

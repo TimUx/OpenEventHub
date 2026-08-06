@@ -53,6 +53,12 @@ export class AdminEventsController {
     return this.events.listAll({ limit: limit ? Number(limit) : 100 });
   }
 
+  @Get('counts')
+  @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
+  counts() {
+    return this.events.countByStatus();
+  }
+
   @Get(':id')
   @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
   async get(@Param('id') id: string) {
@@ -74,6 +80,7 @@ export class AdminEventsController {
       description?: string | null;
       startAt?: string;
       endAt?: string | null;
+      allDay?: boolean;
       status?: EventStatus;
       changeReason?: string | null;
     },
@@ -114,6 +121,7 @@ export class AdminEventsController {
         ...(body.description !== undefined ? { description: body.description } : {}),
         ...(startAt !== undefined ? { startAt } : {}),
         ...(endAt !== undefined ? { endAt } : {}),
+        ...(body.allDay !== undefined ? { allDay: Boolean(body.allDay) } : {}),
         ...(body.status !== undefined ? { status: body.status } : {}),
         changeReason: body.changeReason?.trim() || 'admin.update',
       });

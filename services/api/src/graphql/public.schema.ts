@@ -1,4 +1,5 @@
 import {
+  GraphQLBoolean,
   GraphQLError,
   GraphQLID,
   GraphQLInt,
@@ -53,6 +54,7 @@ function mapEvent(event: {
   description: string | null;
   startAt: Date;
   endAt: Date | null;
+  allDay: boolean;
   status: string;
 }) {
   return {
@@ -63,6 +65,7 @@ function mapEvent(event: {
     description: event.description,
     startAt: event.startAt.toISOString(),
     endAt: event.endAt?.toISOString() ?? null,
+    allDay: event.allDay,
     status: event.status,
   };
 }
@@ -86,6 +89,7 @@ export function createPublicGraphQlSchema(deps: PublicGraphQlDeps): GraphQLSchem
       description: { type: GraphQLString },
       startAt: { type: new GraphQLNonNull(GraphQLString) },
       endAt: { type: GraphQLString },
+      allDay: { type: new GraphQLNonNull(GraphQLBoolean) },
       status: { type: new GraphQLNonNull(GraphQLString) },
     },
   });

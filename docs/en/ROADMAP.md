@@ -247,7 +247,7 @@ Never implement multiple large milestones in parallel.
 ## Post-M11 — Portal and ops follow-ups
 
 After roadmap packages M1–M11, these product/ops enhancements were added
-(see `CHANGELOG.md`, latest **v0.18.0**):
+(see `CHANGELOG.md`, latest **v0.19.0**):
 
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list
@@ -257,6 +257,9 @@ After roadmap packages M1–M11, these product/ops enhancements were added
 - Admin: source edit; categories/regions/events CRUD; error log; AI Settings provider CRUD
 - Optional Ollama: `OLLAMA_DEPLOY`, external network (`ownai-net`), NVIDIA GPU overlay; Swarm Ollama as separate overlay
 - AI ingest: create events from extraction; taxonomy find-or-create; one AI job per plugin event candidate
+- Crawl **future/ongoing** events only; scheduler deletes expired events hourly
+- All-day events (`allDay`): no invented clock times in UI/ICS
+- Admin Events: multi-select status/delete; header hint for events awaiting review
 - HTML plugin multi-format (`1.3.0`): tables/lists/div/JSON-LD/`<time>`/plain text; embedded EMS **Toubiz** (all future dates)
 - Dedicated `toubiz` plugin (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: one tick per distinct cron; serial crawls
