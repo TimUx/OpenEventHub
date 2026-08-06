@@ -18,7 +18,8 @@
 - Quellen (anlegen / bearbeiten / aktivieren / deaktivieren / löschen; Plugin-Typen
   `html` / `rss` / `ics` / `toubiz`; Aktualisierungsintervall per Dropdown; optional eigener Cron)
 - Veranstaltungen (Checkbox-Auswahl; Status ändern / löschen in der oberen Aktionsleiste;
-  Bearbeiten je Termin; Header zeigt Anzahl `pending_moderation`)
+  Bearbeiten je Termin; Filter nach Status, Datum, Ort/Venue, Suche, ganztägig;
+  Header zeigt Anzahl `pending_moderation`)
 - Kategorien (manuell anlegen / bearbeiten / löschen; KI legt fehlende per Find-or-create an und verknüpft)
 - Regionen (manuell anlegen / bearbeiten / löschen; KI kann Orte/Hierarchie per Find-or-create ergänzen)
 - Moderation
@@ -53,7 +54,7 @@ Flaches UI analog zum öffentlichen Portal (Primärblau-AppBar, abgerundete Butt
 
 ![Events](assets/screenshots/admin-events.png)
 
-*Events (Mehrfachauswahl)*
+*Events (Filter + Mehrfachauswahl)*
 
 ![Moderation](assets/screenshots/admin-moderation.png)
 

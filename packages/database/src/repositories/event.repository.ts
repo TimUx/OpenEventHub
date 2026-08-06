@@ -6,6 +6,16 @@ export type EventListOptions = {
   readonly offset?: number;
 };
 
+export type AdminEventListOptions = EventListOptions & {
+  readonly status?: EventStatus;
+  readonly dateFrom?: Date;
+  readonly dateTo?: Date;
+  readonly q?: string;
+  /** Matches venue name or city (case-insensitive contains). */
+  readonly venue?: string;
+  readonly allDay?: boolean;
+};
+
 export type EventSearchOptions = EventListOptions & {
   readonly q: string;
 };
@@ -72,13 +82,48 @@ export class EventRepository {
     });
   }
 
-  listAll(options: EventListOptions = {}): Promise<Event[]> {
+  listAll(options: AdminEventListOptions = {}): Promise<EventWithRelations[]> {
     const take = Math.min(Math.max(options.limit ?? 50, 1), 200);
     const skip = Math.max(options.offset ?? 0, 0);
+    const q = options.q?.trim();
+    const venue = options.venue?.trim();
+
+    const where: Prisma.EventWhereInput = {};
+    if (options.status) {
+      where.status = options.status;
+    }
+    if (options.allDay !== undefined) {
+      where.allDay = options.allDay;
+    }
+    if (options.dateFrom || options.dateTo) {
+      where.startAt = {
+        ...(options.dateFrom ? { gte: options.dateFrom } : {}),
+        ...(options.dateTo ? { lte: options.dateTo } : {}),
+      };
+    }
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { slug: { contains: q, mode: 'insensitive' } },
+        { summary: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+    if (venue) {
+      where.venue = {
+        OR: [
+          { name: { contains: venue, mode: 'insensitive' } },
+          { city: { contains: venue, mode: 'insensitive' } },
+          { address: { contains: venue, mode: 'insensitive' } },
+        ],
+      };
+    }
+
     return this.prisma.event.findMany({
-      orderBy: { updatedAt: 'desc' },
+      where,
+      orderBy: { startAt: 'asc' },
       take,
       skip,
+      include: publishedInclude,
     });
   }
 

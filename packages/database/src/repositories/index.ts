@@ -1,5 +1,6 @@
 export {
   EventRepository,
+  type AdminEventListOptions,
   type EventListOptions,
   type EventSearchOptions,
   type EventUpdateInput,

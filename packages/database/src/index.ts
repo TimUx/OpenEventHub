@@ -44,6 +44,7 @@ export {
   EventRepository,
   type EventUpdateInput,
   type EventWithRelations,
+  type AdminEventListOptions,
   SourceRepository,
   CrawlJobRepository,
   CrawlResultRepository,

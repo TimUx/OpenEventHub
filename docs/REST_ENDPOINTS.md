@@ -21,7 +21,7 @@ GET    /api/v1/search?q=
 POST   /api/v1/auth/login
 
 GET    /api/v1/admin/dashboard                 (admin|moderator|viewer)
-GET    /api/v1/admin/events
+GET    /api/v1/admin/events                    (Query: status, dateFrom, dateTo, q, venue, allDay, limit)
 GET    /api/v1/admin/events/counts             (Zähler je Status, z. B. pending_moderation)
 GET    /api/v1/admin/events/{id}
 PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventVersion)

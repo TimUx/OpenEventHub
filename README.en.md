@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.19.0 — Bulk moderation, future-only crawl, all-day dates** (post-M11)
+**v0.20.0 — Admin Events filters** (post-M11)
 
-Previous: v0.18.0 — HTML multi-format + Toubiz EMS
+Previous: v0.19.0 — Bulk moderation, future-only crawl, all-day dates
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

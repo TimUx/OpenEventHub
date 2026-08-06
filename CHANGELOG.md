@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0] - 2026-08-06
+
+### Added
+
+- Admin Events filters: status, date from/to, venue/place, text search (`q`), all-day; clear/apply in UI
+- `GET /api/v1/admin/events` query params wired to repository (`AdminEventListOptions`); list includes venue relations
+
+### Changed
+
+- Docs (DE/EN): Admin Center, REST; UI screenshot `admin-events.png` refreshed
+
 ## [0.19.0] - 2026-08-06
 
 ### Added
