@@ -77,5 +77,6 @@ In Compose, the crawler image copies `plugins/` and sets `PLUGINS_DIR=/app/plugi
 | `html` | `plugins/html/` |
 | `rss` | `plugins/rss/` |
 | `ics` | `plugins/ics/` |
+| `toubiz` | `plugins/toubiz/` (mein.toubiz.de / embedded `<toubiz-widget>`) |
 
 Verify locally: `npm run verify:plugins`.

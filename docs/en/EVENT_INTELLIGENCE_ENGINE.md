@@ -47,9 +47,18 @@ the `ai` queue. The EIE then:
 5. resolves classification labels via **find-or-create** and links categories, tags,
    regions, and optionally a venue.
 
-Multi-event listing pages: extraction prompt `event-extraction` **1.0.1** currently
-returns **one** primary event per job (earliest dated entry). Full multi-event ingest
-is a later milestone.
+Multi-event listing pages:
+
+- The **HTML plugin** (`1.3.0+`) detects events markup-agnostically (table, list,
+  div/Divi, JSON-LD, `<time>`, plain date lines) and embedded EMS widgets
+  (Toubiz → API, **all future** dates including pagination/`dateIntervals`).
+- The crawler then enqueues **one AI job per candidate** (structured short text)
+  instead of sending the full HTML page once to the LLM.
+- Dedicated `toubiz` plugin for sources wired directly as EMS.
+- Fallback with no plugin hits: extraction prompt `event-extraction` **1.0.1**
+  still returns **one** primary event per job (earliest dated entry).
+- Structured plugin candidates are persisted even if the LLM sets `isEvent=false`
+  (guard in the AI service).
 
 Without `eventId` and without a creatable extraction, the AI result is not persisted
 (warning in logs).

@@ -31,10 +31,10 @@ flowchart LR
 | Component | Role |
 |-----------|------|
 | `scheduler` | Registriert **einen** Repeatable-Job pro Cron-Muster; der Crawler tickt Quellen seriell |
-| `crawler` | Konsumiert `crawl`, führt den Plugin-Lebenszyklus aus, speichert Raw-Payloads, überspringt unveränderte Hashes |
+| `crawler` | Konsumiert `crawl`, führt den Plugin-Lebenszyklus aus, speichert Raw-Payloads, überspringt unveränderte Hashes; bei Plugin-Events **ein AI-Job pro Kandidat** |
 | `ocr-service` | Konsumiert `ocr` für Bild-/PDF-markierte Payloads, schreibt `.ocr.txt`, enqueued `ai` |
 | `ai-service` | Konsumiert `ai` (Event Intelligence Engine) |
-| `plugins/*` | Unabhängig deploybare Connectoren (`html`, `rss`, `ics`) über das Plugin SDK |
+| `plugins/*` | Unabhängig deploybare Connectoren (`html`, `rss`, `ics`, `toubiz`) über das Plugin SDK |
 
 Neue Quelltypen werden als Plugins unter `plugins/` mit einem `plugin.json`-Manifest hinzugefügt.
 Core-Services entdecken sie beim Start (`PLUGINS_DIR`); Änderungen am Core-Code sind nicht erforderlich.

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import {
   cronFromSchedulePreset,
   DEFAULT_SCHEDULE_PRESET,
+  detectSchedulePreset,
   SCHEDULE_PRESET_IDS,
   type SchedulePresetId,
 } from '@openeventhub/shared';
@@ -30,62 +31,151 @@ export default function SourcesPage() {
   const { token } = useAuth();
   const { data, error, loading, reload } = useAdminQuery<Source[]>('/api/v1/admin/sources');
   const [message, setMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
   const [name, setName] = useState('');
   const [pluginType, setPluginType] = useState('rss');
   const [url, setUrl] = useState('');
   const [schedulePreset, setSchedulePreset] = useState<SchedulePresetId>(DEFAULT_SCHEDULE_PRESET);
   const [customCron, setCustomCron] = useState('');
+  const [status, setStatus] = useState('healthy');
 
-  async function onCreate(event: FormEvent) {
-    event.preventDefault();
-    if (!token) return;
-    setMessage(null);
-    const scheduleCron = cronFromSchedulePreset(schedulePreset, customCron);
-    await adminFetch('/api/v1/admin/sources', token, {
-      method: 'POST',
-      body: JSON.stringify({ name, pluginType, url, scheduleCron }),
-    });
+  function resetForm(): void {
+    setEditingId(null);
     setName('');
+    setPluginType('rss');
     setUrl('');
     setSchedulePreset(DEFAULT_SCHEDULE_PRESET);
     setCustomCron('');
-    setMessage(t('sources.created'));
-    await reload();
+    setStatus('healthy');
+    setFormError(null);
   }
 
-  async function crawl(id: string) {
+  function startEdit(source: Source): void {
+    const preset = detectSchedulePreset(source.scheduleCron);
+    setEditingId(source.id);
+    setName(source.name);
+    setPluginType(source.pluginType);
+    setUrl(source.url);
+    setSchedulePreset(preset);
+    setCustomCron(preset === 'custom' ? (source.scheduleCron ?? '') : '');
+    setStatus(source.status === 'disabled' ? 'disabled' : 'healthy');
+    setMessage(null);
+    setFormError(null);
+  }
+
+  async function onSubmit(event: FormEvent): Promise<void> {
+    event.preventDefault();
+    if (!token) return;
+    setSaving(true);
+    setMessage(null);
+    setFormError(null);
+    const scheduleCron = cronFromSchedulePreset(schedulePreset, customCron);
+    const body = {
+      name: name.trim(),
+      pluginType,
+      url: url.trim(),
+      scheduleCron,
+      ...(editingId ? { status } : {}),
+    };
+    try {
+      if (editingId) {
+        await adminFetch(`/api/v1/admin/sources/${editingId}`, token, {
+          method: 'PATCH',
+          body: JSON.stringify(body),
+        });
+        setMessage(t('sources.updated'));
+      } else {
+        await adminFetch('/api/v1/admin/sources', token, {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        setMessage(t('sources.created'));
+      }
+      resetForm();
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function crawl(id: string): Promise<void> {
     if (!token) return;
     setMessage(null);
-    await adminFetch(`/api/v1/admin/sources/${id}/crawl`, token, { method: 'POST' });
-    setMessage(t('sources.crawlEnqueued'));
-    await reload();
+    setFormError(null);
+    try {
+      await adminFetch(`/api/v1/admin/sources/${id}/crawl`, token, { method: 'POST' });
+      setMessage(t('sources.crawlEnqueued'));
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    }
   }
 
-  async function disable(id: string) {
+  async function setSourceStatus(id: string, next: 'healthy' | 'disabled'): Promise<void> {
     if (!token) return;
-    await adminFetch(`/api/v1/admin/sources/${id}`, token, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'disabled' }),
-    });
-    await reload();
+    setFormError(null);
+    try {
+      await adminFetch(`/api/v1/admin/sources/${id}`, token, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: next }),
+      });
+      setMessage(next === 'disabled' ? t('sources.disabled') : t('sources.enabled'));
+      if (editingId === id) {
+        setStatus(next);
+      }
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    }
   }
 
-  async function remove(id: string) {
+  async function remove(id: string): Promise<void> {
     if (!token) return;
     if (!window.confirm(t('sources.confirmDelete'))) return;
-    await adminFetch(`/api/v1/admin/sources/${id}`, token, { method: 'DELETE' });
-    await reload();
+    setFormError(null);
+    try {
+      await adminFetch(`/api/v1/admin/sources/${id}`, token, { method: 'DELETE' });
+      setMessage(t('sources.deleted'));
+      if (editingId === id) {
+        resetForm();
+      }
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    }
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('sources.title')} description={t('sources.description')} />
+      <PageHeader
+        title={t('sources.title')}
+        description={t('sources.description')}
+        action={
+          editingId ? (
+            <button
+              type="button"
+              className="rounded-xl border border-[var(--border)] px-3 py-1.5 text-sm"
+              onClick={resetForm}
+            >
+              {t('sources.addSource')}
+            </button>
+          ) : null
+        }
+      />
       {message ? <p className="text-sm text-primary">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
 
       <Panel>
-        <h2 className="mb-3 font-bold text-lg">{t('sources.addSource')}</h2>
-        <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onCreate(e)}>
+        <h2 className="mb-3 font-bold text-lg">
+          {editingId ? t('sources.editSource') : t('sources.addSource')}
+        </h2>
+        <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onSubmit(e)}>
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3"
             placeholder={t('sources.name')}
@@ -101,6 +191,7 @@ export default function SourcesPage() {
             <option value="rss">rss</option>
             <option value="html">html</option>
             <option value="ics">ics</option>
+            <option value="toubiz">toubiz</option>
           </select>
           <input
             className="h-10 rounded-md border border-[var(--border)] px-3 md:col-span-2"
@@ -139,9 +230,37 @@ export default function SourcesPage() {
               />
             </label>
           ) : null}
-          <button type="submit" className="h-10 rounded-xl bg-primary text-white md:col-span-2">
-            {t('common.create')}
-          </button>
+          {editingId ? (
+            <label className="text-sm md:col-span-2">
+              <span className="mb-1 block font-medium">{t('sources.status')}</span>
+              <select
+                className="h-10 w-full rounded-md border border-[var(--border)] px-3"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="healthy">{t('sources.statusActive')}</option>
+                <option value="disabled">{t('sources.statusDisabled')}</option>
+              </select>
+            </label>
+          ) : null}
+          <div className="flex flex-wrap gap-2 md:col-span-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="h-10 rounded-xl bg-primary px-4 text-white disabled:opacity-60"
+            >
+              {editingId ? t('sources.saveChanges') : t('common.create')}
+            </button>
+            {editingId ? (
+              <button
+                type="button"
+                className="h-10 rounded-xl border border-[var(--border)] px-4"
+                onClick={resetForm}
+              >
+                {t('common.cancel')}
+              </button>
+            ) : null}
+          </div>
         </form>
       </Panel>
 
@@ -172,17 +291,34 @@ export default function SourcesPage() {
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
-                  onClick={() => void crawl(source.id)}
+                  onClick={() => startEdit(source)}
                 >
-                  {t('sources.crawlNow')}
+                  {t('common.edit')}
                 </button>
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
-                  onClick={() => void disable(source.id)}
+                  onClick={() => void crawl(source.id)}
                 >
-                  {t('sources.disable')}
+                  {t('sources.crawlNow')}
                 </button>
+                {source.status === 'disabled' ? (
+                  <button
+                    type="button"
+                    className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
+                    onClick={() => void setSourceStatus(source.id, 'healthy')}
+                  >
+                    {t('sources.enable')}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
+                    onClick={() => void setSourceStatus(source.id, 'disabled')}
+                  >
+                    {t('sources.disable')}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-700"

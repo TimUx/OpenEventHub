@@ -37,15 +37,18 @@ export class AiProcessingService {
   }
 
   private async persistResult(payload: AiJobPayload, result: AiJobResult): Promise<AiJobResult> {
+    const extraction = this.resolveExtraction(payload, result.extraction);
+    result = { ...result, extraction };
+
     let eventId = payload.eventId ?? null;
 
-    if (!eventId && this.canCreateEvent(result.extraction)) {
+    if (!eventId && this.canCreateEvent(extraction)) {
       eventId = await this.createEventFromExtraction(payload, result);
     }
 
     if (!eventId) {
       this.logger.warn(
-        `AI result not persisted (no eventId and extraction not creatable) crawlResult=${payload.crawlResultId ?? 'n/a'} isEvent=${result.extraction.isEvent} title=${result.extraction.title ? 'yes' : 'no'} startAt=${result.extraction.startAt ? 'yes' : 'no'}`,
+        `AI result not persisted (no eventId and extraction not creatable) crawlResult=${payload.crawlResultId ?? 'n/a'} isEvent=${extraction.isEvent} title=${extraction.title ? 'yes' : 'no'} startAt=${extraction.startAt ? 'yes' : 'no'}`,
       );
       return result;
     }
@@ -95,6 +98,19 @@ export class AiProcessingService {
 
   private canCreateEvent(extraction: ExtractedEventFields): boolean {
     return Boolean(extraction.isEvent && extraction.title?.trim() && extraction.startAt);
+  }
+
+  /** Prefer plugin-structured candidates when the LLM flips isEvent off. */
+  private resolveExtraction(
+    payload: AiJobPayload,
+    extraction: ExtractedEventFields,
+  ): ExtractedEventFields {
+    if (extraction.isEvent) return extraction;
+    const fromPlugin = payload.content.includes('Structured event candidate from HTML plugin');
+    if (fromPlugin && extraction.title?.trim() && extraction.startAt) {
+      return { ...extraction, isEvent: true };
+    }
+    return extraction;
   }
 
   private async createEventFromExtraction(

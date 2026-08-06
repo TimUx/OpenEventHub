@@ -11,7 +11,12 @@ import {
 } from '@openeventhub/database';
 import type { CrawlPlugin } from '@openeventhub/plugin-sdk';
 import { metricsRegistry } from '@openeventhub/service-runtime';
-import type { AiJobPayload, CrawlJobPayload, OcrJobPayload } from '@openeventhub/shared';
+import type {
+  AiJobPayload,
+  CrawlJobPayload,
+  ExtractedEventFields,
+  OcrJobPayload,
+} from '@openeventhub/shared';
 
 import { ObjectStorageService } from '../object-storage/object-storage.service.js';
 import { PluginRegistryService } from '../plugins/plugin-registry.service.js';
@@ -102,7 +107,7 @@ export class CrawlProcessingService {
 
       const parsed = await plugin.parse(fetchResult);
       const normalized = await plugin.normalize(parsed);
-      await plugin.emit(normalized);
+      const pluginEvents = (await plugin.emit(normalized)).filter((event) => event.isEvent);
 
       const contentHash = crypto.createHash('sha256').update(fetchResult.content).digest('hex');
 
@@ -138,10 +143,11 @@ export class CrawlProcessingService {
           sourceUrl: targetUrl,
           sourceId: source.id,
           content: fetchResult.content,
+          pluginEvents,
         });
         this.recordCrawlMetrics(pluginType, 'skipped', startedHr);
         this.logger.log(
-          `Crawl skipped unchanged content source=${source.id} contentHash=${contentHash} (downstream re-enqueued)`,
+          `Crawl skipped unchanged content source=${source.id} contentHash=${contentHash} pluginEvents=${pluginEvents.length} (downstream re-enqueued)`,
         );
         return;
       }
@@ -176,11 +182,12 @@ export class CrawlProcessingService {
         sourceUrl: targetUrl,
         sourceId: source.id,
         content: fetchResult.content,
+        pluginEvents,
       });
 
       this.recordCrawlMetrics(pluginType, 'success', startedHr);
       this.logger.log(
-        `Crawl completed source=${source.id} plugin=${plugin.metadata.pluginType} objectKey=${objectKey}`,
+        `Crawl completed source=${source.id} plugin=${plugin.metadata.pluginType} objectKey=${objectKey} pluginEvents=${pluginEvents.length}`,
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -245,6 +252,7 @@ export class CrawlProcessingService {
     readonly sourceUrl: string;
     readonly sourceId: string;
     readonly content: Buffer;
+    readonly pluginEvents?: readonly ExtractedEventFields[];
   }): Promise<void> {
     if (requiresOcr(args.mimeType)) {
       const payload: OcrJobPayload = {
@@ -256,6 +264,24 @@ export class CrawlProcessingService {
         sourceId: args.sourceId,
       };
       await this.downstream.enqueueOcr(payload);
+      return;
+    }
+
+    const pluginEvents = args.pluginEvents ?? [];
+    if (pluginEvents.length > 0) {
+      for (const event of pluginEvents) {
+        const payload: AiJobPayload = {
+          content: formatPluginEventForAi(event, args.sourceUrl),
+          sourceUrl: args.sourceUrl,
+          crawlResultId: args.crawlResultId,
+          jobId: args.crawlJobId,
+          sourceId: args.sourceId,
+        };
+        await this.downstream.enqueueAi(payload);
+      }
+      this.logger.log(
+        `Enqueued ${pluginEvents.length} AI job(s) from plugin events source=${args.sourceId}`,
+      );
       return;
     }
 
@@ -273,4 +299,24 @@ export class CrawlProcessingService {
     assert.ok(plugin, 'plugin required');
     assert.ok(sourceUrl, 'sourceUrl required');
   }
+}
+
+function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string): string {
+  const lines = [
+    `Source URL: ${sourceUrl}`,
+    'Structured event candidate from HTML plugin:',
+    `title: ${event.title ?? ''}`,
+    `startAt: ${event.startAt ?? ''}`,
+    `endAt: ${event.endAt ?? ''}`,
+    `summary: ${event.summary ?? ''}`,
+    `description: ${event.description ?? ''}`,
+    `venueName: ${event.venueName ?? ''}`,
+    `venueAddress: ${event.venueAddress ?? ''}`,
+    `organizerName: ${event.organizerName ?? ''}`,
+    `isRecurring: ${event.isRecurring ? 'true' : 'false'}`,
+    `extractionConfidence: ${event.extractionConfidence}`,
+    '',
+    'This content describes exactly one public event. Preserve the given title and ISO datetimes.',
+  ];
+  return lines.join('\n');
 }

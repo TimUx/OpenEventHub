@@ -87,7 +87,16 @@ const fs = require("fs");
 
   await shot(frontend + "/calendar", "frontend-calendar.png", 2500);
   await shot(frontend + "/map", "frontend-map.png", 3500);
-  await shot(frontend + "/submit", "frontend-submit.png", 1500);
+
+  await page.goto(frontend + "/submit", { waitUntil: "networkidle", timeout: 90000 });
+  await page.waitForTimeout(800);
+  const sourceTab = page.locator("main button").filter({ hasText: /Quelle|Source/ });
+  if (await sourceTab.count()) {
+    await sourceTab.first().click();
+    await page.waitForTimeout(500);
+  }
+  await page.screenshot({ path: `${out}/frontend-submit.png` });
+
   await shot(frontend + "/search", "frontend-search.png", 1500);
 
   const loginCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });

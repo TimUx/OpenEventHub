@@ -5,6 +5,7 @@
 Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flaches UI.
 
 Header-Icons; Event-Liste mit aufklappbaren Filtern und Kalender-Export/Abonnement; Event-Aktionen als Icon-Buttons; Brand-Mark; SEO/PWA mit Bottom-Navigation.
+Quellenverwaltung inkl. Bearbeiten und Plugin-Typen `html` / `rss` / `ics` / `toubiz`.
 
 ## Frontend
 
@@ -16,7 +17,7 @@ Header-Icons; Event-Liste mit aufklappbaren Filtern und Kalender-Export/Abonneme
 | `frontend-event-detail.png` | Veranstaltungsdetail |
 | `frontend-calendar.png` | Kalender inkl. Abonnement |
 | `frontend-map.png` | Karte mit Markern/Filtern |
-| `frontend-submit.png` | Öffentliche Einreichung |
+| `frontend-submit.png` | Öffentliche Einreichung (Quelle-Tab inkl. Plugin-Typen) |
 | `frontend-search.png` | Suche |
 
 ## Admin Center

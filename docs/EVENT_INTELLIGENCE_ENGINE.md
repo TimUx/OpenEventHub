@@ -47,9 +47,18 @@ in die `ai`-Queue. Die EIE:
 5. löst Klassifikations-Labels per **Find-or-create** auf und verknüpft Kategorien,
    Tags, Regionen und optional Venue.
 
-Listen mit mehreren Terminen: der Extraction-Prompt (`event-extraction` **1.0.1**)
-liefert aktuell **ein** primäres Event pro Job (frühester datierter Eintrag).
-Vollständige Multi-Event-Ingestion ist ein späteres Meilenstein-Thema.
+Listen mit mehreren Terminen:
+
+- Das **HTML-Plugin** (`1.3.0+`) erkennt Termine markup-unabhängig (Tabelle, Liste,
+  Div/Divi, JSON-LD, `<time>`, Klartext-Datumszeilen) und eingebettete EMS-Widgets
+  (Toubiz → API, **alle zukünftigen** Termine inkl. Pagination/`dateIntervals`).
+- Der Crawler enqueued dann **einen AI-Job pro Kandidat** (strukturierter Kurztext),
+  statt die komplette HTML-Seite einmalig an das LLM zu senden.
+- Dediziertes Plugin `toubiz` für Quellen, die direkt als EMS angebunden werden.
+- Fallback ohne Plugin-Treffer: Extraction-Prompt (`event-extraction` **1.0.1**)
+  liefert weiterhin **ein** primäres Event pro Job (frühester datierter Eintrag).
+- Strukturierte Plugin-Kandidaten werden auch dann persistiert, wenn das LLM
+  `isEvent=false` setzt (Guard im AI-Service).
 
 Ohne `eventId` und ohne creatable Extraction wird das AI-Ergebnis nicht persistiert
 (Warnung im Log).
