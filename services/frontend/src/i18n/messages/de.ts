@@ -47,6 +47,8 @@ export const de = {
     description:
       'Veröffentlichte Veranstaltungen aus allen verbundenen Quellen. Filtern und sortieren nach Kategorie, Region, Zeitraum und Reihenfolge.',
     filters: 'Filter und Sortierung',
+    filtersToggle: 'Filter',
+    filtersActive: 'aktiv',
     filterCategory: 'Kategorie',
     filterRegion: 'Region',
     filterFrom: 'Von',
@@ -128,6 +130,7 @@ export const de = {
   },
   calendarExport: {
     section: 'Kalender-Export und Abonnement',
+    toggle: 'Kalender übernehmen',
     title: 'In lokalen Kalender übernehmen',
     description:
       'Aktuelle (gefilterte) Treffer als .ics herunterladen oder den Online-Feed in Apple, Google, Outlook oder Thunderbird abonnieren.',

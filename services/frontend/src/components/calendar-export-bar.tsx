@@ -11,6 +11,7 @@ import {
   buildWebcalSubscribeUrl,
   downloadEventsIcs,
 } from '../lib/event-calendar';
+import { CollapsiblePanel } from './collapsible-panel';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
@@ -18,10 +19,13 @@ export function CalendarExportBar({
   events,
   feedQuery,
   calendarName = 'OpenEventHub',
+  defaultOpen = false,
 }: {
   readonly events: readonly ApiEvent[];
   readonly feedQuery?: Record<string, string>;
   readonly calendarName?: string;
+  /** When false (default), the export/subscribe tools stay collapsed. */
+  readonly defaultOpen?: boolean;
 }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
@@ -53,60 +57,69 @@ export function CalendarExportBar({
   }
 
   return (
-    <section
-      className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-soft"
-      aria-label={t('calendarExport.section')}
+    <CollapsiblePanel
+      title={t('calendarExport.toggle')}
+      {...(events.length > 0 ? { badge: String(events.length) } : {})}
+      defaultOpen={defaultOpen}
+      className="shadow-none"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <h2 className="text-base font-bold">{t('calendarExport.title')}</h2>
-          <p className="text-sm text-[var(--muted)]">{t('calendarExport.description')}</p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={events.length === 0}
-          onClick={downloadVisible}
-          title={t('calendarExport.downloadHint')}
-        >
-          <CalendarPlus className="h-4 w-4" aria-hidden />
-          {t('calendarExport.download', { count: events.length })}
-        </Button>
-      </div>
+      <div className="space-y-3" aria-label={t('calendarExport.section')}>
+        <p className="text-sm text-[var(--muted)]">{t('calendarExport.description')}</p>
 
-      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-        <div className="min-w-0">
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="calendar-feed-url"
-          >
-            {t('calendarExport.subscribeUrl')}
-          </label>
-          <Input id="calendar-feed-url" readOnly value={httpsUrl} className="font-mono text-xs" />
-        </div>
-        <div className="flex items-end gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="outline"
-            size="icon"
-            onClick={copyHttps}
-            title={t('calendarExport.copy')}
+            disabled={events.length === 0}
+            onClick={downloadVisible}
+            title={t('calendarExport.downloadHint')}
+            className="h-9 min-h-0 px-3 text-sm"
           >
-            <Copy className="h-4 w-4" aria-hidden />
-            <span className="sr-only">{t('calendarExport.copy')}</span>
+            <CalendarPlus className="h-4 w-4" aria-hidden />
+            {t('calendarExport.download', { count: events.length })}
           </Button>
-          <a
-            href={webcalUrl}
-            className="inline-flex h-11 min-h-tap items-center justify-center gap-2 rounded-xl border-2 border-primary bg-[var(--card)] px-4 text-sm font-semibold text-primary hover:bg-primary-soft"
-          >
-            <Rss className="h-4 w-4" aria-hidden />
-            {t('calendarExport.subscribe')}
-          </a>
         </div>
+
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="min-w-0">
+            <label
+              className="mb-1 block text-xs font-medium text-[var(--muted)]"
+              htmlFor="calendar-feed-url"
+            >
+              {t('calendarExport.subscribeUrl')}
+            </label>
+            <Input
+              id="calendar-feed-url"
+              readOnly
+              value={httpsUrl}
+              className="h-9 min-h-0 font-mono text-xs"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 min-h-0 min-w-9"
+              onClick={copyHttps}
+              title={t('calendarExport.copy')}
+            >
+              <Copy className="h-4 w-4" aria-hidden />
+              <span className="sr-only">{t('calendarExport.copy')}</span>
+            </Button>
+            <a
+              href={webcalUrl}
+              className="inline-flex h-9 min-h-0 items-center justify-center gap-2 rounded-xl border border-primary px-3 text-sm font-medium text-primary hover:bg-primary-soft"
+            >
+              <Rss className="h-4 w-4" aria-hidden />
+              {t('calendarExport.subscribe')}
+            </a>
+          </div>
+        </div>
+        <p className="text-xs text-[var(--muted)]" aria-live="polite">
+          {copied ? t('calendarExport.copied') : t('calendarExport.subscribeHint')}
+        </p>
       </div>
-      <p className="text-xs text-[var(--muted)]" aria-live="polite">
-        {copied ? t('calendarExport.copied') : t('calendarExport.subscribeHint')}
-      </p>
-    </section>
+    </CollapsiblePanel>
   );
 }

@@ -14,7 +14,7 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.16.0 — Calendar subscribe & bulk ICS export** (post-M11)
+**v0.16.1 — Collapsible filters & calendar export** (post-M11)
 
 Vorher: v0.15.0 — Event list filters & quieter event cards
 

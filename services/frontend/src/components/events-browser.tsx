@@ -16,8 +16,9 @@ import {
   type EventSortField,
 } from '../lib/event-list-filters';
 import { cn } from '../lib/utils';
-import { EventCard, type EventDisplayMode } from './event-card';
 import { CalendarExportBar } from './calendar-export-bar';
+import { CollapsiblePanel } from './collapsible-panel';
+import { EventCard, type EventDisplayMode } from './event-card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ViewModeToggle } from './view-mode-toggle';
@@ -99,145 +100,157 @@ export function EventsBrowser({
         />
       </header>
 
-      <form
-        className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-soft sm:grid-cols-2 lg:grid-cols-6"
-        aria-label={t('events.filters')}
-        onSubmit={(event) => event.preventDefault()}
-      >
-        <div>
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="events-category"
-          >
-            {t('events.filterCategory')}
-          </label>
-          <select
-            id="events-category"
-            className={selectClass}
-            value={filters.category}
-            onChange={(event) => patch({ category: event.target.value })}
-          >
-            <option value="">{t('events.filterAny')}</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="space-y-2">
+        <p className="text-sm text-[var(--muted)]" aria-live="polite">
+          {t('events.resultsCount', { shown: visible.length, total: events.length })}
+        </p>
 
-        <div>
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="events-region"
+        <div className="grid gap-2 sm:grid-cols-2">
+          <CollapsiblePanel
+            title={t('events.filtersToggle')}
+            {...(filtersActive ? { badge: t('events.filtersActive') } : {})}
+            className="shadow-none"
           >
-            {t('events.filterRegion')}
-          </label>
-          <select
-            id="events-region"
-            className={selectClass}
-            value={filters.regionId}
-            onChange={(event) => patch({ regionId: event.target.value })}
-          >
-            <option value="">{t('events.filterAny')}</option>
-            {regions.map((region) => (
-              <option key={region.id} value={region.id}>
-                {region.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            <form
+              className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+              aria-label={t('events.filters')}
+              onSubmit={(event) => event.preventDefault()}
+            >
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-[var(--muted)]"
+                  htmlFor="events-category"
+                >
+                  {t('events.filterCategory')}
+                </label>
+                <select
+                  id="events-category"
+                  className={selectClass}
+                  value={filters.category}
+                  onChange={(event) => patch({ category: event.target.value })}
+                >
+                  <option value="">{t('events.filterAny')}</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div>
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="events-from"
-          >
-            {t('events.filterFrom')}
-          </label>
-          <Input
-            id="events-from"
-            type="date"
-            value={filters.dateFrom}
-            onChange={(event) => patch({ dateFrom: event.target.value })}
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-[var(--muted)]"
+                  htmlFor="events-region"
+                >
+                  {t('events.filterRegion')}
+                </label>
+                <select
+                  id="events-region"
+                  className={selectClass}
+                  value={filters.regionId}
+                  onChange={(event) => patch({ regionId: event.target.value })}
+                >
+                  <option value="">{t('events.filterAny')}</option>
+                  {regions.map((region) => (
+                    <option key={region.id} value={region.id}>
+                      {region.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-[var(--muted)]"
+                  htmlFor="events-from"
+                >
+                  {t('events.filterFrom')}
+                </label>
+                <Input
+                  id="events-from"
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(event) => patch({ dateFrom: event.target.value })}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-[var(--muted)]"
+                  htmlFor="events-to"
+                >
+                  {t('events.filterTo')}
+                </label>
+                <Input
+                  id="events-to"
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(event) => patch({ dateTo: event.target.value })}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="mb-1 block text-xs font-medium text-[var(--muted)]"
+                  htmlFor="events-sort"
+                >
+                  {t('events.filterSort')}
+                </label>
+                <select
+                  id="events-sort"
+                  className={selectClass}
+                  value={filters.sortBy}
+                  onChange={(event) => patch({ sortBy: event.target.value as EventSortField })}
+                >
+                  <option value="startAt">{t('events.sortStart')}</option>
+                  <option value="title">{t('events.sortTitle')}</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="mb-1 block text-xs font-medium text-[var(--muted)]">
+                  {t('events.filterOrder')}
+                </span>
+                <div className="flex flex-1 items-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-9 min-h-0 min-w-9 shrink-0"
+                    aria-label={
+                      filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')
+                    }
+                    title={filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')}
+                    onClick={toggleSortDir}
+                  >
+                    {filters.sortDir === 'asc' ? (
+                      <ArrowUpAZ className="h-4 w-4" aria-hidden />
+                    ) : (
+                      <ArrowDownAZ className="h-4 w-4" aria-hidden />
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className={cn('h-9 min-h-0 flex-1 px-3', !filtersActive && 'invisible')}
+                    onClick={clearFilters}
+                    disabled={!filtersActive}
+                  >
+                    {t('events.clearFilters')}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </CollapsiblePanel>
+
+          <CalendarExportBar
+            events={visible}
+            feedQuery={feedQuery}
+            calendarName={filtersActive ? 'OpenEventHub (filtered)' : 'OpenEventHub'}
           />
         </div>
-
-        <div>
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="events-to"
-          >
-            {t('events.filterTo')}
-          </label>
-          <Input
-            id="events-to"
-            type="date"
-            value={filters.dateTo}
-            onChange={(event) => patch({ dateTo: event.target.value })}
-          />
-        </div>
-
-        <div>
-          <label
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
-            htmlFor="events-sort"
-          >
-            {t('events.filterSort')}
-          </label>
-          <select
-            id="events-sort"
-            className={selectClass}
-            value={filters.sortBy}
-            onChange={(event) => patch({ sortBy: event.target.value as EventSortField })}
-          >
-            <option value="startAt">{t('events.sortStart')}</option>
-            <option value="title">{t('events.sortTitle')}</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            {t('events.filterOrder')}
-          </span>
-          <div className="flex flex-1 items-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="shrink-0"
-              aria-label={filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')}
-              title={filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')}
-              onClick={toggleSortDir}
-            >
-              {filters.sortDir === 'asc' ? (
-                <ArrowUpAZ className="h-4 w-4" aria-hidden />
-              ) : (
-                <ArrowDownAZ className="h-4 w-4" aria-hidden />
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className={cn('flex-1', !filtersActive && 'invisible')}
-              onClick={clearFilters}
-              disabled={!filtersActive}
-            >
-              {t('events.clearFilters')}
-            </Button>
-          </div>
-        </div>
-      </form>
-
-      <p className="text-sm text-[var(--muted)]" aria-live="polite">
-        {t('events.resultsCount', { shown: visible.length, total: events.length })}
-      </p>
-
-      <CalendarExportBar
-        events={visible}
-        feedQuery={feedQuery}
-        calendarName={filtersActive ? 'OpenEventHub (filtered)' : 'OpenEventHub'}
-      />
+      </div>
 
       {events.length === 0 ? (
         <p className="text-sm text-[var(--muted)]">{t('events.empty')}</p>

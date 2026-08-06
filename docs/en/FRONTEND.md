@@ -35,8 +35,7 @@ Views:
 Event actions (list, tiles, details, and detail page):
 - **Show on map** / **Add to calendar** — icon buttons with hover tooltips (`title`/`aria-label`)
 - Public lists do not show a status like “PUBLISHED” (visible = published)
-- **Bulk export:** download filtered matches as one `.ics` file
-- **Subscription:** `/calendar.ics` (portal) or `/api/v1/calendar.ics` (API) — `webcal://` for Apple/Outlook/Thunderbird; HTTPS URL for Google Calendar “From URL”
+- **Bulk export / subscription:** under “Add to calendar” as a collapsible advanced panel (collapsed by default); filtered matches as `.ics` or online feed (`/calendar.ics` / `/api/v1/calendar.ics`, `webcal://`)
 
 ## UI languages
 
@@ -61,7 +60,7 @@ Event actions (list, tiles, details, and detail page):
 - **List** — compact rows
 - **Details** — expanded rows with summary/description
 - **Tiles** — card grid
-- Flat filter bar: category, region, date range (from/to), sort by (start date/title), ascending/descending
+- Filters and sorting as a collapsible panel (collapsed by default): category, region, date range (from/to), sort by (start date/title), ascending/descending — active filters show a badge on the toggle
 
 ### Calendar
 - **Day** / **Week** / **Month** / **Year**

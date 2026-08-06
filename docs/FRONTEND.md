@@ -35,8 +35,7 @@ Ansichten:
 Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - **Auf Karte anzeigen** / **In Kalender eintragen** — Icon-Buttons mit Hover-Tooltip (`title`/`aria-label`)
 - Öffentliche Listen zeigen keinen Status wie „PUBLISHED“ (sichtbar = veröffentlicht)
-- **Bulk-Export:** gefilterte Treffer als eine `.ics`-Datei herunterladen
-- **Abonnement:** `/calendar.ics` (Portal) bzw. `/api/v1/calendar.ics` (API) — `webcal://` für Apple/Outlook/Thunderbird; HTTPS-URL für Google Kalender „Per URL“
+- **Bulk-Export / Abonnement:** unter „Kalender übernehmen“ als aufklappbare Zusatzfunktion (standardmäßig zugeklappt); gefilterte Treffer als `.ics` oder Online-Feed (`/calendar.ics` / `/api/v1/calendar.ics`, `webcal://`)
 
 ## Mehrsprachigkeit (UI)
 
@@ -61,7 +60,7 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - **Liste** — kompakte Zeilen
 - **Details** — erweiterte Listeneinträge mit Summary/Beschreibung
 - **Kacheln** — Kartenraster
-- Flaches Filtermenü: Kategorie, Region, Zeitraum (Von/Bis), Sortieren nach (Startdatum/Titel), Auf-/Absteigend
+- Filter und Sortierung als aufklappbares Panel (standardmäßig zugeklappt): Kategorie, Region, Zeitraum (Von/Bis), Sortieren nach (Startdatum/Titel), Auf-/Absteigend — aktiver Filter wird am Toggle als Badge angezeigt
 
 ### Kalender
 - **Tag** / **Woche** / **Monat** / **Jahr**
