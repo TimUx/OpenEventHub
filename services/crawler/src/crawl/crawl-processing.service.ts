@@ -52,9 +52,7 @@ export class CrawlProcessingService {
         await this.processSource(source.id);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        this.logger.error(
-          `Schedule tick continued after failure source=${source.id}: ${message}`,
-        );
+        this.logger.error(`Schedule tick continued after failure source=${source.id}: ${message}`);
       }
     }
   }

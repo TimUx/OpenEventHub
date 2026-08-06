@@ -30,8 +30,7 @@ export const en = {
   footer: 'OpenEventHub — Event Intelligence, not just a calendar.',
   home: {
     title: 'Events from many sources — in one place',
-    lead:
-      'OpenEventHub collects dates from websites, feeds, and calendars, reviews them, and presents one clear published overview.',
+    lead: 'OpenEventHub collects dates from websites, feeds, and calendars, reviews them, and presents one clear published overview.',
     searchLabel: 'Search events',
     searchPlaceholder: 'Concerts, sports, culture…',
     search: 'Search',

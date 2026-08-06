@@ -43,7 +43,9 @@ function fromDatetimeLocal(value: string): string {
 export default function EventsPage() {
   const { t } = useI18n();
   const { token } = useAuth();
-  const { data, error, loading, reload } = useAdminQuery<EventRow[]>('/api/v1/admin/events?limit=100');
+  const { data, error, loading, reload } = useAdminQuery<EventRow[]>(
+    '/api/v1/admin/events?limit=100',
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -64,9 +66,11 @@ export default function EventsPage() {
     setSlug(event.slug);
     setSummary(event.summary ?? '');
     setDescription(event.description ?? '');
-    setStatus((EVENT_STATUSES.includes(event.status as EventStatus)
-      ? event.status
-      : 'draft') as EventStatus);
+    setStatus(
+      (EVENT_STATUSES.includes(event.status as EventStatus)
+        ? event.status
+        : 'draft') as EventStatus,
+    );
     setStartAt(toDatetimeLocal(event.startAt));
     setEndAt(toDatetimeLocal(event.endAt));
     setChangeReason('');
@@ -267,7 +271,9 @@ export default function EventsPage() {
                 {t('events.fieldStatus')}
                 <select
                   className="h-8 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-xs text-[var(--foreground)]"
-                  value={EVENT_STATUSES.includes(event.status as EventStatus) ? event.status : 'draft'}
+                  value={
+                    EVENT_STATUSES.includes(event.status as EventStatus) ? event.status : 'draft'
+                  }
                   onChange={(e) => void quickStatus(event.id, e.target.value as EventStatus)}
                   aria-label={t('events.changeStatus')}
                 >

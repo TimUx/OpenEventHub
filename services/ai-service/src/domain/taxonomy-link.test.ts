@@ -4,12 +4,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { Category, Region, Tag, Venue } from '@prisma/client';
 
-import {
-  linkEventTaxonomy,
-  normalizeLabel,
-  slugify,
-  type TaxonomyDb,
-} from './taxonomy-link.js';
+import { linkEventTaxonomy, normalizeLabel, slugify, type TaxonomyDb } from './taxonomy-link.js';
 
 function createMemoryDb(): TaxonomyDb & {
   categories: Category[];

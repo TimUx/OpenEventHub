@@ -99,13 +99,11 @@ export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
         return jobs.map((job) => mapFailedJob(name, job));
       }),
     );
-    return batches
-      .flat()
-      .sort((a, b) => {
-        const aTs = a.finishedOn ?? a.timestamp ?? '';
-        const bTs = b.finishedOn ?? b.timestamp ?? '';
-        return bTs.localeCompare(aTs);
-      });
+    return batches.flat().sort((a, b) => {
+      const aTs = a.finishedOn ?? a.timestamp ?? '';
+      const bTs = b.finishedOn ?? b.timestamp ?? '';
+      return bTs.localeCompare(aTs);
+    });
   }
 
   private queueEntries(): Array<[string, Queue]> {

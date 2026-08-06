@@ -9,7 +9,11 @@ export { SourceRepository, type SourceUpdateInput } from './source.repository.js
 export { AiSettingsRepository, type PublicAiProviderProfile } from './ai-settings.repository.js';
 export { CrawlJobRepository } from './crawl-job.repository.js';
 export { CrawlResultRepository } from './crawl-result.repository.js';
-export { CategoryRepository, type CategoryUpdateInput, type CategoryWriteInput } from './category.repository.js';
+export {
+  CategoryRepository,
+  type CategoryUpdateInput,
+  type CategoryWriteInput,
+} from './category.repository.js';
 export {
   RegionRepository,
   type RegionUpdateInput,

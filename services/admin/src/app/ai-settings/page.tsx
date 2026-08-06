@@ -272,7 +272,9 @@ export default function AiSettingsPage() {
           <ul className="space-y-3">
             {providers.map((provider) => {
               const isTestingThis =
-                testBusy && testDialog.status === 'running' && testDialog.providerId === provider.id;
+                testBusy &&
+                testDialog.status === 'running' &&
+                testDialog.providerId === provider.id;
               return (
                 <li
                   key={provider.id}

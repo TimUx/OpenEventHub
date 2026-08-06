@@ -75,7 +75,11 @@ function mapQueueFailure(job: FailedQueueJob): ErrorLogEntry {
     kind: 'queue',
     subject: job.queue,
     reason: job.failedReason,
-    detail: [job.name, job.payloadSummary, job.attemptsMade > 0 ? `attempts=${job.attemptsMade}` : null]
+    detail: [
+      job.name,
+      job.payloadSummary,
+      job.attemptsMade > 0 ? `attempts=${job.attemptsMade}` : null,
+    ]
       .filter(Boolean)
       .join(' · '),
     occurredAt: job.finishedOn ?? job.timestamp,

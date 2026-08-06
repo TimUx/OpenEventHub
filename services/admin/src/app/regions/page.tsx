@@ -7,14 +7,7 @@ import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/u
 import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
 
-const REGION_TYPES = [
-  'country',
-  'state',
-  'district',
-  'municipality',
-  'city',
-  'suburb',
-] as const;
+const REGION_TYPES = ['country', 'state', 'district', 'municipality', 'city', 'suburb'] as const;
 
 type RegionType = (typeof REGION_TYPES)[number];
 

@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  crawlScheduleRepeatableJobId,
-  uniqueEnabledScheduleCrons,
-} from './crawl-jobs.js';
+import { crawlScheduleRepeatableJobId, uniqueEnabledScheduleCrons } from './crawl-jobs.js';
 
 describe('crawl schedule helpers', () => {
   it('dedupes enabled schedule crons', () => {
@@ -20,9 +17,6 @@ describe('crawl schedule helpers', () => {
   });
 
   it('builds a stable repeatable job id', () => {
-    assert.equal(
-      crawlScheduleRepeatableJobId('0 */6 * * *'),
-      'schedule:0_*/6_*_*_*',
-    );
+    assert.equal(crawlScheduleRepeatableJobId('0 */6 * * *'), 'schedule:0_*/6_*_*_*');
   });
 });

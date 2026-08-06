@@ -55,9 +55,7 @@ export default function LogsPage() {
                 {(data ?? []).map((entry) => (
                   <tr key={entry.id} className="border-b border-[var(--border)]/60 align-top">
                     <td className="whitespace-nowrap py-2.5 pr-3 text-[var(--muted)]">
-                      {entry.occurredAt
-                        ? new Date(entry.occurredAt).toLocaleString()
-                        : '—'}
+                      {entry.occurredAt ? new Date(entry.occurredAt).toLocaleString() : '—'}
                     </td>
                     <td className="py-2.5 pr-3">
                       <span className="rounded-md bg-[var(--background)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide">
@@ -65,7 +63,9 @@ export default function LogsPage() {
                       </span>
                     </td>
                     <td className="py-2.5 pr-3 font-medium">{entry.subject}</td>
-                    <td className="max-w-md break-words py-2.5 pr-3 text-red-800">{entry.reason}</td>
+                    <td className="max-w-md break-words py-2.5 pr-3 text-red-800">
+                      {entry.reason}
+                    </td>
                     <td className="max-w-xs break-words py-2.5 text-xs text-[var(--muted)]">
                       {entry.detail ?? '—'}
                     </td>

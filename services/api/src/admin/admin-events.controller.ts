@@ -23,7 +23,10 @@ import { RolesGuard } from '../auth/roles.guard.js';
 
 const EVENT_STATUSES = new Set<string>(Object.values(EventStatus));
 
-function parseOptionalDate(value: string | null | undefined, field: string): Date | null | undefined {
+function parseOptionalDate(
+  value: string | null | undefined,
+  field: string,
+): Date | null | undefined {
   if (value === undefined) return undefined;
   if (value === null || value === '') return null;
   const date = new Date(value);
@@ -96,7 +99,8 @@ export class AdminEventsController {
       }
     }
 
-    const startAt = body.startAt !== undefined ? parseOptionalDate(body.startAt, 'startAt') : undefined;
+    const startAt =
+      body.startAt !== undefined ? parseOptionalDate(body.startAt, 'startAt') : undefined;
     const endAt = body.endAt !== undefined ? parseOptionalDate(body.endAt, 'endAt') : undefined;
     if (startAt === null) {
       throw new BadRequestException('startAt is required');

@@ -93,7 +93,10 @@ describe('EventRepository', () => {
     const prisma = {
       $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma),
       event: {
-        update: (args: { where: { id: string }; data: { title?: string; status?: EventStatus } }) => {
+        update: (args: {
+          where: { id: string };
+          data: { title?: string; status?: EventStatus };
+        }) => {
           calls.push(`update:${args.where.id}:${args.data.title}:${args.data.status}`);
           return Promise.resolve({ ...sampleEvent, ...args.data });
         },

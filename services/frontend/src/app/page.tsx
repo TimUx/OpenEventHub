@@ -106,7 +106,9 @@ export default async function HomePage() {
                   <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-[var(--foreground)]">{title}</span>
+                  <span className="block text-sm font-semibold text-[var(--foreground)]">
+                    {title}
+                  </span>
                   <span className="mt-0.5 block text-sm leading-snug text-[var(--muted)]">
                     {description}
                   </span>

@@ -39,10 +39,7 @@ export function CollapsiblePanel({
 
   return (
     <div
-      className={cn(
-        'rounded-lg border border-[var(--border)]/80 bg-[var(--card)]/60',
-        className,
-      )}
+      className={cn('rounded-lg border border-[var(--border)]/80 bg-[var(--card)]/60', className)}
     >
       <button
         type="button"

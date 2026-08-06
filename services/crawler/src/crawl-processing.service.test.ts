@@ -258,13 +258,14 @@ describe('CrawlProcessingService (milestone 5)', () => {
       },
     );
 
-    (service as unknown as { processSource: (id: string) => Promise<void> }).processSource =
-      async (id: string) => {
-        order.push(id);
-        if (id === 'src-b') {
-          throw new Error('boom');
-        }
-      };
+    (service as unknown as { processSource: (id: string) => Promise<void> }).processSource = async (
+      id: string,
+    ) => {
+      order.push(id);
+      if (id === 'src-b') {
+        throw new Error('boom');
+      }
+    };
 
     await service.process({ scheduleCron: '0 */6 * * *' });
     assert.deepEqual(order, ['src-a', 'src-b', 'src-c']);

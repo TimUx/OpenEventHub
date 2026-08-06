@@ -29,8 +29,7 @@ export const de = {
   footer: 'OpenEventHub — Event Intelligence, kein reiner Kalender.',
   home: {
     title: 'Veranstaltungen aus vielen Quellen — an einem Ort',
-    lead:
-      'OpenEventHub sammelt Termine aus Webseiten, Feeds und Kalendern, prüft sie und zeigt eine klare, veröffentlichte Übersicht.',
+    lead: 'OpenEventHub sammelt Termine aus Webseiten, Feeds und Kalendern, prüft sie und zeigt eine klare, veröffentlichte Übersicht.',
     searchLabel: 'Veranstaltungen suchen',
     searchPlaceholder: 'Konzerte, Sport, Kultur…',
     search: 'Suchen',
