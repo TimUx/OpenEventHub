@@ -2,6 +2,12 @@
 
 import { useState, type FormEvent } from 'react';
 import { CalendarPlus, Rss } from 'lucide-react';
+import {
+  cronFromSchedulePreset,
+  DEFAULT_SCHEDULE_PRESET,
+  SCHEDULE_PRESET_IDS,
+  type SchedulePresetId,
+} from '@openeventhub/shared';
 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -33,7 +39,8 @@ export function SubmitForms() {
   const [sourceName, setSourceName] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [pluginType, setPluginType] = useState<(typeof PLUGIN_TYPES)[number]>('rss');
-  const [scheduleCron, setScheduleCron] = useState('0 */6 * * *');
+  const [schedulePreset, setSchedulePreset] = useState<SchedulePresetId>(DEFAULT_SCHEDULE_PRESET);
+  const [customCron, setCustomCron] = useState('');
   const [notes, setNotes] = useState('');
 
   async function onSubmitEvent(event: FormEvent) {
@@ -83,7 +90,7 @@ export function SubmitForms() {
           name: sourceName.trim(),
           url: sourceUrl.trim(),
           pluginType,
-          scheduleCron: scheduleCron.trim() || null,
+          scheduleCron: cronFromSchedulePreset(schedulePreset, customCron),
           notes: notes.trim() || null,
         },
       });
@@ -91,7 +98,8 @@ export function SubmitForms() {
       setSourceName('');
       setSourceUrl('');
       setPluginType('rss');
-      setScheduleCron('0 */6 * * *');
+      setSchedulePreset(DEFAULT_SCHEDULE_PRESET);
+      setCustomCron('');
       setNotes('');
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -288,17 +296,34 @@ export function SubmitForms() {
               />
             </label>
             <label className="text-sm font-semibold md:col-span-2">
-              {t('submit.cron')}
-              <Input
-                className="mt-1"
-                value={scheduleCron}
-                onChange={(e) => setScheduleCron(e.target.value)}
-                placeholder="0 */6 * * *"
-              />
+              {t('submit.schedule')}
+              <select
+                className="mt-1 flex h-11 min-h-tap w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm"
+                value={schedulePreset}
+                onChange={(e) => setSchedulePreset(e.target.value as SchedulePresetId)}
+              >
+                {SCHEDULE_PRESET_IDS.map((id) => (
+                  <option key={id} value={id}>
+                    {t(`submit.schedulePresets.${id}`)}
+                  </option>
+                ))}
+              </select>
               <span className="mt-1 block text-xs font-normal text-[var(--muted)]">
-                {t('submit.cronHint')}
+                {t('submit.scheduleHint')}
               </span>
             </label>
+            {schedulePreset === 'custom' ? (
+              <label className="text-sm font-semibold md:col-span-2">
+                {t('submit.customCron')}
+                <Input
+                  className="mt-1 font-mono text-sm"
+                  value={customCron}
+                  onChange={(e) => setCustomCron(e.target.value)}
+                  placeholder="0 */6 * * *"
+                  required
+                />
+              </label>
+            ) : null}
             <label className="text-sm font-semibold md:col-span-2">
               {t('submit.notes')}
               <textarea

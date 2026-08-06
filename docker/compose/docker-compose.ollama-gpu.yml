@@ -1,0 +1,15 @@
+# Optional overlay: attach NVIDIA GPU to the Ollama service.
+# Applied automatically by scripts/oeh-compose.sh when Docker NVIDIA runtime is available
+# (or when OLLAMA_GPU=1). Requires nvidia-container-toolkit on the host.
+#
+# Manual use:
+#   docker compose -f docker/compose/docker-compose.yml \
+#     -f docker/compose/docker-compose.ollama-gpu.yml --env-file .env up -d ollama
+
+services:
+  ollama:
+    profiles: [ollama]
+    gpus: all
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility

@@ -22,8 +22,11 @@ POST   /api/v1/auth/login
 
 GET    /api/v1/admin/dashboard                 (admin|moderator|viewer)
 GET    /api/v1/admin/events
-GET    /api/v1/admin/categories
-GET    /api/v1/admin/regions
+GET    /api/v1/admin/events/{id}
+PATCH  /api/v1/admin/events/{id}               (admin|moderator; writes EventVersion)
+DELETE /api/v1/admin/events/{id}               (admin only)
+GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; delete: admin)
+GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
 
 GET|POST|PATCH|DELETE /api/v1/admin/sources*   (mutations: admin|moderator; delete: admin)
 POST   /api/v1/admin/sources/{id}/crawl
@@ -36,6 +39,8 @@ GET|POST|PATCH|DELETE /api/v1/admin/users*     (admin only)
 GET    /api/v1/admin/crawler/jobs
 GET|POST /api/v1/admin/scheduler*
 GET    /api/v1/admin/queues
+GET    /api/v1/admin/queues/failed             (BullMQ failedReason + payload summary)
+GET    /api/v1/admin/logs/errors               (aggregated errors: queues, crawl jobs, Source.lastError)
 
 GET    /api/v1/admin/ai/providers              (admin|moderator)
 GET    /api/v1/admin/ai/providers/catalog      (admin|moderator)

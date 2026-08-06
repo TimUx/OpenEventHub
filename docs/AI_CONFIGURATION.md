@@ -11,17 +11,50 @@
 
 ## Standard: Local Ollama
 
-Compose und Swarm Stack starten einen **Ollama**-Dienst (`http://ollama:11434`,
-kein Host-Port; Netz `edge`+`internal` für Modell-Pulls, ohne Traefik-Exposure).
+Compose kann einen **Ollama**-Dienst mitstarten (`http://ollama:11434`, Profil `ollama`,
+kein Host-Port; Netz `edge`+`internal`). Steuerung:
 
-Beim Seed (`db:seed`) wird das Profil **Local Ollama** angelegt bzw. aktualisiert
-(`baseUrl=http://ollama:11434/v1`, Modell `llama3.2` bzw. `OLLAMA_MODEL`) und als
+| Variable | Bedeutung |
+|----------|-----------|
+| `OLLAMA_DEPLOY=1` (Default) | Gebündeltes `oeh-ollama` (+ `ollama-pull`) starten |
+| `OLLAMA_DEPLOY=0` | Kein OEH-Ollama; externes Ollama nutzen (z. B. eigener Stack / Open WebUI) |
+
+Bei externem Ollama `OLLAMA_BASE_URL` setzen, erreichbar **aus den Containern**:
+
+- **Empfohlen bei Port nur auf `127.0.0.1`:** gemeinsames Docker-Netz  
+  `OLLAMA_EXTERNAL_NETWORK=ownai-net` und z. B. `OLLAMA_BASE_URL=http://ownai-ollama:11434/v1`  
+  (`scripts/oeh-compose.sh` hängt `docker-compose.ollama-external.yml` an)
+- Host-Bind `0.0.0.0:11434`: `http://host.docker.internal:11434/v1`  
+  (App-Services haben `extra_hosts: host.docker.internal:host-gateway`)
+
+Seed und Admin-Profil **Local Ollama** verwenden `OLLAMA_BASE_URL` / `OLLAMA_MODEL`.
+Nach Umstellung ggf. Admin → KI-Einstellungen prüfen oder `db:seed` erneut ausführen.
+
+Beim Seed wird das Profil angelegt bzw. aktualisiert (`timeoutMs` mindestens 180 000) und als
 aktiver Provider gesetzt, sofern noch keiner aktiv ist.
 
-Compose zieht das Default-Modell einmalig über den One-Shot-Service `ollama-pull`.
+Compose zieht das Default-Modell nur bei `OLLAMA_DEPLOY=1` über `ollama-pull`.
 Override: `OLLAMA_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_IMAGE` in `.env`.
 
+### GPU (NVIDIA) — nur gebündeltes Ollama
+
+Voraussetzung: [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+und ein funktionierender Test wie `docker run --rm --gpus all nvidia/cuda:12.8.0-base-ubuntu24.04 nvidia-smi`.
+
+| `OLLAMA_GPU` | Verhalten |
+|--------------|-----------|
+| `auto` (Default) | GPU-Overlay, wenn Docker eine `nvidia`-Runtime meldet |
+| `1` / `true` | GPU erzwingen |
+| `0` / `false` | nur CPU |
+
+Wirksam nur mit `OLLAMA_DEPLOY=1`. `scripts/oeh-compose.sh` hängt dann
+`docker/compose/docker-compose.ollama-gpu.yml` an.
+
+Swarm: Ollama ist **nicht** im Basis-Stack; optional  
+`docker/stack/docker-stack.ollama.yml` (+ ggf. `docker-stack.ollama-gpu.yml`).
+
 Admin → KI-Einstellungen: Profile **anlegen, bearbeiten, löschen**, aktiv setzen und testen.
+Der Profil-Test öffnet sofort einen Dialog mit Warteanzeige und zeigt danach Erfolg oder Fehler.
 
 ## Unterstützte Provider
 
@@ -32,7 +65,7 @@ Admin → KI-Einstellungen: Profile **anlegen, bearbeiten, löschen**, aktiv set
 | `google` | Gemini | Google Generative Language |
 | `azure_openai` | Azure OpenAI | OpenAI-compatible |
 | `openrouter` | OpenRouter | OpenAI-compatible |
-| `ollama` | Local Ollama (Compose/Stack) | OpenAI-compatible (`/v1`) |
+| `ollama` | Local Ollama (optional Compose-Profil / optional Swarm-Overlay; oder externes Netz) | OpenAI-compatible (`/v1`) |
 | `custom_openai` | Any OpenAI-compatible gateway | OpenAI-compatible |
 
 ## Admin-Einstellungen

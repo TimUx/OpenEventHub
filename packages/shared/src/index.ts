@@ -14,7 +14,11 @@ export {
   type ExtractedEventFields,
 } from './ai-jobs.js';
 
-export { type CrawlJobPayload } from './crawl-jobs.js';
+export {
+  crawlScheduleRepeatableJobId,
+  uniqueEnabledScheduleCrons,
+  type CrawlJobPayload,
+} from './crawl-jobs.js';
 
 export { type OcrJobPayload, type OcrJobResult } from './ocr-jobs.js';
 
@@ -51,3 +55,14 @@ export {
   type IcsEventInput,
   type IcsVenueInput,
 } from './ics.js';
+
+export {
+  cronFromSchedulePreset,
+  DEFAULT_SCHEDULE_PRESET,
+  detectSchedulePreset,
+  isSchedulePresetId,
+  normalizeCronExpression,
+  SCHEDULE_PRESET_CRONS,
+  SCHEDULE_PRESET_IDS,
+  type SchedulePresetId,
+} from './schedule-presets.js';

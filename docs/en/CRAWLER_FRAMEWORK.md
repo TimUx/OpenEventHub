@@ -30,7 +30,7 @@ flowchart LR
 
 | Component | Role |
 |-----------|------|
-| `scheduler` | Loads `Source.scheduleCron` and registers BullMQ repeatable jobs on `crawl` |
+| `scheduler` | Registers **one** repeatable job per cron pattern; crawler runs matching sources serially |
 | `crawler` | Consumes `crawl`, runs plugin lifecycle, stores raw payloads, skips unchanged hashes |
 | `ocr-service` | Consumes `ocr` for image/PDF-marked payloads, writes `.ocr.txt`, enqueues `ai` |
 | `ai-service` | Consumes `ai` (Event Intelligence Engine) |
@@ -42,4 +42,5 @@ Core services discover them at startup (`PLUGINS_DIR`); no core code changes req
 ## Change detection
 
 When a crawl produces the same `contentHash` as a prior successful result for the same
-source, the job is marked `skipped` and downstream OCR/AI jobs are not enqueued.
+source, the job is marked `skipped` (no new object-storage write). Downstream OCR/AI
+jobs are still re-enqueued so a prior AI/OCR failure can recover without content changes.

@@ -2,11 +2,12 @@ import type { AiJobPayload, AiJobResult } from '@openeventhub/shared';
 
 import { calculateConfidenceScore } from '../domain/confidence.score.js';
 import { parseClassificationJson, parseExtractionJson } from '../domain/json-parsers.js';
+import { prepareContentForLlm } from '../domain/prepare-content.js';
 import type { LlmProvider } from '../ports/llm.provider.js';
 import { type PromptRepository, renderTemplate } from '../ports/prompt.repository.js';
 
-const EXTRACTION_PROMPT = { id: 'event-extraction', version: '1.0.0' } as const;
-const CLASSIFICATION_PROMPT = { id: 'event-classification', version: '1.0.0' } as const;
+const EXTRACTION_PROMPT = { id: 'event-extraction', version: '1.0.1' } as const;
+const CLASSIFICATION_PROMPT = { id: 'event-classification', version: '1.0.1' } as const;
 
 export interface IntelligencePipelineOptions {
   readonly sourceCount?: number;
@@ -23,6 +24,8 @@ export class EventIntelligencePipeline {
     payload: AiJobPayload,
     options: IntelligencePipelineOptions = {},
   ): Promise<AiJobResult> {
+    const content = prepareContentForLlm(payload.content);
+
     const extractionPrompt = await this.prompts.getPrompt(
       EXTRACTION_PROMPT.id,
       EXTRACTION_PROMPT.version,
@@ -35,7 +38,7 @@ export class EventIntelligencePipeline {
           role: 'user',
           content: renderTemplate(extractionPrompt.user, {
             sourceUrl: payload.sourceUrl ?? '',
-            content: payload.content,
+            content,
           }),
         },
       ],

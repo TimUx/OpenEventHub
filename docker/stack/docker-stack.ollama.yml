@@ -1,0 +1,35 @@
+# Optional Swarm overlay: bundled Ollama service.
+# Deploy when you want OpenEventHub to run its own Ollama (not an external instance):
+#   docker stack deploy -c docker/stack/docker-stack.yml \
+#     -c docker/stack/docker-stack.ollama.yml openeventhub
+# Optional GPU:
+#   … -c docker/stack/docker-stack.ollama-gpu.yml …
+
+volumes:
+  ollama_data:
+
+services:
+  ollama:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.9.0}
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - edge
+      - internal
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+    healthcheck:
+      test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 40s

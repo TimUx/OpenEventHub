@@ -78,3 +78,63 @@ export function StatusPill({ value }: { readonly value: string }) {
     </span>
   );
 }
+
+/** Simple focus modal for short admin feedback flows (e.g. provider tests). */
+export function ModalDialog({
+  open,
+  title,
+  onClose,
+  children,
+  closeLabel,
+}: {
+  readonly open: boolean;
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly children: ReactNode;
+  readonly closeLabel: string;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    function onKey(event: KeyboardEvent): void {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="oeh-modal-title"
+        className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-soft"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="oeh-modal-title" className="font-bold text-lg">
+          {title}
+        </h2>
+        <div className="mt-4">{children}</div>
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            className="h-10 rounded-xl border border-[var(--border)] px-4 text-sm font-semibold hover:bg-primary-soft"
+            onClick={onClose}
+          >
+            {closeLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

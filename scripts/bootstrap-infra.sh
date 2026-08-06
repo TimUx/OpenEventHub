@@ -10,5 +10,5 @@ if [[ ! -f .env ]]; then
   echo "Created .env from .env.example — review secrets before production use."
 fi
 
-docker compose -f docker/compose/docker-compose.yml --env-file .env up -d
+bash scripts/oeh-compose.sh -f docker/compose/docker-compose.yml --env-file .env up -d
 bash scripts/check-infra-health.sh

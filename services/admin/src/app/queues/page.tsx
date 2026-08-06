@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
 
@@ -20,7 +22,7 @@ export default function QueuesPage() {
   const { data, error, loading, reload } = useAdminQuery<QueueRow[]>('/api/v1/admin/queues');
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title={t('queues.title')}
         description={t('queues.description')}
@@ -54,6 +56,13 @@ export default function QueuesPage() {
           </Panel>
         ))}
       </div>
+
+      <p className="text-sm text-[var(--muted)]">
+        {t('queues.failedMovedHint')}{' '}
+        <Link href="/logs" className="font-semibold text-primary hover:underline">
+          {t('queues.openErrorLog')}
+        </Link>
+      </p>
     </div>
   );
 }

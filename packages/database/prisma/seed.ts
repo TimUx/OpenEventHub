@@ -156,6 +156,8 @@ async function main(): Promise<void> {
           baseUrl: ollamaBaseUrl,
           model: ollamaModel,
           enabled: true,
+          // Local models often need more than the 60s schema default.
+          timeoutMs: Math.max(existingOllama.timeoutMs, 180_000),
         },
       })
     : await prisma.aiProviderProfile.create({
@@ -165,6 +167,7 @@ async function main(): Promise<void> {
           baseUrl: ollamaBaseUrl,
           model: ollamaModel,
           enabled: true,
+          timeoutMs: 180_000,
         },
       });
 

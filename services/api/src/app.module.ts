@@ -19,7 +19,11 @@ import {
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
 import { AdminAiController } from './admin/admin-ai.controller.js';
+import { AdminCategoriesController } from './admin/admin-categories.controller.js';
 import { AdminDashboardController } from './admin/admin-dashboard.controller.js';
+import { AdminEventsController } from './admin/admin-events.controller.js';
+import { AdminLogsController } from './admin/admin-logs.controller.js';
+import { AdminLogsService } from './admin/admin-logs.service.js';
 import { AdminModerationController } from './admin/admin-moderation.controller.js';
 import {
   AdminCrawlerController,
@@ -27,6 +31,7 @@ import {
   AdminSchedulerController,
 } from './admin/admin-ops.controller.js';
 import { AdminQueuesService } from './admin/admin-queues.service.js';
+import { AdminRegionsController } from './admin/admin-regions.controller.js';
 import { AdminSchedulerService } from './admin/admin-scheduler.service.js';
 import { AdminSourcesController } from './admin/admin-sources.controller.js';
 import { AdminUsersController } from './admin/admin-users.controller.js';
@@ -101,12 +106,16 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AuthController,
     AdminAiController,
     AdminDashboardController,
+    AdminEventsController,
+    AdminCategoriesController,
+    AdminRegionsController,
     AdminSourcesController,
     AdminModerationController,
     AdminUsersController,
     AdminCrawlerController,
     AdminSchedulerController,
     AdminQueuesController,
+    AdminLogsController,
     EventsController,
     CalendarFeedController,
     CategoriesController,
@@ -169,6 +178,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     EventsService,
     AdminSchedulerService,
     AdminQueuesService,
+    AdminLogsService,
     AdminJwtAuthGuard,
     RolesGuard,
     {

@@ -136,8 +136,10 @@ services:
       start_period: 30s
 
   # Local LLM for AI Settings default profile (Admin → Local Ollama).
+  # Enabled only with Compose profile `ollama` (OLLAMA_DEPLOY=1 via scripts/oeh-compose.sh).
   # On edge+internal so model pulls can reach the registry; no Traefik / host ports.
   ollama:
+    profiles: [ollama]
     image: ${OLLAMA_IMAGE:-ollama/ollama:0.9.0}
     container_name: oeh-ollama
     restart: unless-stopped
@@ -157,6 +159,7 @@ services:
 
   # One-shot model pull for the seeded default (llama3.2 unless overridden).
   ollama-pull:
+    profiles: [ollama]
     image: ${OLLAMA_IMAGE:-ollama/ollama:0.9.0}
     container_name: oeh-ollama-pull
     networks:

@@ -8,10 +8,14 @@ OpenEventHub runs infrastructure and application services with Docker Compose.
 
 | File | Purpose |
 |------|---------|
-| `docker/compose/docker-compose.yml` | Infrastructure (Traefik, Postgres, Redis, SeaweedFS) |
+| `docker/compose/docker-compose.yml` | Infrastructure (Traefik, Postgres, Redis, SeaweedFS, optional Ollama) |
 | `docker/compose/docker-compose.apps.yml` | Application service containers |
+| `docker/compose/docker-compose.ollama-gpu.yml` | Optional/automatic: NVIDIA GPU for bundled Ollama |
+| `docker/compose/docker-compose.ollama-external.yml` | Optional: attach API/AI to an external Ollama network |
 | `docker/compose/docker-compose.dev-ports.yml` | Optional: host ports for local tooling |
 | `docker/stack/docker-stack.yml` | Swarm stack (production) |
+| `docker/stack/docker-stack.ollama.yml` | Swarm: optional bundled Ollama |
+| `docker/stack/docker-stack.ollama-gpu.yml` | Swarm: GPU reservation for bundled Ollama |
 | `.env.example` | Environment template |
 
 ## Networks & ports
@@ -28,7 +32,8 @@ Details: `docs/COMMUNICATION.md`.
 - postgres
 - redis
 - object-storage (SeaweedFS S3; bucket via `S3_BUCKET`)
-- ollama (+ one-shot `ollama-pull` for the default model; `edge`+`internal`, no host port; see `docs/AI_CONFIGURATION.md`)
+- ollama (optional, Compose profile `ollama`; controlled by `OLLAMA_DEPLOY`) + one-shot `ollama-pull`
+- With `OLLAMA_DEPLOY=1` and the NVIDIA toolkit: GPU overlay via `scripts/oeh-compose.sh`
 
 ## Application services
 

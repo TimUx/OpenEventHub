@@ -43,7 +43,7 @@ scripts/        Bootstrap and ops helpers
 | `api` | 3000 | REST `/api/v1`, GraphQL, OpenAPI, admin APIs |
 | `frontend` | 3100 | Public portal |
 | `admin` | 3101 | Operator center |
-| `scheduler` | — | Registers repeatable crawl jobs from `Source.scheduleCron` |
+| `scheduler` | — | One repeatable job per distinct cron; crawler processes matching sources serially |
 | `crawler` | — | Plugin crawl pipeline + object storage |
 | `ocr-service` | — | Tesseract OCR queue consumer |
 | `ai-service` | — | Event Intelligence Engine |

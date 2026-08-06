@@ -36,9 +36,12 @@ NestJS services load `/run/secrets/*` via `docker/scripts/load-secrets-entrypoin
 ## Deploy
 
 ```bash
-export SERVICE_VERSION=0.16.1
+export SERVICE_VERSION=0.17.0
 export GITHUB_OWNER=timux   # GHCR namespace
 docker stack deploy -c docker/stack/docker-stack.yml openeventhub
+# Optional: bundled Ollama (otherwise use external Ollama like Compose with OLLAMA_DEPLOY=0)
+# docker stack deploy -c docker/stack/docker-stack.yml -c docker/stack/docker-stack.ollama.yml openeventhub
+# With GPU: also add docker/stack/docker-stack.ollama-gpu.yml
 docker stack services openeventhub
 ```
 

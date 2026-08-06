@@ -106,6 +106,7 @@ const fs = require("fs");
   await shot(admin + "/sources", "admin-sources.png", 2500);
   await shot(admin + "/moderation", "admin-moderation.png", 2000);
   await shot(admin + "/ai-settings", "admin-ai-settings.png", 2000);
+  await shot(admin + "/logs", "admin-logs.png", 2000);
 
   console.log("screenshots:", fs.readdirSync(out).filter((f) => f.endsWith(".png")).sort());
   await browser.close();

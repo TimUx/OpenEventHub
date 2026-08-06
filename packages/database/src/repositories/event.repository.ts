@@ -17,6 +17,17 @@ export type EventWithRelations = Event & {
   }>;
 };
 
+export type EventUpdateInput = {
+  readonly title?: string;
+  readonly slug?: string;
+  readonly summary?: string | null;
+  readonly description?: string | null;
+  readonly startAt?: Date;
+  readonly endAt?: Date | null;
+  readonly status?: EventStatus;
+  readonly changeReason?: string | null;
+};
+
 const publishedInclude = {
   venue: true,
   categories: {
@@ -74,6 +85,54 @@ export class EventRepository {
     return this.prisma.event
       .groupBy({ by: ['status'], _count: { _all: true } })
       .then((rows) => Object.fromEntries(rows.map((row) => [row.status, row._count._all])));
+  }
+
+  /**
+   * Updates an event and appends an EventVersion snapshot (domain versioning).
+   */
+  updateWithVersion(id: string, data: EventUpdateInput): Promise<Event> {
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.event.update({
+        where: { id },
+        data: {
+          ...(data.title !== undefined ? { title: data.title } : {}),
+          ...(data.slug !== undefined ? { slug: data.slug } : {}),
+          ...(data.summary !== undefined ? { summary: data.summary } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          ...(data.startAt !== undefined ? { startAt: data.startAt } : {}),
+          ...(data.endAt !== undefined ? { endAt: data.endAt } : {}),
+          ...(data.status !== undefined ? { status: data.status } : {}),
+        },
+      });
+
+      const last = await tx.eventVersion.findFirst({
+        where: { eventId: id },
+        orderBy: { versionNumber: 'desc' },
+        select: { versionNumber: true },
+      });
+      const versionNumber = (last?.versionNumber ?? 0) + 1;
+
+      await tx.eventVersion.create({
+        data: {
+          eventId: id,
+          versionNumber,
+          title: updated.title,
+          startAt: updated.startAt,
+          endAt: updated.endAt,
+          venueId: updated.venueId,
+          organizerId: updated.organizerId,
+          confidenceScore: updated.confidenceScore,
+          status: updated.status,
+          changeReason: data.changeReason ?? 'admin.update',
+        },
+      });
+
+      return updated;
+    });
+  }
+
+  delete(id: string): Promise<Event> {
+    return this.prisma.event.delete({ where: { id } });
   }
 
   searchPublished(options: EventSearchOptions): Promise<EventWithRelations[]> {

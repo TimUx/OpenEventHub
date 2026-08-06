@@ -6,6 +6,7 @@ import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
+import { formatScheduleLabel } from '../../lib/schedule-label';
 
 type Repeatable = {
   key: string;
@@ -52,21 +53,30 @@ export default function SchedulerPage() {
       {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <Panel>
-        <ul className="space-y-2 text-sm">
-          {(data ?? []).map((job) => (
-            <li
-              key={job.key}
-              className="flex flex-wrap justify-between gap-2 border-b border-[var(--border)]/50 py-2"
-            >
-              <span>
-                {job.name} · <code>{job.pattern}</code>
-              </span>
-              <span className="text-[var(--muted)]">
-                {t('common.next')} {job.next ? new Date(job.next).toLocaleString() : '—'}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {(data?.length ?? 0) > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[28rem] text-left text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--muted)]">
+                  <th className="pb-2 pr-3 font-semibold">{t('crawler.source')}</th>
+                  <th className="pb-2 pr-3 font-semibold">{t('scheduler.interval')}</th>
+                  <th className="pb-2 font-semibold">{t('scheduler.nextRun')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(data ?? []).map((job) => (
+                  <tr key={job.key} className="border-b border-[var(--border)]/50 align-top">
+                    <td className="py-2.5 pr-3 font-medium">{job.name}</td>
+                    <td className="py-2.5 pr-3">{formatScheduleLabel(t, job.pattern)}</td>
+                    <td className="py-2.5 text-[var(--muted)]">
+                      {job.next ? new Date(job.next).toLocaleString() : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
         {!loading && (data?.length ?? 0) === 0 ? (
           <p className="text-sm text-[var(--muted)]">{t('scheduler.empty')}</p>
         ) : null}

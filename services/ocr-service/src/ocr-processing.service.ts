@@ -42,6 +42,7 @@ export class OcrProcessingService {
       ...(job.sourceUrl ? { sourceUrl: job.sourceUrl } : {}),
       ...(job.crawlResultId ? { crawlResultId: job.crawlResultId } : {}),
       ...(job.crawlJobId ? { jobId: job.crawlJobId } : {}),
+      ...(job.sourceId ? { sourceId: job.sourceId } : {}),
     });
 
     this.logger.log(

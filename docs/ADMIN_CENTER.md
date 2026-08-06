@@ -6,19 +6,23 @@
 - Systemstatus
 - Crawl-Übersicht
 - AI-Status
-- Queue-Status
+- Queue-Status (Zähler)
 - Letzte Imports
-- Fehlerübersicht
+- Fehlerübersicht (nur Zähler) mit Link zum **Fehler-Log**
+
+## Fehler-Log
+- Tabellarische Liste aktueller Fehler inkl. Gründe
+- Quellen: BullMQ (`failedReason`), fehlgeschlagene Crawl-Jobs, Quellen-`lastError`
 
 ## Verwaltung
-- Quellen
-- Veranstaltungen
-- Kategorien
-- Regionen
+- Quellen (Aktualisierungsintervall per Dropdown; optional eigener Cron)
+- Veranstaltungen (bearbeiten, Status ändern, löschen; Updates erzeugen EventVersion)
+- Kategorien (manuell anlegen / bearbeiten / löschen; KI legt fehlende per Find-or-create an und verknüpft)
+- Regionen (manuell anlegen / bearbeiten / löschen; KI kann Orte/Hierarchie per Find-or-create ergänzen)
 - Moderation
 - Benutzer & Rollen
-- AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama)
-- Scheduler
+- AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama; Profil-Test mit sofortigem Dialog inkl. Warteanzeige)
+- Scheduler (lesbare Intervalle + nächster Lauf; Konfiguration unter Quellen)
 
 ## Mehrsprachigkeit (UI)
 
@@ -52,3 +56,7 @@ Flaches UI analog zum öffentlichen Portal (Primärblau-AppBar, abgerundete Butt
 ![KI-Einstellungen](assets/screenshots/admin-ai-settings.png)
 
 *KI-Einstellungen*
+
+![Fehler-Log](assets/screenshots/admin-logs.png)
+
+*Fehler-Log*

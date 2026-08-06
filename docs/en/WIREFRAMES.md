@@ -10,11 +10,11 @@ Flat UI (primary-blue app bar, rounded buttons, no background gradients).
 +--------------------------------------------------+
 | OpenEventHub   Events  Calendar  Map  Search  +  |
 +--------------------------------------------------+
-| Event Intelligence                               |
-| OpenEventHub                                     |
-| Lead text                                        |
+| Events from many sources — in one place          |
+| Short value text                                 |
 | [ Search…                             ] [Search] |
-| [ Browse ] [ Calendar ] [ Submit ]               |
++--------------------------------------------------+
+| [List · …] [Calendar · …] [Map · …] [Submit · …] |
 +--------------------------------------------------+
 | Upcoming                            View all     |
 | [ Event card ] [ Event card ]                    |

@@ -38,7 +38,7 @@ Typen und Feldverträge: `docs/PLUGIN_SDK.md`.
    ```bash
    npm run apps:up
    ```
-6. In Admin → Sources eine Quelle mit `pluginType=<name>`, URL und optionalem Cron anlegen
+6. In Admin → Sources eine Quelle mit `pluginType=<name>`, URL und Aktualisierungsintervall (Dropdown bzw. eigener Cron) anlegen
 7. **Crawl now** nutzen oder auf den Scheduler warten
 
 ## Tipps zum Testen

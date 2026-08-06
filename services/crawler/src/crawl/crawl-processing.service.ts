@@ -31,9 +31,36 @@ export class CrawlProcessingService {
   ) {}
 
   async process(job: CrawlJobPayload): Promise<void> {
-    const source = await this.sources.findById(job.sourceId);
+    if (job.scheduleCron) {
+      await this.processScheduleTick(job.scheduleCron);
+      return;
+    }
+    if (!job.sourceId) {
+      throw new Error('CrawlJobPayload requires sourceId or scheduleCron');
+    }
+    await this.processSource(job.sourceId);
+  }
+
+  /** Run all enabled sources for one cron pattern one after another. */
+  private async processScheduleTick(scheduleCron: string): Promise<void> {
+    const sources = await this.sources.listByScheduleCron(scheduleCron);
+    this.logger.log(
+      `Schedule tick cron=${JSON.stringify(scheduleCron)} sources=${sources.length} (serial)`,
+    );
+    for (const source of sources) {
+      try {
+        await this.processSource(source.id);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.error(`Schedule tick continued after failure source=${source.id}: ${message}`);
+      }
+    }
+  }
+
+  private async processSource(sourceId: string): Promise<void> {
+    const source = await this.sources.findById(sourceId);
     if (!source) {
-      throw new Error(`Cannot process crawl job: Source '${job.sourceId}' not found`);
+      throw new Error(`Cannot process crawl job: Source '${sourceId}' not found`);
     }
 
     const plugin = this.plugins.getPlugin(source.pluginType);
@@ -89,7 +116,7 @@ export class CrawlProcessingService {
       });
 
       if (prior) {
-        await this.prisma.crawlResult.create({
+        const skipped = await this.prisma.crawlResult.create({
           data: {
             crawlJob: { connect: { id: crawlJob.id } },
             objectKey: prior.objectKey,
@@ -102,9 +129,19 @@ export class CrawlProcessingService {
         });
 
         await this.finishSuccess(crawlJob.id, source.id);
+        // Re-enqueue AI/OCR so a prior AI failure can recover without content changes.
+        await this.enqueueDownstream({
+          mimeType: fetchResult.mimeType,
+          objectKey: prior.objectKey,
+          crawlResultId: skipped.id,
+          crawlJobId: crawlJob.id,
+          sourceUrl: targetUrl,
+          sourceId: source.id,
+          content: fetchResult.content,
+        });
         this.recordCrawlMetrics(pluginType, 'skipped', startedHr);
         this.logger.log(
-          `Crawl skipped unchanged content source=${source.id} contentHash=${contentHash}`,
+          `Crawl skipped unchanged content source=${source.id} contentHash=${contentHash} (downstream re-enqueued)`,
         );
         return;
       }
@@ -137,6 +174,7 @@ export class CrawlProcessingService {
         crawlResultId: crawlResult.id,
         crawlJobId: crawlJob.id,
         sourceUrl: targetUrl,
+        sourceId: source.id,
         content: fetchResult.content,
       });
 
@@ -205,6 +243,7 @@ export class CrawlProcessingService {
     readonly crawlResultId: string;
     readonly crawlJobId: string;
     readonly sourceUrl: string;
+    readonly sourceId: string;
     readonly content: Buffer;
   }): Promise<void> {
     if (requiresOcr(args.mimeType)) {
@@ -214,6 +253,7 @@ export class CrawlProcessingService {
         crawlResultId: args.crawlResultId,
         sourceUrl: args.sourceUrl,
         crawlJobId: args.crawlJobId,
+        sourceId: args.sourceId,
       };
       await this.downstream.enqueueOcr(payload);
       return;
@@ -224,6 +264,7 @@ export class CrawlProcessingService {
       sourceUrl: args.sourceUrl,
       crawlResultId: args.crawlResultId,
       jobId: args.crawlJobId,
+      sourceId: args.sourceId,
     };
     await this.downstream.enqueueAi(payload);
   }

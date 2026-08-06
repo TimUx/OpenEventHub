@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 
 import { useAuth } from '../../components/auth-provider';
-import { PageHeader, Panel } from '../../components/ui';
+import { ModalDialog, PageHeader, Panel } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
 
@@ -28,6 +29,12 @@ type ProviderProfile = {
   hasApiKey: boolean;
   apiKeyHint: string | null;
 };
+
+type ProviderTestDialog =
+  | { status: 'idle' }
+  | { status: 'running'; providerId: string; providerName: string }
+  | { status: 'ok'; providerId: string; providerName: string; detail: string }
+  | { status: 'error'; providerId: string; providerName: string; detail: string };
 
 const EMPTY_FORM = {
   name: 'Local Ollama',
@@ -54,6 +61,8 @@ export default function AiSettingsPage() {
   const [apiKey, setApiKey] = useState(EMPTY_FORM.apiKey);
   const [enabled, setEnabled] = useState(EMPTY_FORM.enabled);
   const [saving, setSaving] = useState(false);
+  const [testDialog, setTestDialog] = useState<ProviderTestDialog>({ status: 'idle' });
+  const testGeneration = useRef(0);
 
   const selectedCatalog = useMemo(
     () => catalog.find((item) => item.type === type),
@@ -183,24 +192,49 @@ export default function AiSettingsPage() {
     }
   }
 
-  async function testProvider(id: string) {
-    if (!token) return;
+  function closeTestDialog(): void {
+    testGeneration.current += 1;
+    setTestDialog({ status: 'idle' });
+  }
+
+  async function testProvider(provider: ProviderProfile) {
+    if (!token || testDialog.status === 'running') return;
+    const generation = ++testGeneration.current;
     setError(null);
+    setMessage(null);
+    setTestDialog({
+      status: 'running',
+      providerId: provider.id,
+      providerName: provider.name,
+    });
     try {
       const payload = await adminFetch<{ sample: string; model: string; provider: string }>(
-        `/api/v1/admin/ai/providers/${id}/test`,
+        `/api/v1/admin/ai/providers/${provider.id}/test`,
         token,
         { method: 'POST' },
       );
-      setMessage(
-        t('aiSettings.testOk', {
-          provider: payload.provider,
-          model: payload.model,
-          sample: payload.sample,
-        }),
-      );
+      if (generation !== testGeneration.current) return;
+      const detail = t('aiSettings.testOk', {
+        provider: payload.provider,
+        model: payload.model,
+        sample: payload.sample,
+      });
+      setTestDialog({
+        status: 'ok',
+        providerId: provider.id,
+        providerName: provider.name,
+        detail,
+      });
+      setMessage(detail);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err));
+      if (generation !== testGeneration.current) return;
+      const detail = err instanceof Error ? err.message : String(err);
+      setTestDialog({
+        status: 'error',
+        providerId: provider.id,
+        providerName: provider.name,
+        detail,
+      });
     }
   }
 
@@ -222,6 +256,8 @@ export default function AiSettingsPage() {
     return null;
   }
 
+  const testBusy = testDialog.status === 'running';
+
   return (
     <div className="space-y-6">
       <PageHeader title={t('aiSettings.title')} description={t('aiSettings.description')} />
@@ -234,54 +270,64 @@ export default function AiSettingsPage() {
           <p className="text-sm text-[var(--muted)]">{t('aiSettings.noProfiles')}</p>
         ) : (
           <ul className="space-y-3">
-            {providers.map((provider) => (
-              <li
-                key={provider.id}
-                className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)]/60 pb-3"
-              >
-                <div className="text-sm">
-                  <strong>{provider.name}</strong> · {provider.type} · {provider.model}
-                  {!provider.enabled ? ` · ${t('aiSettings.disabled')}` : ''}
-                  {provider.hasApiKey
-                    ? ` · ${t('aiSettings.keyHint', { hint: provider.apiKeyHint ?? '' })}`
-                    : ` · ${t('aiSettings.noApiKey')}`}
-                  {activeId === provider.id ? ` · ${t('aiSettings.active')}` : ''}
-                  {provider.baseUrl ? (
-                    <div className="mt-0.5 text-xs text-[var(--muted)]">{provider.baseUrl}</div>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="rounded-xl bg-primary px-3 py-1.5 text-xs text-white"
-                    onClick={() => void activate(provider.id)}
-                  >
-                    {t('aiSettings.setActive')}
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs"
-                    onClick={() => void testProvider(provider.id)}
-                  >
-                    {t('aiSettings.test')}
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs"
-                    onClick={() => startEdit(provider)}
-                  >
-                    {t('aiSettings.edit')}
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md border border-red-300 px-3 py-1.5 text-xs text-red-700"
-                    onClick={() => void deleteProvider(provider)}
-                  >
-                    {t('aiSettings.delete')}
-                  </button>
-                </div>
-              </li>
-            ))}
+            {providers.map((provider) => {
+              const isTestingThis =
+                testBusy &&
+                testDialog.status === 'running' &&
+                testDialog.providerId === provider.id;
+              return (
+                <li
+                  key={provider.id}
+                  className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)]/60 pb-3"
+                >
+                  <div className="text-sm">
+                    <strong>{provider.name}</strong> · {provider.type} · {provider.model}
+                    {!provider.enabled ? ` · ${t('aiSettings.disabled')}` : ''}
+                    {provider.hasApiKey
+                      ? ` · ${t('aiSettings.keyHint', { hint: provider.apiKeyHint ?? '' })}`
+                      : ` · ${t('aiSettings.noApiKey')}`}
+                    {activeId === provider.id ? ` · ${t('aiSettings.active')}` : ''}
+                    {provider.baseUrl ? (
+                      <div className="mt-0.5 text-xs text-[var(--muted)]">{provider.baseUrl}</div>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="rounded-xl bg-primary px-3 py-1.5 text-xs text-white"
+                      onClick={() => void activate(provider.id)}
+                    >
+                      {t('aiSettings.setActive')}
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] px-3 py-1.5 text-xs disabled:opacity-60"
+                      disabled={testBusy}
+                      onClick={() => void testProvider(provider)}
+                    >
+                      {isTestingThis ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                      ) : null}
+                      {isTestingThis ? t('aiSettings.testing') : t('aiSettings.test')}
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-md border border-[var(--border)] px-3 py-1.5 text-xs"
+                      onClick={() => startEdit(provider)}
+                    >
+                      {t('aiSettings.edit')}
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-md border border-red-300 px-3 py-1.5 text-xs text-red-700"
+                      onClick={() => void deleteProvider(provider)}
+                    >
+                      {t('aiSettings.delete')}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Panel>
@@ -385,6 +431,36 @@ export default function AiSettingsPage() {
           </div>
         </form>
       </Panel>
+
+      <ModalDialog
+        open={testDialog.status !== 'idle'}
+        title={t('aiSettings.testDialogTitle')}
+        onClose={closeTestDialog}
+        closeLabel={t('aiSettings.testClose')}
+      >
+        {testDialog.status === 'running' ? (
+          <div className="flex items-start gap-3" aria-live="polite" aria-busy="true">
+            <Loader2 className="mt-0.5 h-6 w-6 shrink-0 animate-spin text-primary" aria-hidden />
+            <div className="space-y-1 text-sm">
+              <p className="font-medium">
+                {t('aiSettings.testRunning', { name: testDialog.providerName })}
+              </p>
+              <p className="text-[var(--muted)]">{t('aiSettings.testRunningHint')}</p>
+            </div>
+          </div>
+        ) : null}
+        {testDialog.status === 'ok' ? (
+          <div className="space-y-1 text-sm" aria-live="polite">
+            <p className="font-medium text-[var(--success)]">{testDialog.detail}</p>
+          </div>
+        ) : null}
+        {testDialog.status === 'error' ? (
+          <div className="space-y-1 text-sm" aria-live="assertive">
+            <p className="font-medium text-red-700">{t('aiSettings.testFailed')}</p>
+            <p className="text-red-700/90">{testDialog.detail}</p>
+          </div>
+        ) : null}
+      </ModalDialog>
     </div>
   );
 }

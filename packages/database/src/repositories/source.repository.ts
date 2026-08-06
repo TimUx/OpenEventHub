@@ -25,6 +25,17 @@ export class SourceRepository {
     return this.prisma.source.findMany({ orderBy: { name: 'asc' } });
   }
 
+  /** Enabled sources that share a schedule cron, ordered for serial crawls. */
+  listByScheduleCron(scheduleCron: string): Promise<Source[]> {
+    return this.prisma.source.findMany({
+      where: {
+        scheduleCron,
+        status: { not: 'disabled' },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   update(id: string, data: SourceUpdateInput): Promise<Source> {
     return this.prisma.source.update({
       where: { id },

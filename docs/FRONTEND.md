@@ -80,7 +80,7 @@ Gewählte Modi werden lokal im Browser gespeichert (`oeh_view_*`).
 
 Öffentliche Formulare unter `/submit`:
 - **Veranstaltung** — Titel, Zeitraum, Ort, Beschreibung (optional E-Mail)
-- **Quelle** — Name, URL, Plugin-Typ (`rss` / `html` / `ics`), optional Cron
+- **Quelle** — Name, URL, Plugin-Typ (`rss` / `html` / `ics`), Aktualisierungsintervall per Dropdown (optional eigener Cron)
 
 Einreichungen gehen über `POST /api/v1/submissions` bzw. `POST /api/v1/source-submissions` in die Moderationswarteschlange (Admin → Moderation). Direkte Freischaltung erfolgt nicht.
 

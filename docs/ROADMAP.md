@@ -246,14 +246,17 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 
 ## Post-M11 — Portal- und Ops-Nachzüge
 
-Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.16.1):
+Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.17.0):
 
-- Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark
+- Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste
 - Kalender-Abonnement (`/calendar.ics`) und Bulk-`.ics`-Export gefilterter Events
 - Eingebettete Karte mit Suche, Filtern und Auto-Zoom; Deep-Link `?event=`
-- Öffentliche Einreichung von Veranstaltungen und Quellen
-- Admin AI Settings: Provider-Profile CRUD; Default **Local Ollama** (Compose/Stack)
+- Öffentliche Einreichung von Veranstaltungen und Quellen (Schedule-Presets)
+- Admin: Kategorien/Regionen/Events CRUD; Fehler-Log; AI Settings Provider-CRUD
+- Optional Ollama: `OLLAMA_DEPLOY`, externes Netz (`ownai-net`), NVIDIA-GPU-Overlay; Swarm-Ollama als separates Overlay
+- AI-Ingest: Events aus Extraktion anlegen; Taxonomie Find-or-create
+- Scheduler: ein Tick pro Distinct-Cron; serielle Crawls
 - Strikte Docker-Netztrennung (`edge` / `internal`) mit minimalen Host-Ports
 - UI-i18n (`de`/`en`) und erweiterte Anzeigemodi (Events/Kalender)
 - SEO (Sitemap, robots, JSON-LD, Canonicals) und PWA (Manifest, Service Worker, Install-Icons)

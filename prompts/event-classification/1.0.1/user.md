@@ -1,0 +1,2 @@
+Extracted event JSON:
+{{extractedEvent}}
