@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.14.0 — SEO, PWA & responsive portal** (post-M11)
+**v0.14.1 — Compact header appearance controls** (post-M11)
 
-Vorher: v0.13.0 — Event actions, accents, AI CRUD, Local Ollama
+Vorher: v0.14.0 — SEO, PWA & responsive portal
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

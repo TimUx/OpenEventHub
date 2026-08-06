@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.1] - 2026-08-06
+
+### Changed
+
+- Portal/Admin header: language and accent controls are compact icon buttons (like dark/light); language click toggles DE ↔ EN
+- Docs and UI screenshots refreshed for the quieter header chrome
+
 ## [0.14.0] - 2026-08-05
 
 ### Added

@@ -53,8 +53,8 @@ export function SiteHeader() {
               );
             })}
           </nav>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <LocaleSwitcher className="inline-flex items-center" variant="onPrimary" />
+          <div className="flex shrink-0 items-center gap-0.5">
+            <LocaleSwitcher variant="onPrimary" />
             <AppearanceControls />
           </div>
         </div>

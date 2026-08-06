@@ -4,7 +4,7 @@
 
 Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flaches UI.
 
-Akzentfarben und Light/Dark im Portal-Header; Event-Aktionen (Karte / Kalender); Brand-Mark; SEO/PWA-fähiges Portal mit Bottom-Navigation auf schmalen Viewports.
+Akzentfarben und Light/Dark im Portal-Header als Icon-Buttons; Event-Aktionen (Karte / Kalender); Brand-Mark; SEO/PWA-fähiges Portal mit Bottom-Navigation auf schmalen Viewports.
 
 ## Frontend
 
