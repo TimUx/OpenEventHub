@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.15.0 — Event list filters & quieter event cards** (post-M11)
+**v0.16.0 — Calendar subscribe & bulk ICS export** (post-M11)
 
-Previous: v0.14.1 — Compact header appearance controls
+Previous: v0.15.0 — Event list filters & quieter event cards
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

@@ -126,6 +126,20 @@ export const en = {
     eventsCount: '{count} events',
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
+  calendarExport: {
+    section: 'Calendar export and subscription',
+    title: 'Add to your local calendar',
+    description:
+      'Download the current (filtered) matches as .ics, or subscribe to the online feed in Apple, Google, Outlook, or Thunderbird.',
+    download: 'Download {count} events',
+    downloadHint: 'Downloads an .ics file with all currently visible events.',
+    subscribeUrl: 'Subscription URL (HTTPS)',
+    subscribe: 'Subscribe',
+    subscribeHint:
+      '“Subscribe” opens webcal:// (Apple/Outlook/Thunderbird). Google Calendar: copy the URL → “From URL”.',
+    copy: 'Copy URL',
+    copied: 'URL copied.',
+  },
   map: {
     title: 'Map',
     description:

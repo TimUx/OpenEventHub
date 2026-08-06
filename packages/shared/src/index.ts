@@ -36,3 +36,18 @@ export {
   resolveLocale,
   type Locale,
 } from './i18n/locale.js';
+
+export {
+  buildCalendarIcs,
+  buildEventIcs,
+  buildVEventLines,
+  calendarFeedFilename,
+  escapeIcsText,
+  eventIcsFilename,
+  foldIcsLine,
+  toIcsUtc,
+  toWebcalUrl,
+  type BuildCalendarIcsOptions,
+  type IcsEventInput,
+  type IcsVenueInput,
+} from './ics.js';

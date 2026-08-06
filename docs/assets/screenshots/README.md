@@ -4,7 +4,7 @@
 
 Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flaches UI.
 
-Header-Icons (Sprache / Palette / Dark-Light); Event-Liste mit flachem Filtermenü; Event-Aktionen als Icon-Buttons; Brand-Mark; SEO/PWA mit Bottom-Navigation auf schmalen Viewports.
+Header-Icons; Event-Liste mit Filtermenü und Kalender-Export/Abonnement; Event-Aktionen als Icon-Buttons; Brand-Mark; SEO/PWA mit Bottom-Navigation.
 
 ## Frontend
 
@@ -12,9 +12,9 @@ Header-Icons (Sprache / Palette / Dark-Light); Event-Liste mit flachem Filtermen
 |-------|--------|
 | `frontend-home.png` | Startseite (Desktop) |
 | `frontend-home-mobile.png` | Startseite (Smartphone, Bottom-Nav) |
-| `frontend-events.png` | Veranstaltungsliste inkl. Filter/Sortierung |
+| `frontend-events.png` | Veranstaltungsliste inkl. Filter + Kalender-Export |
 | `frontend-event-detail.png` | Veranstaltungsdetail |
-| `frontend-calendar.png` | Kalender |
+| `frontend-calendar.png` | Kalender inkl. Abonnement |
 | `frontend-map.png` | Karte mit Markern/Filtern |
 | `frontend-submit.png` | Öffentliche Einreichung |
 | `frontend-search.png` | Suche |

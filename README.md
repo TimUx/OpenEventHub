@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.15.0 — Event list filters & quieter event cards** (post-M11)
+**v0.16.0 — Calendar subscribe & bulk ICS export** (post-M11)
 
-Vorher: v0.14.1 — Compact header appearance controls
+Vorher: v0.15.0 — Event list filters & quieter event cards
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

@@ -35,6 +35,8 @@ Ansichten:
 Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - **Auf Karte anzeigen** / **In Kalender eintragen** — Icon-Buttons mit Hover-Tooltip (`title`/`aria-label`)
 - Öffentliche Listen zeigen keinen Status wie „PUBLISHED“ (sichtbar = veröffentlicht)
+- **Bulk-Export:** gefilterte Treffer als eine `.ics`-Datei herunterladen
+- **Abonnement:** `/calendar.ics` (Portal) bzw. `/api/v1/calendar.ics` (API) — `webcal://` für Apple/Outlook/Thunderbird; HTTPS-URL für Google Kalender „Per URL“
 
 ## Mehrsprachigkeit (UI)
 

@@ -7,6 +7,7 @@
 ```
 GET    /api/v1/events
 GET    /api/v1/events/{id}
+GET    /api/v1/calendar.ics
 POST   /api/v1/submissions
 POST   /api/v1/source-submissions
 GET    /api/v1/categories

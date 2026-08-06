@@ -24,6 +24,7 @@ import {
 import { formatEventDate, getPublicApiBase, type ApiEvent } from '../lib/api';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import { CalendarExportBar } from './calendar-export-bar';
 import { ViewModeToggle } from './view-mode-toggle';
 
 const CALENDAR_MODES: CalendarViewMode[] = ['day', 'week', 'month', 'year'];
@@ -170,6 +171,8 @@ export function CalendarBrowser() {
           ]}
         />
       </header>
+
+      <CalendarExportBar events={events} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">

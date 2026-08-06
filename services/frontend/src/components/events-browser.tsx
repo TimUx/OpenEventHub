@@ -17,6 +17,7 @@ import {
 } from '../lib/event-list-filters';
 import { cn } from '../lib/utils';
 import { EventCard, type EventDisplayMode } from './event-card';
+import { CalendarExportBar } from './calendar-export-bar';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ViewModeToggle } from './view-mode-toggle';
@@ -43,6 +44,14 @@ export function EventsBrowser({
 
   const visible = useMemo(() => applyEventListFilters(events, filters), [events, filters]);
   const filtersActive = eventListFiltersActive(filters);
+  const feedQuery = useMemo(() => {
+    const query: Record<string, string> = {};
+    if (filters.category) query.category = filters.category;
+    if (filters.regionId) query.regionId = filters.regionId;
+    if (filters.dateFrom) query.from = filters.dateFrom;
+    if (filters.dateTo) query.to = filters.dateTo;
+    return query;
+  }, [filters]);
 
   function patch(partial: Partial<EventListFilterState>): void {
     setFilters((current) => ({ ...current, ...partial }));
@@ -223,6 +232,12 @@ export function EventsBrowser({
       <p className="text-sm text-[var(--muted)]" aria-live="polite">
         {t('events.resultsCount', { shown: visible.length, total: events.length })}
       </p>
+
+      <CalendarExportBar
+        events={visible}
+        feedQuery={feedQuery}
+        calendarName={filtersActive ? 'OpenEventHub (filtered)' : 'OpenEventHub'}
+      />
 
       {events.length === 0 ? (
         <p className="text-sm text-[var(--muted)]">{t('events.empty')}</p>
