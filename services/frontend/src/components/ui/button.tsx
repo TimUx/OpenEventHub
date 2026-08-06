@@ -20,6 +20,7 @@ const buttonVariants = cva(
         default: `${CONTROL_HEIGHT} px-4`,
         sm: `${CONTROL_HEIGHT} px-4`,
         lg: `${CONTROL_HEIGHT} px-4`,
+        icon: `${CONTROL_HEIGHT} min-w-11 px-0`,
       },
     },
     defaultVariants: {

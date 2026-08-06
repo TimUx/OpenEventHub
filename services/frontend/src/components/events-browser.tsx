@@ -1,16 +1,30 @@
 'use client';
 
-import { LayoutGrid, List, Rows3 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ArrowDownAZ, ArrowUpAZ, LayoutGrid, List, Rows3 } from 'lucide-react';
 
 import type { Locale } from '@openeventhub/shared';
 
 import { usePersistedViewMode } from '../hooks/use-persisted-view-mode';
 import { useI18n } from '../i18n/i18n-provider';
 import type { ApiCategory, ApiEvent, ApiRegion } from '../lib/api';
+import {
+  applyEventListFilters,
+  DEFAULT_EVENT_LIST_FILTERS,
+  eventListFiltersActive,
+  type EventListFilterState,
+  type EventSortField,
+} from '../lib/event-list-filters';
+import { cn } from '../lib/utils';
 import { EventCard, type EventDisplayMode } from './event-card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { ViewModeToggle } from './view-mode-toggle';
 
 const EVENT_MODES: EventDisplayMode[] = ['list', 'details', 'tiles'];
+
+const selectClass =
+  'flex h-11 min-h-tap w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm text-[var(--foreground)]';
 
 export function EventsBrowser({
   events,
@@ -25,6 +39,29 @@ export function EventsBrowser({
 }) {
   const { t, dictionary } = useI18n();
   const [mode, setMode] = usePersistedViewMode<EventDisplayMode>('events', 'tiles', EVENT_MODES);
+  const [filters, setFilters] = useState<EventListFilterState>(DEFAULT_EVENT_LIST_FILTERS);
+
+  const visible = useMemo(() => applyEventListFilters(events, filters), [events, filters]);
+  const filtersActive = eventListFiltersActive(filters);
+
+  function patch(partial: Partial<EventListFilterState>): void {
+    setFilters((current) => ({ ...current, ...partial }));
+  }
+
+  function clearFilters(): void {
+    setFilters((current) => ({
+      ...DEFAULT_EVENT_LIST_FILTERS,
+      sortBy: current.sortBy,
+      sortDir: current.sortDir,
+    }));
+  }
+
+  function toggleSortDir(): void {
+    setFilters((current) => ({
+      ...current,
+      sortDir: current.sortDir === 'asc' ? 'desc' : 'asc',
+    }));
+  }
 
   return (
     <div className="space-y-6">
@@ -53,53 +90,159 @@ export function EventsBrowser({
         />
       </header>
 
-      <aside
-        className="flex flex-wrap gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-sm"
+      <form
+        className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-soft sm:grid-cols-2 lg:grid-cols-6"
         aria-label={t('events.filters')}
+        onSubmit={(event) => event.preventDefault()}
       >
-        <span className="text-[var(--muted)]">{t('events.categories')}</span>
-        {categories.length === 0 ? (
-          <span className="text-[var(--muted)]">{t('events.noneYet')}</span>
-        ) : (
-          categories.slice(0, 8).map((category) => (
-            <a
-              key={category.id}
-              href={`/search?q=${encodeURIComponent(category.name)}`}
-              className="rounded-full bg-primary-soft px-2.5 py-0.5 text-primary"
-            >
-              {category.name}
-            </a>
-          ))
-        )}
-        <span className="ml-2 text-[var(--muted)]">{t('events.regions')}</span>
-        {regions.slice(0, 6).map((region) => (
-          <a
-            key={region.id}
-            href={`/search?q=${encodeURIComponent(region.name)}`}
-            className="rounded-full bg-sand/40 px-2.5 py-0.5 text-ink dark:bg-sand/20 dark:text-paper"
+        <div>
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="events-category"
           >
-            {region.name}
-          </a>
-        ))}
-      </aside>
+            {t('events.filterCategory')}
+          </label>
+          <select
+            id="events-category"
+            className={selectClass}
+            value={filters.category}
+            onChange={(event) => patch({ category: event.target.value })}
+          >
+            <option value="">{t('events.filterAny')}</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="events-region"
+          >
+            {t('events.filterRegion')}
+          </label>
+          <select
+            id="events-region"
+            className={selectClass}
+            value={filters.regionId}
+            onChange={(event) => patch({ regionId: event.target.value })}
+          >
+            <option value="">{t('events.filterAny')}</option>
+            {regions.map((region) => (
+              <option key={region.id} value={region.id}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="events-from"
+          >
+            {t('events.filterFrom')}
+          </label>
+          <Input
+            id="events-from"
+            type="date"
+            value={filters.dateFrom}
+            onChange={(event) => patch({ dateFrom: event.target.value })}
+          />
+        </div>
+
+        <div>
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="events-to"
+          >
+            {t('events.filterTo')}
+          </label>
+          <Input
+            id="events-to"
+            type="date"
+            value={filters.dateTo}
+            onChange={(event) => patch({ dateTo: event.target.value })}
+          />
+        </div>
+
+        <div>
+          <label
+            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+            htmlFor="events-sort"
+          >
+            {t('events.filterSort')}
+          </label>
+          <select
+            id="events-sort"
+            className={selectClass}
+            value={filters.sortBy}
+            onChange={(event) => patch({ sortBy: event.target.value as EventSortField })}
+          >
+            <option value="startAt">{t('events.sortStart')}</option>
+            <option value="title">{t('events.sortTitle')}</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+            {t('events.filterOrder')}
+          </span>
+          <div className="flex flex-1 items-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="shrink-0"
+              aria-label={filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')}
+              title={filters.sortDir === 'asc' ? t('events.sortAsc') : t('events.sortDesc')}
+              onClick={toggleSortDir}
+            >
+              {filters.sortDir === 'asc' ? (
+                <ArrowUpAZ className="h-4 w-4" aria-hidden />
+              ) : (
+                <ArrowDownAZ className="h-4 w-4" aria-hidden />
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className={cn('flex-1', !filtersActive && 'invisible')}
+              onClick={clearFilters}
+              disabled={!filtersActive}
+            >
+              {t('events.clearFilters')}
+            </Button>
+          </div>
+        </div>
+      </form>
+
+      <p className="text-sm text-[var(--muted)]" aria-live="polite">
+        {t('events.resultsCount', { shown: visible.length, total: events.length })}
+      </p>
 
       {events.length === 0 ? (
         <p className="text-sm text-[var(--muted)]">{t('events.empty')}</p>
+      ) : visible.length === 0 ? (
+        <p className="text-sm text-[var(--muted)]">{t('events.emptyFiltered')}</p>
       ) : mode === 'tiles' ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
+          {visible.map((event) => (
             <EventCard key={event.id} event={event} locale={locale} mode="tiles" />
           ))}
         </div>
       ) : mode === 'list' ? (
         <div className="space-y-2">
-          {events.map((event) => (
+          {visible.map((event) => (
             <EventCard key={event.id} event={event} locale={locale} mode="list" />
           ))}
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map((event) => (
+          {visible.map((event) => (
             <EventCard
               key={event.id}
               event={event}

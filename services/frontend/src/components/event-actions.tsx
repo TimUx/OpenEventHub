@@ -19,6 +19,9 @@ export function EventActions({
 }) {
   const { t } = useI18n();
   const onMap = canShowEventOnMap(event);
+  const mapLabel = onMap ? t('eventActions.showOnMap') : t('eventActions.showOnMapUnavailable');
+  const calendarLabel = t('eventActions.addToCalendar');
+  const calendarHint = t('eventActions.addToCalendarHint');
 
   function pageUrl(): string {
     if (typeof window !== 'undefined') {
@@ -34,29 +37,35 @@ export function EventActions({
       onKeyDown={(keyEvent) => keyEvent.stopPropagation()}
     >
       {onMap ? (
-        <Link href={buildEventMapHref(event.id)} className={buttonVariants({ variant: 'outline' })}>
+        <Link
+          href={buildEventMapHref(event.id)}
+          className={buttonVariants({ variant: 'outline', size: 'icon' })}
+          aria-label={mapLabel}
+          title={mapLabel}
+        >
           <MapPinned className="h-4 w-4" aria-hidden />
-          {t('eventActions.showOnMap')}
         </Link>
       ) : (
         <Button
           type="button"
           variant="outline"
+          size="icon"
           disabled
-          title={t('eventActions.showOnMapUnavailable')}
+          aria-label={mapLabel}
+          title={mapLabel}
         >
           <MapPinned className="h-4 w-4" aria-hidden />
-          {t('eventActions.showOnMap')}
         </Button>
       )}
       <Button
         type="button"
         variant="outline"
+        size="icon"
         onClick={() => downloadEventIcs(event, pageUrl())}
-        title={t('eventActions.addToCalendarHint')}
+        aria-label={calendarLabel}
+        title={calendarHint}
       >
         <CalendarPlus className="h-4 w-4" aria-hidden />
-        {t('eventActions.addToCalendar')}
       </Button>
     </div>
   );

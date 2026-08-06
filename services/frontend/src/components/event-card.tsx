@@ -30,12 +30,7 @@ export function EventCard({
             {formatEventDate(event.startAt, locale)}
           </p>
         </Link>
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <span className="text-xs uppercase tracking-wide text-[var(--muted)]">
-            {event.status}
-          </span>
-          <EventActions event={event} />
-        </div>
+        <EventActions event={event} className="shrink-0" />
       </div>
     );
   }
@@ -45,12 +40,7 @@ export function EventCard({
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge>{formatEventDate(event.startAt, locale)}</Badge>
-              <span className="text-xs uppercase tracking-wide text-[var(--muted)]">
-                {event.status}
-              </span>
-            </div>
+            <Badge>{formatEventDate(event.startAt, locale)}</Badge>
             <h2 className="font-bold text-2xl leading-snug">
               <Link href={`/events/${event.id}`} className="hover:text-primary">
                 {event.title}
@@ -79,9 +69,8 @@ export function EventCard({
 
   return (
     <Card>
-      <div className="mb-3 flex items-start justify-between gap-3">
+      <div className="mb-3">
         <Badge>{formatEventDate(event.startAt, locale)}</Badge>
-        <span className="text-xs uppercase tracking-wide text-[var(--muted)]">{event.status}</span>
       </div>
       <h2 className="font-bold text-xl leading-snug">
         <Link href={`/events/${event.id}`} className="hover:text-primary">
