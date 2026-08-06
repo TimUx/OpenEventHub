@@ -48,6 +48,8 @@ export const en = {
     description:
       'Published events from all connected sources. Filter and sort by category, region, date range, and order.',
     filters: 'Filters and sorting',
+    filtersToggle: 'Filters',
+    filtersActive: 'on',
     filterCategory: 'Category',
     filterRegion: 'Region',
     filterFrom: 'From',
@@ -128,6 +130,7 @@ export const en = {
   },
   calendarExport: {
     section: 'Calendar export and subscription',
+    toggle: 'Add to calendar',
     title: 'Add to your local calendar',
     description:
       'Download the current (filtered) matches as .ics, or subscribe to the online feed in Apple, Google, Outlook, or Thunderbird.',

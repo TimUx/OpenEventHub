@@ -14,7 +14,7 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.16.0 — Calendar subscribe & bulk ICS export** (post-M11)
+**v0.16.1 — Collapsible filters & calendar export** (post-M11)
 
 Previous: v0.15.0 — Event list filters & quieter event cards
 

@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/frontend",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "private": true,
   "description": "OpenEventHub public event portal",
   "scripts": {
