@@ -13,8 +13,9 @@ Stack:
 
 Flaches UI (an FestSchmiede angelehnt):
 - solide Primär-/Akzentfarbe (Default Blau `#1565c0`), Sekundär/Teal (`#00838f`), Erfolg grün (`#2e7d32`)
-- wählbare Akzentfarben über ein Dropdown in der Kopfzeile (Farbpunkt + Name; nur WCAG-AA-sichere Paare für Light/Dark)
+- wählbare Akzentfarben über ein Palette-Icon in der Kopfzeile; Menü mit Farbpunkt + Name (nur WCAG-AA-sichere Paare für Light/Dark)
 - Light/Dark-Modus und Akzent werden lokal im Browser gespeichert (`oeh-theme`, `oeh-accent`)
+- Sprache und Erscheinung als schlanke Icon-Buttons (wie Dark/Light), kein Chip-Dropdown
 - keine Hintergrund-Farbverläufe; helles Grau + weiße Flächen
 - Roboto / Sans, fette Überschriften
 - abgerundete Buttons (`12px`, einheitliche Höhe `44px` / `h-11` wie Inputs), flache Icons, leichte Kartenschatten
@@ -39,7 +40,7 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 
 - Unterstützte Locales: **`de`** (Default), **`en`**
 - Ermittlung: Cookie `oeh_locale` → Browser-`Accept-Language` → Default **Deutsch**
-- Manuelle Umschaltung über Sprachwähler in der Kopfzeile (setzt Cookie)
+- Manuelle Umschaltung über Sprach-Icon in der Kopfzeile (setzt Cookie; Klick wechselt DE ↔ EN)
 - Message-Dateien: `services/frontend/src/i18n/messages/{de,en}.ts`
 
 ## Mobile & PWA

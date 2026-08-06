@@ -10,7 +10,7 @@
 #   3. Images available (GHCR from release workflow or local tags)
 #
 # Deploy:
-#   export SERVICE_VERSION=0.14.0 GITHUB_OWNER=timux
+#   export SERVICE_VERSION=0.14.1 GITHUB_OWNER=timux
 #   docker stack deploy -c docker/stack/docker-stack.yml openeventhub
 #
 # Validate without Swarm:
@@ -53,7 +53,7 @@ x-resources-ui: &resources-ui
 
 x-app-env: &app-env
   NODE_ENV: production
-  SERVICE_VERSION: ${SERVICE_VERSION:-0.14.0}
+  SERVICE_VERSION: ${SERVICE_VERSION:-0.14.1}
   POSTGRES_HOST: postgres
   POSTGRES_PORT_INTERNAL: '5432'
   REDIS_HOST: redis
@@ -278,7 +278,7 @@ services:
       start_period: 40s
 
   api:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-api:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-api:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3000'
@@ -310,7 +310,7 @@ services:
         - traefik.http.services.api.loadbalancer.server.port=3000
 
   scheduler:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-scheduler:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-scheduler:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3001'
@@ -330,7 +330,7 @@ services:
       resources: *resources-worker
 
   worker:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-worker:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-worker:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3002'
@@ -349,7 +349,7 @@ services:
       resources: *resources-worker
 
   crawler:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-crawler:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-crawler:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3003'
@@ -373,7 +373,7 @@ services:
       resources: *resources-worker
 
   ai-service:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ai-service:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ai-service:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3004'
@@ -395,7 +395,7 @@ services:
       resources: *resources-worker
 
   ocr-service:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ocr-service:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-ocr-service:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3005'
@@ -417,7 +417,7 @@ services:
       resources: *resources-worker
 
   search:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-search:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-search:${SERVICE_VERSION:-0.14.1}
     environment:
       <<: *app-env
       PORT: '3006'
@@ -436,10 +436,10 @@ services:
       resources: *resources-worker
 
   frontend:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-frontend:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-frontend:${SERVICE_VERSION:-0.14.1}
     environment:
       NODE_ENV: production
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.14.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.14.1}
       PORT: '3100'
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.localhost}
@@ -463,10 +463,10 @@ services:
         - traefik.http.services.frontend.loadbalancer.server.port=3100
 
   admin:
-    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-admin:${SERVICE_VERSION:-0.14.0}
+    image: ghcr.io/${GITHUB_OWNER:-timux}/openeventhub-admin:${SERVICE_VERSION:-0.14.1}
     environment:
       NODE_ENV: production
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.14.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.14.1}
       PORT: '3101'
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://api.localhost}

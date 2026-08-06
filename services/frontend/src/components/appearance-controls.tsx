@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Check, Moon, Palette, Sun } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { useI18n } from '../i18n/i18n-provider';
@@ -16,6 +16,9 @@ import {
   readStoredDarkMode,
 } from '../lib/accent-theme';
 import { cn } from '../lib/utils';
+
+const iconButtonClass =
+  'inline-flex h-11 min-h-tap min-w-11 items-center justify-center rounded-xl text-primary-contrast transition-colors hover:bg-primary-contrast/15';
 
 export function AppearanceControls({
   className,
@@ -84,30 +87,18 @@ export function AppearanceControls({
   const current = getAccentTheme(ready ? accent : 'blue');
 
   return (
-    <div ref={rootRef} className={cn('relative flex items-center gap-2', className)}>
+    <div ref={rootRef} className={cn('relative flex items-center gap-0.5', className)}>
       <button
         type="button"
-        className="inline-flex h-11 min-h-tap items-center gap-2 rounded-xl border border-white/50 bg-white px-2.5 text-sm font-semibold text-primary shadow-soft"
-        aria-label={t('nav.accentColor')}
+        className={iconButtonClass}
+        aria-label={`${t('nav.accentColor')}: ${t(`nav.accent.${current.id}`)}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
+        title={t(`nav.accent.${current.id}`)}
         onClick={() => setOpen((value) => !value)}
       >
-        <span
-          className="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
-          style={{ backgroundColor: current.swatch }}
-          aria-hidden
-        />
-        <span className="hidden max-w-20 truncate sm:inline">{t(`nav.accent.${current.id}`)}</span>
-        <ChevronDown
-          className={cn(
-            'h-3.5 w-3.5 shrink-0 opacity-70 transition-transform',
-            open && 'rotate-180',
-          )}
-          strokeWidth={2.5}
-          aria-hidden
-        />
+        <Palette className="h-4 w-4" strokeWidth={2} aria-hidden />
       </button>
 
       {open ? (
@@ -158,7 +149,7 @@ export function AppearanceControls({
       {showThemeToggle ? (
         <button
           type="button"
-          className="inline-flex h-11 min-h-tap min-w-11 items-center justify-center rounded-xl text-primary-contrast hover:bg-primary-contrast/15"
+          className={iconButtonClass}
           aria-label={dark ? t('nav.lightMode') : t('nav.darkMode')}
           onClick={toggleTheme}
         >

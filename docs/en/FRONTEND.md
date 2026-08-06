@@ -13,8 +13,9 @@ Stack:
 
 Flat UI (FestSchmiede-inspired):
 - solid primary/accent (default blue `#1565c0`), secondary/teal (`#00838f`), success green (`#2e7d32`)
-- selectable accent colors via a header dropdown (swatch + name; only WCAG AA-safe pairs for light/dark)
+- selectable accent colors via a palette icon in the header; menu shows swatch + name (only WCAG AA-safe pairs for light/dark)
 - light/dark mode and accent persist in the browser (`oeh-theme`, `oeh-accent`)
+- language and appearance as compact icon buttons (like dark/light), no chip dropdowns
 - no background gradients; light grey + white surfaces
 - Roboto / sans, bold headings
 - rounded buttons (`12px`, uniform height `44px` / `h-11` matching inputs), flat icons, soft card shadows
@@ -39,7 +40,7 @@ Event actions (list, tiles, details, and detail page):
 
 - Supported locales: **`de`** (default), **`en`**
 - Resolution: cookie `oeh_locale` → browser `Accept-Language` → default **German**
-- Manual override via header language switcher
+- Manual override via language icon in the header (sets cookie; click toggles DE ↔ EN)
 - Messages: `services/frontend/src/i18n/messages/{de,en}.ts`
 
 ## Mobile & PWA
