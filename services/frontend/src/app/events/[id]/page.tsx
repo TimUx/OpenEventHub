@@ -74,7 +74,9 @@ export default async function EventDetailPage({ params }: PageProps) {
       ) : null}
       {event.endAt ? (
         <p className="text-sm text-[var(--muted)]">
-          {translate(dictionary, 'detail.ends', { date: formatEventDate(event.endAt, locale, { allDay: Boolean(event.allDay) }) })}
+          {translate(dictionary, 'detail.ends', {
+            date: formatEventDate(event.endAt, locale, { allDay: Boolean(event.allDay) }),
+          })}
         </p>
       ) : null}
     </article>

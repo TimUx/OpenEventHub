@@ -67,7 +67,9 @@ describe('html plugin multi-format listing parser', () => {
     `;
     const normalized = await createPlugin().normalize({ html });
     assert.ok(
-      normalized.events.some((e) => e.title.includes('Sommerlauf') || e.title.includes('Olympiapark')),
+      normalized.events.some(
+        (e) => e.title.includes('Sommerlauf') || e.title.includes('Olympiapark'),
+      ),
     );
     assert.ok(normalized.events.some((e) => e.title.includes('Hüttenkirmes')));
   });

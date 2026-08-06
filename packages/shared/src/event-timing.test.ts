@@ -1,11 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  eventEffectiveEnd,
-  filterNotExpiredEvents,
-  isEventNotExpired,
-} from './event-timing.js';
+import { eventEffectiveEnd, filterNotExpiredEvents, isEventNotExpired } from './event-timing.js';
 
 describe('event-timing', () => {
   const now = new Date('2026-08-06T15:00:00.000Z');
