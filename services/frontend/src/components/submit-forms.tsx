@@ -17,7 +17,7 @@ import { cn } from '../lib/utils';
 
 type SubmitKind = 'event' | 'source';
 
-const PLUGIN_TYPES = ['rss', 'html', 'ics'] as const;
+const PLUGIN_TYPES = ['rss', 'html', 'ics', 'toubiz'] as const;
 
 export function SubmitForms() {
   const { t } = useI18n();

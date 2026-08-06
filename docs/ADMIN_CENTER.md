@@ -15,7 +15,8 @@
 - Quellen: BullMQ (`failedReason`), fehlgeschlagene Crawl-Jobs, Quellen-`lastError`
 
 ## Verwaltung
-- Quellen (Aktualisierungsintervall per Dropdown; optional eigener Cron)
+- Quellen (anlegen / bearbeiten / aktivieren / deaktivieren / löschen; Plugin-Typen
+  `html` / `rss` / `ics` / `toubiz`; Aktualisierungsintervall per Dropdown; optional eigener Cron)
 - Veranstaltungen (bearbeiten, Status ändern, löschen; Updates erzeugen EventVersion)
 - Kategorien (manuell anlegen / bearbeiten / löschen; KI legt fehlende per Find-or-create an und verknüpft)
 - Regionen (manuell anlegen / bearbeiten / löschen; KI kann Orte/Hierarchie per Find-or-create ergänzen)

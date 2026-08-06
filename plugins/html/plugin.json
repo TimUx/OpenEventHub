@@ -1,6 +1,6 @@
 {
   "pluginType": "html",
-  "name": "HTML Table Plugin",
-  "version": "1.0.0",
+  "name": "HTML Listing Plugin",
+  "version": "1.3.0",
   "main": "./index.js"
 }

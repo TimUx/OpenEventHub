@@ -31,10 +31,10 @@ flowchart LR
 | Component | Role |
 |-----------|------|
 | `scheduler` | Registers **one** repeatable job per cron pattern; crawler runs matching sources serially |
-| `crawler` | Consumes `crawl`, runs plugin lifecycle, stores raw payloads, skips unchanged hashes |
+| `crawler` | Consumes `crawl`, runs plugin lifecycle, stores raw payloads, skips unchanged hashes; with plugin events **one AI job per candidate** |
 | `ocr-service` | Consumes `ocr` for image/PDF-marked payloads, writes `.ocr.txt`, enqueues `ai` |
 | `ai-service` | Consumes `ai` (Event Intelligence Engine) |
-| `plugins/*` | Independently deployable connectors (`html`, `rss`, `ics`) via Plugin SDK |
+| `plugins/*` | Independently deployable connectors (`html`, `rss`, `ics`, `toubiz`) via Plugin SDK |
 
 New source types are added as plugins under `plugins/` with a `plugin.json` manifest.
 Core services discover them at startup (`PLUGINS_DIR`); no core code changes required.

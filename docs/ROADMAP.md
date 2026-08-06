@@ -246,16 +246,19 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 
 ## Post-M11 — Portal- und Ops-Nachzüge
 
-Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen (siehe `CHANGELOG.md` → v0.17.0):
+Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
+(siehe `CHANGELOG.md`, zuletzt **v0.18.0**):
 
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste
 - Kalender-Abonnement (`/calendar.ics`) und Bulk-`.ics`-Export gefilterter Events
 - Eingebettete Karte mit Suche, Filtern und Auto-Zoom; Deep-Link `?event=`
 - Öffentliche Einreichung von Veranstaltungen und Quellen (Schedule-Presets)
-- Admin: Kategorien/Regionen/Events CRUD; Fehler-Log; AI Settings Provider-CRUD
+- Admin: Quellen bearbeiten; Kategorien/Regionen/Events CRUD; Fehler-Log; AI Settings Provider-CRUD
 - Optional Ollama: `OLLAMA_DEPLOY`, externes Netz (`ownai-net`), NVIDIA-GPU-Overlay; Swarm-Ollama als separates Overlay
-- AI-Ingest: Events aus Extraktion anlegen; Taxonomie Find-or-create
+- AI-Ingest: Events aus Extraktion anlegen; Taxonomie Find-or-create; ein AI-Job pro Plugin-Event-Kandidat
+- HTML-Plugin multi-format (`1.3.0`): Tabellen/Listen/Div/JSON-LD/`<time>`/Klartext; Embedded EMS **Toubiz** (alle zukünftigen Termine)
+- Dediziertes Plugin `toubiz` (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: ein Tick pro Distinct-Cron; serielle Crawls
 - Strikte Docker-Netztrennung (`edge` / `internal`) mit minimalen Host-Ports
 - UI-i18n (`de`/`en`) und erweiterte Anzeigemodi (Events/Kalender)

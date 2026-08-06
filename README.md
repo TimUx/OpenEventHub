@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.17.0 — AI ingest, optional Ollama, Admin ops** (post-M11)
+**v0.18.0 — HTML multi-format + Toubiz EMS** (post-M11)
 
-Vorher: v0.16.1 — Collapsible filters & calendar export
+Vorher: v0.17.0 — AI ingest, optional Ollama, Admin ops
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

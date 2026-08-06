@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2026-08-06
+
+### Added
+
+- HTML listing plugin **1.3.0**: multi-format extraction (tables, lists, Divi/div cards, JSON-LD, `<time>`, DE/EN/ISO plain-text date lines)
+- Embedded online EMS support: Toubiz (`<toubiz-widget>`) → `mein.toubiz.de` API; paginated fetch of **all future** occurrences (`dateIntervals`)
+- Dedicated `toubiz` first-party plugin; selectable in Admin sources and public source submit
+- Crawler: one AI job per plugin event candidate (structured short text) instead of one LLM pass over full HTML
+- Admin sources: edit existing sources (name, plugin, URL, schedule, status) in addition to enable/disable/delete
+
+### Changed
+
+- AI service persists structured plugin candidates even when the LLM sets `isEvent=false`
+- Docs (DE/EN): Plugin SDK/example, Crawler, EIE, Admin, Roadmap; UI screenshots refreshed
+
+### Fixed
+
+- HTML-only pages with no static markup (EMS widgets) no longer yield empty crawls when a Toubiz widget is present
+
 ## [0.17.0] - 2026-08-06
 
 ### Added

@@ -15,7 +15,8 @@
 - Sources: BullMQ (`failedReason`), failed crawl jobs, source `lastError`
 
 ## Management
-- Sources (update interval via dropdown; optional custom cron)
+- Sources (create / edit / enable / disable / delete; plugin types
+  `html` / `rss` / `ics` / `toubiz`; update interval via dropdown; optional custom cron)
 - Events (edit, change status, delete; updates create EventVersion)
 - Categories (manual create / edit / delete; AI find-or-creates missing labels and links them)
 - Regions (manual create / edit / delete; AI may find-or-create places/hierarchy)

@@ -1,4 +1,4 @@
-# Example Plugin — HTML Table
+# Example Plugin — HTML Listings
 
 > Language: English · [Deutsch (primary)](../PLUGIN_EXAMPLE.md)
 
@@ -7,9 +7,9 @@ crawler loader and Plugin SDK contracts).
 
 ## Goal
 
-Parse an HTML page with event rows into `ExtractedEventFields[]` without touching
-the database. The crawler stores raw fetch bytes, then hands normalized events
-downstream (AI / OCR queues as configured).
+Extract event candidates from **any HTML markup** (table, list, div cards, Divi
+blocks, JSON-LD, `<time>`) without touching the database. The crawler stores raw
+fetch bytes and, on hits, enqueues **one AI job per event candidate**.
 
 ## Files
 
@@ -17,6 +17,7 @@ downstream (AI / OCR queues as configured).
 plugins/html/
   plugin.json   # pluginType: html
   index.js      # createPlugin()
+  index.test.js
 ```
 
 ### Manifest
@@ -24,69 +25,62 @@ plugins/html/
 ```json
 {
   "pluginType": "html",
-  "name": "HTML Table Plugin",
-  "version": "1.0.0",
+  "name": "HTML Listing Plugin",
+  "version": "1.3.0",
   "main": "./index.js"
 }
 ```
 
-### Factory
+## Detection strategies (`normalize`)
 
-`index.js` exports `createPlugin` (and `default`). The registry does:
+All hits are merged and deduped (title + start + end):
 
-```js
-const factory = mod.createPlugin ?? mod.default;
-const plugin = await factory();
-```
+| Strategy | Examples |
+|----------|----------|
+| JSON-LD | `<script type="application/ld+json">` with `@type: Event` |
+| Marked tables | `tr.oeh-event` / `data-oeh-event` + cell classes `title`, `start-at`, … |
+| Generic tables | Any `tr`/`td` with date + title in cells |
+| Event blocks | `article` / `li` / `div.event*` / `itemtype=…Event` |
+| `<time datetime>` | With a nearby heading title |
+| Plain-text listings | Markup flattened to lines; DE/EN/ISO date lines under month/year context |
+| Embedded EMS (Toubiz) | `<toubiz-widget api-token …>` → API `mein.toubiz.de`, **all future** dates (paginated, including `dateIntervals`) |
 
-## Lifecycle in this plugin
+Date examples: `01.08.2026`, `01.08. + 02.08.`, `07.08. – 09.08.`, `15 + 16.08.2026`,
+`2026-08-01`, `1 August 2026`, headings like `August 2026` / `Termine 2026`.
 
-| Step | Behavior |
-|------|----------|
-| `initialize` | No-op (stateless) |
-| `discover` | Returns `[context.sourceUrl]` |
-| `fetch` | `fetchUrlToBuffer(sourceUrl)` from `plugins/utils/fetch-url.js` |
-| `parse` | Finds `<tr>` with `data-oeh-event`, `data-event`, or class `oeh-event`; falls back to all `<tr>` |
-| `normalize` | Reads cells with classes `title`, `summary`, `description`, `start-at`/`start`, `end-at`/`end`; builds events with confidence ~0.9 when title+start exist |
-| `emit` | Returns `normalized.events` |
-| `healthCheck` | `{ status: 'ok' }` |
-
-## Sample markup the plugin expects
+## Sample markup
 
 ```html
+<!-- Table -->
 <tr data-oeh-event>
   <td class="title">Open Air</td>
-  <td class="summary">Music in the park</td>
-  <td class="description">…</td>
   <td class="start-at">2026-08-15T17:00:00.000Z</td>
-  <td class="end-at">2026-08-15T22:00:00.000Z</td>
 </tr>
+
+<!-- List -->
+<ul><li>04.04.2026 Osterfeuer Allendorf</li></ul>
+
+<!-- Div / Divi -->
+<h3>August 2026</h3>
+<p>01.08. + 02.08.<br />Hüttenkirmes Olberode</p>
+
+<!-- Card -->
+<div class="event-card">
+  <h3>Sommerlauf</h3>
+  <time datetime="2026-08-23">23.08.2026</time>
+</div>
 ```
 
 ## Wire it into the platform
 
-1. Ensure the crawler image includes `plugins/` (`PLUGINS_DIR=/app/plugins`)
-2. Admin → Sources → create:
-   - **pluginType:** `html`
-   - **url:** page URL (or `file://…` in local experiments)
-   - **scheduleCron:** e.g. `0 */6 * * *` (UTC) or empty for manual only
-3. **Crawl now** enqueues BullMQ `crawl` with `{ sourceId }`
-4. Confirm a crawl job appears under Admin → Crawler
+1. Crawler image includes `plugins/` (`PLUGINS_DIR=/app/plugins`)
+2. Admin → Sources → `pluginType: html` (auto-detects Toubiz widgets) or `pluginType: toubiz`, set URL
+3. Crawl now → Admin → Crawler / Events (moderation)
 
 ## Verify
 
 ```bash
 npm run verify:plugins
+node --test plugins/html/index.test.js
+node --test plugins/toubiz/index.test.js
 ```
-
-Expected: `html`, `rss`, and `ics` each load and report `metadata.pluginType`.
-
-## Sibling examples
-
-| Plugin | `pluginType` | Parse target |
-|--------|--------------|--------------|
-| RSS | `rss` | `<item>` / `pubDate` |
-| ICS | `ics` | `VEVENT` / `DTSTART` |
-
-Copy `plugins/html/` as a skeleton when adding a new type; change `pluginType`,
-parse/normalize logic, and Admin source rows — not the crawler core.
