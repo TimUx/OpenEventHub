@@ -33,8 +33,8 @@ Views:
 - Public submission (event / source → moderation queue)
 
 Event actions (list, tiles, details, and detail page):
-- **Show on map** — deep link `/map?event=<id>` (enabled when venue coordinates exist)
-- **Add to calendar** — downloads an `.ics` file for local calendars (phone, Outlook, Thunderbird, …)
+- **Show on map** / **Add to calendar** — icon buttons with hover tooltips (`title`/`aria-label`)
+- Public lists do not show a status like “PUBLISHED” (visible = published)
 
 ## UI languages
 
@@ -59,6 +59,7 @@ Event actions (list, tiles, details, and detail page):
 - **List** — compact rows
 - **Details** — expanded rows with summary/description
 - **Tiles** — card grid
+- Flat filter bar: category, region, date range (from/to), sort by (start date/title), ascending/descending
 
 ### Calendar
 - **Day** / **Week** / **Month** / **Year**

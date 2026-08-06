@@ -33,8 +33,8 @@ Ansichten:
 - Öffentliche Einreichung (Veranstaltung / Quelle → Moderationswarteschlange)
 
 Event-Aktionen (Liste, Kacheln, Details und Detailseite):
-- **Auf Karte anzeigen** — Deep-Link `/map?event=<id>` (nur mit Venue-Koordinaten aktiv)
-- **In Kalender eintragen** — Download einer `.ics`-Datei für lokale Kalender (Smartphone, Outlook, Thunderbird, …)
+- **Auf Karte anzeigen** / **In Kalender eintragen** — Icon-Buttons mit Hover-Tooltip (`title`/`aria-label`)
+- Öffentliche Listen zeigen keinen Status wie „PUBLISHED“ (sichtbar = veröffentlicht)
 
 ## Mehrsprachigkeit (UI)
 
@@ -59,6 +59,7 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - **Liste** — kompakte Zeilen
 - **Details** — erweiterte Listeneinträge mit Summary/Beschreibung
 - **Kacheln** — Kartenraster
+- Flaches Filtermenü: Kategorie, Region, Zeitraum (Von/Bis), Sortieren nach (Startdatum/Titel), Auf-/Absteigend
 
 ### Kalender
 - **Tag** / **Woche** / **Monat** / **Jahr**
