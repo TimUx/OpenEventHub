@@ -49,8 +49,44 @@ export class AdminEventsController {
 
   @Get()
   @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
-  list(@Query('limit') limit?: string) {
-    return this.events.listAll({ limit: limit ? Number(limit) : 100 });
+  list(
+    @Query('limit') limit?: string,
+    @Query('status') status?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('q') q?: string,
+    @Query('venue') venue?: string,
+    @Query('allDay') allDay?: string,
+  ) {
+    if (status !== undefined && status !== '' && !EVENT_STATUSES.has(status)) {
+      throw new BadRequestException(`Invalid status: ${status}`);
+    }
+
+    let parsedAllDay: boolean | undefined;
+    if (allDay !== undefined && allDay !== '') {
+      if (allDay === 'true' || allDay === '1') parsedAllDay = true;
+      else if (allDay === 'false' || allDay === '0') parsedAllDay = false;
+      else throw new BadRequestException('Invalid allDay (use true|false)');
+    }
+
+    const from = parseOptionalDate(dateFrom || undefined, 'dateFrom');
+    const to = parseOptionalDate(dateTo || undefined, 'dateTo');
+    // Inclusive end-of-day when only a calendar date is provided.
+    let dateToExclusive: Date | undefined;
+    if (to && dateTo && /^\d{4}-\d{2}-\d{2}$/.test(dateTo.trim())) {
+      dateToExclusive = new Date(to);
+      dateToExclusive.setUTCHours(23, 59, 59, 999);
+    }
+
+    return this.events.listAll({
+      limit: limit ? Number(limit) : 100,
+      ...(status ? { status: status as EventStatus } : {}),
+      ...(from ? { dateFrom: from } : {}),
+      ...(dateToExclusive ? { dateTo: dateToExclusive } : to ? { dateTo: to } : {}),
+      ...(q?.trim() ? { q: q.trim() } : {}),
+      ...(venue?.trim() ? { venue: venue.trim() } : {}),
+      ...(parsedAllDay !== undefined ? { allDay: parsedAllDay } : {}),
+    });
   }
 
   @Get('counts')

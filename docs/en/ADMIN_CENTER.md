@@ -18,7 +18,7 @@
 - Sources (create / edit / enable / disable / delete; plugin types
   `html` / `rss` / `ics` / `toubiz`; update interval via dropdown; optional custom cron)
 - Events (checkbox selection; bulk status / delete in the top action bar; edit per event;
-  header shows `pending_moderation` count)
+  filters for status, date, venue/place, search, all-day; header shows `pending_moderation` count)
 - Categories (manual create / edit / delete; AI find-or-creates missing labels and links them)
 - Regions (manual create / edit / delete; AI may find-or-create places/hierarchy)
 - Moderation
@@ -53,7 +53,7 @@ Flat UI matching the public portal (primary-blue app bar, rounded buttons, no ba
 
 ![Events](../assets/screenshots/admin-events.png)
 
-*Events (multi-select)*
+*Events (filters + multi-select)*
 
 ![Moderation](../assets/screenshots/admin-moderation.png)
 

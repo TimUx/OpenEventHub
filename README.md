@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.19.0 — Bulk moderation, future-only crawl, all-day dates** (post-M11)
+**v0.20.0 — Admin Events filters** (post-M11)
 
-Vorher: v0.18.0 — HTML multi-format + Toubiz EMS
+Vorher: v0.19.0 — Bulk moderation, future-only crawl, all-day dates
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

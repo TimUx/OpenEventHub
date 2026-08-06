@@ -27,7 +27,61 @@ type EventRow = {
   startAt: string;
   endAt: string | null;
   allDay?: boolean;
+  venue?: {
+    name: string;
+    city: string | null;
+    address: string | null;
+  } | null;
 };
+
+type EventFilters = {
+  status: '' | EventStatus;
+  dateFrom: string;
+  dateTo: string;
+  q: string;
+  venue: string;
+  allDay: '' | 'true' | 'false';
+};
+
+const EMPTY_FILTERS: EventFilters = {
+  status: '',
+  dateFrom: '',
+  dateTo: '',
+  q: '',
+  venue: '',
+  allDay: '',
+};
+
+function buildEventsPath(filters: EventFilters): string {
+  const params = new URLSearchParams();
+  params.set('limit', '100');
+  if (filters.status) params.set('status', filters.status);
+  if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.set('dateTo', filters.dateTo);
+  const q = filters.q.trim();
+  if (q) params.set('q', q);
+  const venue = filters.venue.trim();
+  if (venue) params.set('venue', venue);
+  if (filters.allDay) params.set('allDay', filters.allDay);
+  return `/api/v1/admin/events?${params.toString()}`;
+}
+
+function filtersActive(filters: EventFilters): boolean {
+  return Boolean(
+    filters.status ||
+    filters.dateFrom ||
+    filters.dateTo ||
+    filters.q.trim() ||
+    filters.venue.trim() ||
+    filters.allDay,
+  );
+}
+
+function formatVenue(venue: EventRow['venue']): string | null {
+  if (!venue) return null;
+  const parts = [venue.name, venue.city].filter((part): part is string => Boolean(part?.trim()));
+  return parts.length > 0 ? parts.join(', ') : null;
+}
 
 function formatAdminEventWhen(iso: string, allDay: boolean | undefined, locale: string): string {
   const tag = locale.startsWith('de') ? 'de-DE' : 'en-GB';
@@ -64,9 +118,10 @@ function fromDatetimeLocalAllDay(value: string): string {
 export default function EventsPage() {
   const { t, locale } = useI18n();
   const { token } = useAuth();
-  const { data, error, loading, reload } = useAdminQuery<EventRow[]>(
-    '/api/v1/admin/events?limit=100',
-  );
+  const [draftFilters, setDraftFilters] = useState<EventFilters>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<EventFilters>(EMPTY_FILTERS);
+  const eventsPath = useMemo(() => buildEventsPath(appliedFilters), [appliedFilters]);
+  const { data, error, loading, reload } = useAdminQuery<EventRow[]>(eventsPath);
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -87,6 +142,19 @@ export default function EventsPage() {
 
   const events = data ?? [];
   const eventIds = useMemo(() => events.map((event) => event.id), [events]);
+  const hasFilters = filtersActive(appliedFilters);
+
+  function applyFilters(event?: FormEvent): void {
+    event?.preventDefault();
+    setAppliedFilters({ ...draftFilters });
+    clearSelection();
+  }
+
+  function clearFilters(): void {
+    setDraftFilters(EMPTY_FILTERS);
+    setAppliedFilters(EMPTY_FILTERS);
+    clearSelection();
+  }
 
   useEffect(() => {
     setSelected((prev) => {
@@ -231,6 +299,102 @@ export default function EventsPage() {
       {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
+
+      <Panel>
+        <form className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" onSubmit={applyFilters}>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterStatus')}</span>
+            <select
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.status}
+              onChange={(e) =>
+                setDraftFilters((prev) => ({
+                  ...prev,
+                  status: e.target.value as EventFilters['status'],
+                }))
+              }
+            >
+              <option value="">{t('events.filterAnyStatus')}</option>
+              {EVENT_STATUSES.map((value) => (
+                <option key={value} value={value}>
+                  {t(`events.status.${value}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterDateFrom')}</span>
+            <input
+              type="date"
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.dateFrom}
+              onChange={(e) => setDraftFilters((prev) => ({ ...prev, dateFrom: e.target.value }))}
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterDateTo')}</span>
+            <input
+              type="date"
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.dateTo}
+              onChange={(e) => setDraftFilters((prev) => ({ ...prev, dateTo: e.target.value }))}
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterVenue')}</span>
+            <input
+              type="search"
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.venue}
+              placeholder={t('events.filterVenuePlaceholder')}
+              onChange={(e) => setDraftFilters((prev) => ({ ...prev, venue: e.target.value }))}
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterSearch')}</span>
+            <input
+              type="search"
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.q}
+              placeholder={t('events.filterSearchPlaceholder')}
+              onChange={(e) => setDraftFilters((prev) => ({ ...prev, q: e.target.value }))}
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t('events.filterAllDay')}</span>
+            <select
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
+              value={draftFilters.allDay}
+              onChange={(e) =>
+                setDraftFilters((prev) => ({
+                  ...prev,
+                  allDay: e.target.value as EventFilters['allDay'],
+                }))
+              }
+            >
+              <option value="">{t('events.filterAnyAllDay')}</option>
+              <option value="true">{t('events.filterAllDayYes')}</option>
+              <option value="false">{t('events.filterAllDayNo')}</option>
+            </select>
+          </label>
+          <div className="flex flex-wrap items-end gap-2 md:col-span-2 lg:col-span-3">
+            <button
+              type="submit"
+              className="h-9 rounded-xl bg-primary px-4 text-sm font-semibold text-white"
+            >
+              {t('events.applyFilters')}
+            </button>
+            <button
+              type="button"
+              className="h-9 rounded-xl border border-[var(--border)] px-4 text-sm font-semibold disabled:opacity-60"
+              disabled={!filtersActive(draftFilters) && !hasFilters}
+              onClick={clearFilters}
+            >
+              {t('events.clearFilters')}
+            </button>
+          </div>
+        </form>
+      </Panel>
 
       <Panel className="sticky top-0 z-10 space-y-3 shadow-soft">
         <div className="flex flex-wrap items-center gap-2">
@@ -393,6 +557,7 @@ export default function EventsPage() {
       <div className="space-y-2">
         {events.map((event) => {
           const checked = selected.has(event.id);
+          const venueLabel = formatVenue(event.venue);
           return (
             <Panel key={event.id} className="space-y-3">
               <div className="flex flex-wrap items-start gap-3">
@@ -412,6 +577,7 @@ export default function EventsPage() {
                       <p className="text-xs text-[var(--muted)]">
                         {event.slug} · {formatAdminEventWhen(event.startAt, event.allDay, locale)}
                         {event.allDay ? ` · ${t('events.allDayBadge')}` : ''}
+                        {venueLabel ? ` · ${venueLabel}` : ''}
                       </p>
                     </div>
                     <StatusPill value={event.status} />
@@ -431,7 +597,9 @@ export default function EventsPage() {
           );
         })}
         {!loading && events.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">{t('events.empty')}</p>
+          <p className="text-sm text-[var(--muted)]">
+            {hasFilters ? t('events.emptyFiltered') : t('events.empty')}
+          </p>
         ) : null}
       </div>
     </div>
