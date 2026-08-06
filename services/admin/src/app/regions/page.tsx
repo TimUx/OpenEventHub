@@ -15,7 +15,7 @@ type Region = {
   id: string;
   name: string;
   slug: string;
-  type: RegionType | string;
+  type: string;
   parentId: string | null;
   isoCode: string | null;
 };

@@ -23,7 +23,7 @@ type EventRow = {
   slug: string;
   summary: string | null;
   description: string | null;
-  status: EventStatus | string;
+  status: string;
   startAt: string;
   endAt: string | null;
 };
