@@ -6,7 +6,7 @@ Beispielaufnahmen von Frontend und Admin Center mit Demo-Daten (München), flach
 
 Header-Icons; Event-Liste mit aufklappbaren Filtern und Kalender-Export/Abonnement; Event-Aktionen als Icon-Buttons; Brand-Mark; SEO/PWA mit Bottom-Navigation.
 Quellenverwaltung inkl. Bearbeiten und Plugin-Typen `html` / `rss` / `ics` / `toubiz`.
-Events mit Filtern (Status, Datum, Ort, Suche, ganztägig), Mehrfachauswahl und Bulk-Status/Löschen; Header-Hinweis auf prüfpflichtige Termine.
+Events als Tabelle mit Spaltenfilter/-sortierung, Mehrfachauswahl und Bulk-Status/Löschen; Header-Hinweis auf prüfpflichtige Termine.
 
 ## Frontend
 
@@ -28,7 +28,7 @@ Events mit Filtern (Status, Datum, Ort, Suche, ganztägig), Mehrfachauswahl und 
 | `admin-login.png` | Login |
 | `admin-dashboard.png` | Dashboard |
 | `admin-sources.png` | Quellenverwaltung |
-| `admin-events.png` | Events (Filter, Auswahl, Bulk-Status/Löschen) |
+| `admin-events.png` | Events (Tabelle, Spaltenfilter, Bulk-Aktionen) |
 | `admin-moderation.png` | Moderation |
 | `admin-ai-settings.png` | KI-Einstellungen |
 | `admin-logs.png` | Fehler-Log |

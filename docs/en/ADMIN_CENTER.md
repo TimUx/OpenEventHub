@@ -17,10 +17,12 @@
 ## Management
 - Sources (create / edit / enable / disable / delete; plugin types
   `html` / `rss` / `ics` / `toubiz`; update interval via dropdown; optional custom cron)
-- Events (checkbox selection; bulk status / delete in the top action bar; edit per event;
-  filters for status, date, venue/place, search, all-day; header shows `pending_moderation` count)
-- Categories (manual create / edit / delete; AI find-or-creates missing labels and links them)
-- Regions (manual create / edit / delete; AI may find-or-create places/hierarchy)
+- Events (spreadsheet table: filter/sort via column headers; checkbox selection with a
+  compact bulk bar for status/delete; edit per row; header shows `pending_moderation` count)
+- Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
+  AI find-or-creates missing labels and links them)
+- Regions (spreadsheet table with column filter/sort; manual create / edit / delete;
+  AI may find-or-create places/hierarchy)
 - Moderation
 - Users & Roles
 - AI Settings (create / edit / delete provider profiles; default: Local Ollama; profile test opens a dialog with a waiting indicator)
@@ -53,7 +55,7 @@ Flat UI matching the public portal (primary-blue app bar, rounded buttons, no ba
 
 ![Events](../assets/screenshots/admin-events.png)
 
-*Events (filters + multi-select)*
+*Events (table with column filters)*
 
 ![Moderation](../assets/screenshots/admin-moderation.png)
 

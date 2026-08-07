@@ -259,7 +259,7 @@ After roadmap packages M1–M11, these product/ops enhancements were added
 - AI ingest: create events from extraction; taxonomy find-or-create; one AI job per plugin event candidate
 - Crawl **future/ongoing** events only; scheduler deletes expired events hourly
 - All-day events (`allDay`): no invented clock times in UI/ICS
-- Admin Events: multi-select status/delete; filters (status, date, venue, search, all-day); header hint for events awaiting review
+- Admin Events: multi-select status/delete; table column filter/sort (status, date, venue, search, all-day); header hint for events awaiting review
 - HTML plugin multi-format (`1.3.0`): tables/lists/div/JSON-LD/`<time>`/plain text; embedded EMS **Toubiz** (all future dates)
 - Dedicated `toubiz` plugin (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: one tick per distinct cron; serial crawls

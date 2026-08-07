@@ -43,6 +43,9 @@ type EventFilters = {
   allDay: '' | 'true' | 'false';
 };
 
+type SortKey = 'title' | 'startAt' | 'venue' | 'status' | 'allDay';
+type SortDir = 'asc' | 'desc';
+
 const EMPTY_FILTERS: EventFilters = {
   status: '',
   dateFrom: '',
@@ -52,9 +55,12 @@ const EMPTY_FILTERS: EventFilters = {
   allDay: '',
 };
 
+const inputClass =
+  'h-7 w-full min-w-0 rounded border border-[var(--border)] bg-[var(--background)] px-1.5 text-xs';
+
 function buildEventsPath(filters: EventFilters): string {
   const params = new URLSearchParams();
-  params.set('limit', '100');
+  params.set('limit', '200');
   if (filters.status) params.set('status', filters.status);
   if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
   if (filters.dateTo) params.set('dateTo', filters.dateTo);
@@ -77,10 +83,10 @@ function filtersActive(filters: EventFilters): boolean {
   );
 }
 
-function formatVenue(venue: EventRow['venue']): string | null {
-  if (!venue) return null;
+function formatVenue(venue: EventRow['venue']): string {
+  if (!venue) return '';
   const parts = [venue.name, venue.city].filter((part): part is string => Boolean(part?.trim()));
-  return parts.length > 0 ? parts.join(', ') : null;
+  return parts.join(', ');
 }
 
 function formatAdminEventWhen(iso: string, allDay: boolean | undefined, locale: string): string {
@@ -115,12 +121,49 @@ function fromDatetimeLocalAllDay(value: string): string {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString();
 }
 
+function compareEvents(a: EventRow, b: EventRow, key: SortKey, dir: SortDir): number {
+  const mul = dir === 'asc' ? 1 : -1;
+  let left = '';
+  let right = '';
+  switch (key) {
+    case 'title':
+      left = a.title;
+      right = b.title;
+      break;
+    case 'startAt':
+      left = a.startAt;
+      right = b.startAt;
+      break;
+    case 'venue':
+      left = formatVenue(a.venue);
+      right = formatVenue(b.venue);
+      break;
+    case 'status':
+      left = a.status;
+      right = b.status;
+      break;
+    case 'allDay':
+      left = a.allDay ? '1' : '0';
+      right = b.allDay ? '1' : '0';
+      break;
+  }
+  return left.localeCompare(right, undefined, { sensitivity: 'base', numeric: true }) * mul;
+}
+
 export default function EventsPage() {
   const { t, locale } = useI18n();
   const { token } = useAuth();
-  const [draftFilters, setDraftFilters] = useState<EventFilters>(EMPTY_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState<EventFilters>(EMPTY_FILTERS);
-  const eventsPath = useMemo(() => buildEventsPath(appliedFilters), [appliedFilters]);
+  const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
+  const [debouncedFilters, setDebouncedFilters] = useState<EventFilters>(EMPTY_FILTERS);
+  const [sortKey, setSortKey] = useState<SortKey>('startAt');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setDebouncedFilters(filters), 300);
+    return () => window.clearTimeout(handle);
+  }, [filters]);
+
+  const eventsPath = useMemo(() => buildEventsPath(debouncedFilters), [debouncedFilters]);
   const { data, error, loading, reload } = useAdminQuery<EventRow[]>(eventsPath);
   const [message, setMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -140,21 +183,14 @@ export default function EventsPage() {
   const [endAt, setEndAt] = useState('');
   const [changeReason, setChangeReason] = useState('');
 
-  const events = data ?? [];
+  const events = useMemo(() => {
+    const rows = [...(data ?? [])];
+    rows.sort((a, b) => compareEvents(a, b, sortKey, sortDir));
+    return rows;
+  }, [data, sortKey, sortDir]);
+
   const eventIds = useMemo(() => events.map((event) => event.id), [events]);
-  const hasFilters = filtersActive(appliedFilters);
-
-  function applyFilters(event?: FormEvent): void {
-    event?.preventDefault();
-    setAppliedFilters({ ...draftFilters });
-    clearSelection();
-  }
-
-  function clearFilters(): void {
-    setDraftFilters(EMPTY_FILTERS);
-    setAppliedFilters(EMPTY_FILTERS);
-    clearSelection();
-  }
+  const hasFilters = filtersActive(debouncedFilters);
 
   useEffect(() => {
     setSelected((prev) => {
@@ -169,6 +205,30 @@ export default function EventsPage() {
   const allSelected = events.length > 0 && selected.size === events.length;
   const selectedCount = selected.size;
 
+  function patchFilter<K extends keyof EventFilters>(key: K, value: EventFilters[K]): void {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function clearFilters(): void {
+    setFilters(EMPTY_FILTERS);
+    setDebouncedFilters(EMPTY_FILTERS);
+    setSelected(new Set());
+  }
+
+  function toggleSort(key: SortKey): void {
+    if (sortKey === key) {
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+    setSortKey(key);
+    setSortDir('asc');
+  }
+
+  function sortIndicator(key: SortKey): string {
+    if (sortKey !== key) return '';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   function toggleOne(id: string): void {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -178,12 +238,8 @@ export default function EventsPage() {
     });
   }
 
-  function selectAll(): void {
-    setSelected(new Set(eventIds));
-  }
-
-  function clearSelection(): void {
-    setSelected(new Set());
+  function toggleSelectAll(): void {
+    setSelected(allSelected ? new Set() : new Set(eventIds));
   }
 
   function startEdit(event: EventRow): void {
@@ -257,7 +313,7 @@ export default function EventsPage() {
         });
       }
       setMessage(t('events.bulkStatusUpdated', { count: ids.length }));
-      clearSelection();
+      setSelected(new Set());
       if (editingId && ids.includes(editingId)) {
         setStatus(bulkStatus);
       }
@@ -283,7 +339,7 @@ export default function EventsPage() {
       if (editingId && ids.includes(editingId)) {
         setEditingId(null);
       }
-      clearSelection();
+      setSelected(new Set());
       await reload();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : String(err));
@@ -293,157 +349,57 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader title={t('events.title')} description={t('events.description')} />
       {message ? <p className="text-sm text-primary">{message}</p> : null}
       {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
 
-      <Panel>
-        <form className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" onSubmit={applyFilters}>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterStatus')}</span>
-            <select
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.status}
-              onChange={(e) =>
-                setDraftFilters((prev) => ({
-                  ...prev,
-                  status: e.target.value as EventFilters['status'],
-                }))
-              }
-            >
-              <option value="">{t('events.filterAnyStatus')}</option>
-              {EVENT_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {t(`events.status.${value}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterDateFrom')}</span>
-            <input
-              type="date"
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.dateFrom}
-              onChange={(e) => setDraftFilters((prev) => ({ ...prev, dateFrom: e.target.value }))}
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterDateTo')}</span>
-            <input
-              type="date"
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.dateTo}
-              onChange={(e) => setDraftFilters((prev) => ({ ...prev, dateTo: e.target.value }))}
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterVenue')}</span>
-            <input
-              type="search"
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.venue}
-              placeholder={t('events.filterVenuePlaceholder')}
-              onChange={(e) => setDraftFilters((prev) => ({ ...prev, venue: e.target.value }))}
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterSearch')}</span>
-            <input
-              type="search"
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.q}
-              placeholder={t('events.filterSearchPlaceholder')}
-              onChange={(e) => setDraftFilters((prev) => ({ ...prev, q: e.target.value }))}
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.filterAllDay')}</span>
-            <select
-              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={draftFilters.allDay}
-              onChange={(e) =>
-                setDraftFilters((prev) => ({
-                  ...prev,
-                  allDay: e.target.value as EventFilters['allDay'],
-                }))
-              }
-            >
-              <option value="">{t('events.filterAnyAllDay')}</option>
-              <option value="true">{t('events.filterAllDayYes')}</option>
-              <option value="false">{t('events.filterAllDayNo')}</option>
-            </select>
-          </label>
-          <div className="flex flex-wrap items-end gap-2 md:col-span-2 lg:col-span-3">
-            <button
-              type="submit"
-              className="h-9 rounded-xl bg-primary px-4 text-sm font-semibold text-white"
-            >
-              {t('events.applyFilters')}
-            </button>
-            <button
-              type="button"
-              className="h-9 rounded-xl border border-[var(--border)] px-4 text-sm font-semibold disabled:opacity-60"
-              disabled={!filtersActive(draftFilters) && !hasFilters}
-              onClick={clearFilters}
-            >
-              {t('events.clearFilters')}
-            </button>
-          </div>
-        </form>
-      </Panel>
-
-      <Panel className="sticky top-0 z-10 space-y-3 shadow-soft">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="h-9 rounded-xl border border-[var(--border)] px-3 text-sm font-semibold"
-            onClick={allSelected ? clearSelection : selectAll}
-            disabled={events.length === 0 || bulkBusy}
-          >
-            {allSelected ? t('events.clearSelection') : t('events.selectAll')}
-          </button>
-          <span className="text-sm text-[var(--muted)]">
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+          <span className="text-[var(--muted)]">
             {t('events.selectedCount', { count: selectedCount })}
           </span>
-        </div>
-        <div className="flex flex-wrap items-end gap-2">
-          <label className="text-sm">
-            <span className="mb-1 block font-medium">{t('events.bulkStatus')}</span>
-            <select
-              className="h-9 min-w-44 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm"
-              value={bulkStatus}
-              disabled={bulkBusy}
-              onChange={(e) => setBulkStatus(e.target.value as EventStatus)}
-            >
-              {EVENT_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {t(`events.status.${value}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <select
+            className="h-7 rounded border border-[var(--border)] bg-[var(--background)] px-1.5"
+            value={bulkStatus}
+            disabled={bulkBusy}
+            aria-label={t('events.bulkStatus')}
+            onChange={(e) => setBulkStatus(e.target.value as EventStatus)}
+          >
+            {EVENT_STATUSES.map((value) => (
+              <option key={value} value={value}>
+                {t(`events.status.${value}`)}
+              </option>
+            ))}
+          </select>
           <button
             type="button"
-            className="h-9 rounded-xl bg-primary px-4 text-sm font-semibold text-white disabled:opacity-60"
-            disabled={selectedCount === 0 || bulkBusy}
+            className="h-7 rounded bg-primary px-2 font-semibold text-white disabled:opacity-60"
+            disabled={bulkBusy}
             onClick={() => void applyBulkStatus()}
           >
             {t('events.applyStatus')}
           </button>
           <button
             type="button"
-            className="h-9 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 disabled:opacity-60"
-            disabled={selectedCount === 0 || bulkBusy}
+            className="h-7 rounded border border-red-200 px-2 font-semibold text-red-700 disabled:opacity-60"
+            disabled={bulkBusy}
             onClick={() => void applyBulkDelete()}
           >
             {t('events.deleteSelected')}
           </button>
+          <button
+            type="button"
+            className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+            disabled={bulkBusy}
+            onClick={() => setSelected(new Set())}
+          >
+            {t('events.clearSelection')}
+          </button>
         </div>
-      </Panel>
+      ) : null}
 
       {editingId ? (
         <Panel>
@@ -554,54 +510,212 @@ export default function EventsPage() {
         </Panel>
       ) : null}
 
-      <div className="space-y-2">
-        {events.map((event) => {
-          const checked = selected.has(event.id);
-          const venueLabel = formatVenue(event.venue);
-          return (
-            <Panel key={event.id} className="space-y-3">
-              <div className="flex flex-wrap items-start gap-3">
-                <label className="mt-1 flex items-center gap-2 text-sm">
+      <Panel className="overflow-x-auto !p-0">
+        <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
+          <thead className="bg-[var(--background)]">
+            <tr className="border-b border-[var(--border)] text-xs text-[var(--muted)]">
+              <th className="w-10 px-2 py-1.5">
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 rounded border-[var(--border)]"
+                  checked={allSelected}
+                  disabled={events.length === 0 || bulkBusy}
+                  onChange={toggleSelectAll}
+                  aria-label={allSelected ? t('events.clearSelection') : t('events.selectAll')}
+                />
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('title')}
+                >
+                  {t('events.colTitle')}
+                  {sortIndicator('title')}
+                </button>
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('startAt')}
+                >
+                  {t('events.colStart')}
+                  {sortIndicator('startAt')}
+                </button>
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('venue')}
+                >
+                  {t('events.colVenue')}
+                  {sortIndicator('venue')}
+                </button>
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('status')}
+                >
+                  {t('events.colStatus')}
+                  {sortIndicator('status')}
+                </button>
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('allDay')}
+                >
+                  {t('events.colAllDay')}
+                  {sortIndicator('allDay')}
+                </button>
+              </th>
+              <th className="w-20 px-2 py-1.5 font-semibold">{t('events.colActions')}</th>
+            </tr>
+            <tr className="border-b border-[var(--border)]">
+              <th className="px-2 py-1" />
+              <th className="px-2 py-1">
+                <input
+                  type="search"
+                  className={inputClass}
+                  value={filters.q}
+                  placeholder={t('events.filterSearchPlaceholder')}
+                  aria-label={t('events.filterSearch')}
+                  onChange={(e) => patchFilter('q', e.target.value)}
+                />
+              </th>
+              <th className="px-2 py-1">
+                <div className="flex gap-1">
                   <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-[var(--border)]"
-                    checked={checked}
-                    onChange={() => toggleOne(event.id)}
-                    aria-label={t('events.selectEvent', { title: event.title })}
+                    type="date"
+                    className={inputClass}
+                    value={filters.dateFrom}
+                    aria-label={t('events.filterDateFrom')}
+                    onChange={(e) => patchFilter('dateFrom', e.target.value)}
                   />
-                </label>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <p className="font-medium">{event.title}</p>
-                      <p className="text-xs text-[var(--muted)]">
-                        {event.slug} · {formatAdminEventWhen(event.startAt, event.allDay, locale)}
-                        {event.allDay ? ` · ${t('events.allDayBadge')}` : ''}
-                        {venueLabel ? ` · ${venueLabel}` : ''}
-                      </p>
-                    </div>
+                  <input
+                    type="date"
+                    className={inputClass}
+                    value={filters.dateTo}
+                    aria-label={t('events.filterDateTo')}
+                    onChange={(e) => patchFilter('dateTo', e.target.value)}
+                  />
+                </div>
+              </th>
+              <th className="px-2 py-1">
+                <input
+                  type="search"
+                  className={inputClass}
+                  value={filters.venue}
+                  placeholder={t('events.filterVenuePlaceholder')}
+                  aria-label={t('events.filterVenue')}
+                  onChange={(e) => patchFilter('venue', e.target.value)}
+                />
+              </th>
+              <th className="px-2 py-1">
+                <select
+                  className={inputClass}
+                  value={filters.status}
+                  aria-label={t('events.filterStatus')}
+                  onChange={(e) => patchFilter('status', e.target.value as EventFilters['status'])}
+                >
+                  <option value="">{t('events.filterAnyStatus')}</option>
+                  {EVENT_STATUSES.map((value) => (
+                    <option key={value} value={value}>
+                      {t(`events.status.${value}`)}
+                    </option>
+                  ))}
+                </select>
+              </th>
+              <th className="px-2 py-1">
+                <select
+                  className={inputClass}
+                  value={filters.allDay}
+                  aria-label={t('events.filterAllDay')}
+                  onChange={(e) => patchFilter('allDay', e.target.value as EventFilters['allDay'])}
+                >
+                  <option value="">{t('events.filterAnyAllDay')}</option>
+                  <option value="true">{t('events.filterAllDayYes')}</option>
+                  <option value="false">{t('events.filterAllDayNo')}</option>
+                </select>
+              </th>
+              <th className="px-2 py-1">
+                {hasFilters || filtersActive(filters) ? (
+                  <button
+                    type="button"
+                    className="h-7 text-xs text-[var(--muted)] underline-offset-2 hover:underline"
+                    onClick={clearFilters}
+                  >
+                    {t('events.clearFilters')}
+                  </button>
+                ) : null}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event) => {
+              const checked = selected.has(event.id);
+              const venueLabel = formatVenue(event.venue);
+              return (
+                <tr
+                  key={event.id}
+                  className={`border-b border-[var(--border)]/60 hover:bg-[var(--background)]/80 ${
+                    checked ? 'bg-primary-soft/40' : ''
+                  } ${editingId === event.id ? 'bg-primary-soft/60' : ''}`}
+                >
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5 rounded border-[var(--border)]"
+                      checked={checked}
+                      onChange={() => toggleOne(event.id)}
+                      aria-label={t('events.selectEvent', { title: event.title })}
+                    />
+                  </td>
+                  <td className="max-w-[16rem] px-2 py-1.5">
+                    <p className="truncate font-medium" title={event.title}>
+                      {event.title}
+                    </p>
+                    <p className="truncate font-mono text-[11px] text-[var(--muted)]">
+                      {event.slug}
+                    </p>
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-1.5 text-xs">
+                    {formatAdminEventWhen(event.startAt, event.allDay, locale)}
+                  </td>
+                  <td className="max-w-[12rem] truncate px-2 py-1.5 text-xs" title={venueLabel}>
+                    {venueLabel || '—'}
+                  </td>
+                  <td className="px-2 py-1.5">
                     <StatusPill value={event.status} />
-                  </div>
-                  <div className="mt-3">
+                  </td>
+                  <td className="px-2 py-1.5 text-xs text-[var(--muted)]">
+                    {event.allDay ? t('events.allDayBadge') : '—'}
+                  </td>
+                  <td className="px-2 py-1.5">
                     <button
                       type="button"
-                      className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"
+                      className="rounded border border-[var(--border)] px-1.5 py-0.5 text-xs"
                       onClick={() => startEdit(event)}
                     >
                       {t('events.edit')}
                     </button>
-                  </div>
-                </div>
-              </div>
-            </Panel>
-          );
-        })}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
         {!loading && events.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
+          <p className="px-3 py-4 text-sm text-[var(--muted)]">
             {hasFilters ? t('events.emptyFiltered') : t('events.empty')}
           </p>
         ) : null}
-      </div>
+      </Panel>
     </div>
   );
 }

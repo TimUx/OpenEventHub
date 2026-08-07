@@ -259,7 +259,7 @@ Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiter
 - AI-Ingest: Events aus Extraktion anlegen; Taxonomie Find-or-create; ein AI-Job pro Plugin-Event-Kandidat
 - Crawl nur **zukünftige/laufende** Termine; Scheduler löscht abgelaufene Events stündlich
 - Ganztägige Events (`allDay`): keine erfundenen Uhrzeiten in UI/ICS
-- Admin Events: Mehrfachauswahl Status/Löschen; Filter (Status, Datum, Ort, Suche, ganztägig); Header-Hinweis auf prüfpflichtige Events
+- Admin Events: Mehrfachauswahl Status/Löschen; Tabellenfilter/-sortierung (Status, Datum, Ort, Suche, ganztägig); Header-Hinweis auf prüfpflichtige Events
 - HTML-Plugin multi-format (`1.3.0`): Tabellen/Listen/Div/JSON-LD/`<time>`/Klartext; Embedded EMS **Toubiz** (alle zukünftigen Termine)
 - Dediziertes Plugin `toubiz` (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: ein Tick pro Distinct-Cron; serielle Crawls
