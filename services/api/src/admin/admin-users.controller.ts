@@ -67,7 +67,7 @@ export class AdminUsersController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() body: { role?: AdminRole; password?: string },
+    @Body() body: { email?: string; role?: AdminRole; password?: string },
     @CurrentAdmin() admin: AdminJwtPayload,
   ) {
     const existing = await this.users.findById(id);
@@ -75,6 +75,19 @@ export class AdminUsersController {
       throw new NotFoundException(`User ${id} not found`);
     }
     let user = existing;
+
+    if (body.email !== undefined) {
+      const email = body.email.trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        throw new BadRequestException('Valid email required');
+      }
+      const conflict = await this.users.findByEmail(email);
+      if (conflict && conflict.id !== id) {
+        throw new BadRequestException('User already exists');
+      }
+      user = await this.users.updateEmail(id, email);
+    }
+
     if (body.role) {
       user = await this.users.updateRole(id, body.role);
     }
@@ -91,7 +104,11 @@ export class AdminUsersController {
       actorRole: admin.role,
       resourceType: 'admin_user',
       resourceId: user.id,
-      metadata: { role: body.role, passwordChanged: Boolean(body.password) },
+      metadata: {
+        email: body.email,
+        role: body.role,
+        passwordChanged: Boolean(body.password),
+      },
     });
     return user;
   }

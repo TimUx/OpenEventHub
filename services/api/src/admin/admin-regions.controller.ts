@@ -9,10 +9,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminRole, RegionRepository, RegionType } from '@openeventhub/database';
+import type { RegionHierarchyNode } from '@openeventhub/shared';
 import { Prisma } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service.js';
@@ -20,6 +22,7 @@ import { AdminJwtAuthGuard, type AdminJwtPayload } from '../auth/admin-jwt.guard
 import { CurrentAdmin } from '../auth/current-admin.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
+import { RegionLookupService } from '../geocoding/region-lookup.service.js';
 import { slugifyLabel } from './slugify.js';
 
 const REGION_TYPES = new Set<string>(Object.values(RegionType));
@@ -32,6 +35,7 @@ const REGION_TYPES = new Set<string>(Object.values(RegionType));
 export class AdminRegionsController {
   constructor(
     private readonly regions: RegionRepository,
+    private readonly lookup: RegionLookupService,
     private readonly audit: AuditService,
   ) {}
 
@@ -39,6 +43,62 @@ export class AdminRegionsController {
   @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
   list() {
     return this.regions.list();
+  }
+
+  @Get('lookup')
+  @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
+  async lookupPlaces(@Query('q') q?: string) {
+    const query = q?.trim() ?? '';
+    if (query.length < 2) {
+      return { query, candidates: [] };
+    }
+    try {
+      return await this.lookup.lookup(query);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new BadRequestException(`Place lookup failed: ${message}`);
+    }
+  }
+
+  @Post('from-lookup')
+  async createFromLookup(
+    @Body()
+    body: {
+      chain?: RegionHierarchyNode[];
+      candidateId?: string;
+      label?: string;
+    },
+    @CurrentAdmin() admin: AdminJwtPayload,
+  ) {
+    const chain = Array.isArray(body.chain) ? body.chain : [];
+    if (chain.length === 0) {
+      throw new BadRequestException('chain is required');
+    }
+    for (const node of chain) {
+      if (!node?.name?.trim() || !node.type || !REGION_TYPES.has(node.type)) {
+        throw new BadRequestException('Invalid chain node');
+      }
+    }
+
+    const result = await this.lookup.createFromChain(chain);
+    this.audit.record({
+      action: 'region.create_chain',
+      actorId: admin.sub,
+      actorRole: admin.role,
+      resourceType: 'region',
+      resourceId: result.leaf.id,
+      metadata: {
+        candidateId: body.candidateId ?? null,
+        label: body.label ?? null,
+        createdIds: result.createdIds,
+        chain: chain.map((n) => `${n.type}:${n.name}`),
+      },
+    });
+    return {
+      leaf: result.leaf,
+      regions: result.regions,
+      createdCount: result.createdIds.length,
+    };
   }
 
   @Post()

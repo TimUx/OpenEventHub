@@ -247,7 +247,7 @@ Never implement multiple large milestones in parallel.
 ## Post-M11 — Portal and ops follow-ups
 
 After roadmap packages M1–M11, these product/ops enhancements were added
-(see `CHANGELOG.md`, latest **v0.22.0**):
+(see `CHANGELOG.md`, latest **v0.23.0**):
 
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list

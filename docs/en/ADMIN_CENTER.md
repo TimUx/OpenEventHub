@@ -21,12 +21,14 @@
   compact bulk bar for status/delete; edit per row; header shows `pending_moderation` count)
 - Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
   seed provides the rural starter catalog; AI does **not** create new categories)
-- Regions (spreadsheet table with column filter/sort; manual create / edit / delete;
+- Regions (spreadsheet table with column filter/sort; place lookup creates hierarchy;
+  ambiguous names need a choice; manual edit / delete;
   AI may add places/hierarchy via find-or-create)
 - **Import settings** (coverage area and category allowlist for ingest;
   separate from the region/category catalogs)
 - Moderation
-- Users & Roles
+- Users & Roles (edit: email/role/password; delete)
+- **My profile** (any signed-in admin: email/password with current password)
 - AI Settings (create / edit / delete provider profiles; default: Local Ollama; profile test opens a dialog with a waiting indicator)
 - Scheduler (plain-language intervals + next run; configured under Sources)
 
@@ -39,7 +41,7 @@
 
 ## Visual language
 
-Flat UI matching the public portal (primary-blue app bar, rounded buttons, no background gradients).
+Flat UI with a left sidebar and slim top header (primary blue as brand/accent, rounded buttons, no background gradients).
 
 ## Branding (white-label)
 
@@ -50,7 +52,8 @@ Flat UI matching the public portal (primary-blue app bar, rounded buttons, no ba
 
 ## Navigation
 
-Grouped, collapsible menu:
+Fixed **left sidebar** (permanent on desktop, overlay on mobile) with always-visible
+groups — same pattern as HaushaltsRadar:
 
 | Group | Items |
 |-------|-------|
@@ -59,6 +62,9 @@ Grouped, collapsible menu:
 | Ingest | Sources, Crawler, Scheduler, Import settings |
 | Ops | Queues, Error log |
 | System | AI Settings, Users |
+| Account | My profile |
+
+Slim top header: pending hint, language, user, sign out.
 
 ## Screenshots
 

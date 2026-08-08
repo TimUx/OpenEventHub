@@ -104,3 +104,16 @@ export {
   type AllowlistCategoryNode,
   type CategoryAllowlistDecision,
 } from './category-import-allowlist.js';
+
+export {
+  buildRegionHierarchyFromNominatim,
+  candidateIdFromNominatim,
+  isUsableNominatimPlaceHit,
+  toRegionLookupCandidate,
+  uniqueRegionLookupCandidates,
+  type NominatimAddress,
+  type NominatimSearchHit,
+  type RegionHierarchyNode,
+  type RegionHierarchyType,
+  type RegionLookupCandidate,
+} from './nominatim-region-hierarchy.js';

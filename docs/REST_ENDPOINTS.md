@@ -28,6 +28,8 @@ PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventV
 DELETE /api/v1/admin/events/{id}               (admin only)
 GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; delete: admin)
 GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
+GET /api/v1/admin/regions/lookup?q=…             (Ortssuche DE via Nominatim)
+POST /api/v1/admin/regions/from-lookup           (Hierarchie Find-or-create; body `{ chain }`)
 GET|PUT /api/v1/admin/coverage-scope             (Abdeckungsgebiet; PUT body `{ regionIds: string[] }`)
 GET|PUT /api/v1/admin/category-import-allowlist  (Kategorie-Allowlist; PUT body `{ categoryIds: string[] }`)
 
@@ -37,7 +39,8 @@ POST   /api/v1/admin/sources/{id}/crawl
 GET    /api/v1/admin/moderation
 POST   /api/v1/admin/moderation/{id}/decide    (admin|moderator)
 
-GET|POST|PATCH|DELETE /api/v1/admin/users*     (admin only)
+GET|PATCH /api/v1/admin/me                     (eigenes Profil; PATCH braucht `currentPassword`)
+GET|POST|PATCH|DELETE /api/v1/admin/users*     (admin only; PATCH: email/role/password)
 
 GET    /api/v1/admin/crawler/jobs
 GET|POST /api/v1/admin/scheduler*

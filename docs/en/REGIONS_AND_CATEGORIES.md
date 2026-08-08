@@ -9,7 +9,7 @@
 | Starters | Seed (`db:seed`) creates regions (e.g. Deutschland → Bayern → München) and a **curated flat rural category catalog** (Kirmes, Schützenfest, Dorffest, Konzert, …) |
 | Crawls / AI | **Places/tags:** find-or-create. **Categories:** map onto existing catalog entries only (DE/EN aliases); no auto-creation of new categories |
 | Places | No full gazetteer required — Kommunen/Orte appear from classification (`municipality` / `place` / `region` / `district`) and optionally venues |
-| Ops | Admin Center under **Categories** and **Regions**; DEV category reset: `bash scripts/reset-categories.sh`; region repair: `bash scripts/repair-dev-regions.sh` |
+| Ops | Admin Center under **Categories** and **Regions**; **region create** via place lookup (OpenStreetMap/Nominatim) also creates missing parents; ambiguous names require a choice; DEV category reset: `bash scripts/reset-categories.sh`; region repair: `bash scripts/repair-dev-regions.sh` |
 
 Filters stay moderatable: newly created entries show up in Admin and can be cleaned up or merged.
 
@@ -34,6 +34,20 @@ On crawl auto-create:
 | `place` | `suburb` | Ort | Kommune (else district) |
 
 Note: DB enum keeps `city` / `suburb` for compatibility; `city` is treated as Kommune, `suburb` as Ort.
+
+### Place lookup in Admin (hierarchy create)
+
+Under Admin → Regions → **Add region**, the API searches Germany
+(OpenStreetMap Nominatim, `countrycodes=de`):
+
+1. Enter a name (e.g. `Wasenberg`)
+2. Suggested chain: `Deutschland › Hessen › Schwalm-Eder-Kreis › Willingshausen › Wasenberg`
+3. Multiple hits (e.g. `Merzhausen`, `Neustadt`) require a selection
+4. **Create hierarchy** find-or-creates missing nodes (reuse same name/type under the same parent)
+
+API: `GET /api/v1/admin/regions/lookup?q=…`, `POST /api/v1/admin/regions/from-lookup`
+(`{ chain: [{ type, name, isoCode }] }`). Optional `NOMINATIM_BASE_URL` /
+`NOMINATIM_USER_AGENT`.
 
 ## Coverage scope
 

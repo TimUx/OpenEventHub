@@ -33,6 +33,31 @@ export class RegionRepository {
     return this.prisma.region.findUnique({ where: { slug } });
   }
 
+  findByNameTypeParent(
+    name: string,
+    type: RegionType,
+    parentId: string | null,
+  ): Promise<Region | null> {
+    return this.prisma.region.findFirst({
+      where: {
+        name: { equals: name, mode: 'insensitive' },
+        type,
+        parentId,
+      },
+    });
+  }
+
+  async allocateUniqueSlug(base: string): Promise<string> {
+    const normalized = base.trim().toLowerCase() || 'region';
+    let candidate = normalized;
+    let suffix = 2;
+    while (await this.findBySlug(candidate)) {
+      candidate = `${normalized}-${suffix}`.slice(0, 80);
+      suffix += 1;
+    }
+    return candidate;
+  }
+
   create(data: RegionWriteInput): Promise<Region> {
     return this.prisma.region.create({
       data: {

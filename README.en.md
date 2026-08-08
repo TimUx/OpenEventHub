@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.22.0 — Import settings, category allowlist & region hierarchy** (post-M11)
+**v0.23.0 — Admin sidebar, profile & region place lookup** (post-M11)
 
-Previous: v0.21.0 — Event density heatmap (Apache ECharts)
+Previous: v0.22.0 — Import settings, category allowlist & region hierarchy
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

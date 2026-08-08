@@ -36,9 +36,11 @@ import {
 } from './admin/admin-ops.controller.js';
 import { AdminQueuesService } from './admin/admin-queues.service.js';
 import { AdminRegionsController } from './admin/admin-regions.controller.js';
+import { RegionLookupService } from './geocoding/region-lookup.service.js';
 import { AdminSchedulerService } from './admin/admin-scheduler.service.js';
 import { AdminSourcesController } from './admin/admin-sources.controller.js';
 import { AdminUsersController } from './admin/admin-users.controller.js';
+import { AdminMeController } from './admin/admin-me.controller.js';
 import { AuditService } from './audit/audit.service.js';
 import { AdminJwtAuthGuard } from './auth/admin-jwt.guard.js';
 import { AuthController } from './auth/auth.controller.js';
@@ -118,6 +120,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminSourcesController,
     AdminModerationController,
     AdminUsersController,
+    AdminMeController,
     AdminCrawlerController,
     AdminSchedulerController,
     AdminQueuesController,
@@ -195,6 +198,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminSchedulerService,
     AdminQueuesService,
     AdminLogsService,
+    RegionLookupService,
     AdminJwtAuthGuard,
     RolesGuard,
     {
