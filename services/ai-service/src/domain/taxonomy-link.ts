@@ -176,6 +176,7 @@ async function resolvePlaceRegion(
   let parentId: string | null = null;
   let leafId: string | null = null;
 
+  // Bundesland / state
   const regionName = normalizeLabel(classification.region);
   if (regionName) {
     const region = await findOrCreateRegion(db, regionName, 'state', null);
@@ -183,17 +184,19 @@ async function resolvePlaceRegion(
     leafId = region.id;
   }
 
-  const municipalityName = normalizeLabel(classification.municipality);
-  if (municipalityName) {
-    const municipality = await findOrCreateRegion(db, municipalityName, 'municipality', parentId);
-    parentId = municipality.id;
-    leafId = municipality.id;
-  }
-
+  // Landkreis / district under state (docs: Country → State → District → Municipality)
   const districtName = normalizeLabel(classification.district);
   if (districtName) {
     const district = await findOrCreateRegion(db, districtName, 'district', parentId);
+    parentId = district.id;
     leafId = district.id;
+  }
+
+  // Gemeinde / Stadt under Landkreis (or directly under state when no district)
+  const municipalityName = normalizeLabel(classification.municipality);
+  if (municipalityName) {
+    const municipality = await findOrCreateRegion(db, municipalityName, 'municipality', parentId);
+    leafId = municipality.id;
   }
 
   return leafId;

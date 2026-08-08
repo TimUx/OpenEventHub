@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/ai-service",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "private": true,
   "description": "OpenEventHub Event Intelligence Engine (AI service)",
   "type": "module",

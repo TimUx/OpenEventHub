@@ -78,3 +78,12 @@ export {
 export { inferAllDay, temporalHasClockTime } from './temporal-all-day.js';
 
 export { demotePlaceAdjective, inferPlaceFromTitle } from './place-from-title.js';
+
+export {
+  ancestorIds,
+  evaluateCoverageScope,
+  expandCoverageRegionIds,
+  normalizeCoverageKey,
+  type CoverageDecision,
+  type CoverageRegionNode,
+} from './coverage-scope.js';

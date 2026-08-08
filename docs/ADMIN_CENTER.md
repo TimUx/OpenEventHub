@@ -23,7 +23,8 @@
 - Kategorien (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
   KI legt fehlende per Find-or-create an und verknüpft)
 - Regionen (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
-  KI kann Orte/Hierarchie per Find-or-create ergänzen)
+  KI kann Orte/Hierarchie per Find-or-create ergänzen; **Abdeckungsgebiet** wählbar:
+  Landkreis schließt Unterorte ein, zusätzliche Gemeinden separat)
 - Moderation
 - Benutzer & Rollen
 - AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama; Profil-Test mit sofortigem Dialog inkl. Warteanzeige)

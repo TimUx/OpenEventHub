@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult, ExtractedEventFields } from '@openeventhub/shared';
-import { inferAllDay, inferPlaceFromTitle, isEventNotExpired } from '@openeventhub/shared';
+import {
+  evaluateCoverageScope,
+  inferAllDay,
+  inferPlaceFromTitle,
+  isEventNotExpired,
+} from '@openeventhub/shared';
 import { EventStatus, Prisma, PrismaClient } from '@prisma/client';
 
 import { calculateConfidenceScore } from './domain/confidence.score.js';
@@ -53,6 +58,13 @@ export class AiProcessingService {
     let eventId = payload.eventId ?? null;
 
     if (!eventId && this.canCreateEvent(extraction)) {
+      const coverage = await this.evaluateGeographicCoverage(result);
+      if (!coverage.inScope) {
+        this.logger.log(
+          `Skipped out-of-coverage event title=${JSON.stringify(extraction.title)} reason=${coverage.reason}`,
+        );
+        return result;
+      }
       eventId = await this.upsertEventFromExtraction(payload, result);
     }
 
@@ -125,6 +137,59 @@ export class AiProcessingService {
       extraction.startAt &&
       isEventNotExpired(extraction.startAt, extraction.endAt),
     );
+  }
+
+  /**
+   * Drop new events whose place lies outside the operator coverage set.
+   * Empty coverage = filter disabled. Unknown place = allow (moderation).
+   */
+  private async evaluateGeographicCoverage(
+    result: AiJobResult,
+  ): Promise<{ readonly inScope: boolean; readonly reason: string }> {
+    const scopeRootIds = (
+      await this.prisma.coverageScopeRegion.findMany({ select: { regionId: true } })
+    ).map((row) => row.regionId);
+
+    if (scopeRootIds.length === 0) {
+      return { inScope: true, reason: 'coverage_disabled' };
+    }
+
+    const regions = await this.prisma.region.findMany({
+      select: { id: true, name: true, parentId: true },
+    });
+
+    const classification = result.classification;
+    const extraction = result.extraction;
+    const placeLabels = [
+      classification.municipality,
+      classification.district,
+      classification.region,
+      extraction.venueName,
+      extraction.venueAddress,
+    ];
+
+    // Prefer matching against existing catalog rows when names already exist.
+    let resolvedRegionId: string | null = null;
+    for (const label of [
+      classification.municipality,
+      classification.district,
+      classification.region,
+    ]) {
+      const name = label?.trim();
+      if (!name) continue;
+      const hit = regions.find((row) => row.name.toLowerCase() === name.toLowerCase());
+      if (hit) {
+        resolvedRegionId = hit.id;
+        break;
+      }
+    }
+
+    return evaluateCoverageScope({
+      scopeRootIds,
+      regions,
+      placeLabels,
+      resolvedRegionId,
+    });
   }
 
   /** Prefer plugin-structured candidates when the LLM flips isEvent off. */

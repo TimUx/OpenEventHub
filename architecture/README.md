@@ -11,6 +11,7 @@ Follow `docs/ADR_GUIDE.md`.
 | [0004](adr/0004-replace-minio-with-seaweedfs.md)        | Replace MinIO with SeaweedFS               | Accepted |
 | [0005](adr/0005-openai-compatible-ai-provider.md)       | Exchangeable OpenAI-compatible AI provider | Accepted |
 | [0006](adr/0006-admin-managed-ai-configuration.md)      | Admin-managed AI provider configuration    | Accepted |
+| [0007](adr/0007-social-flyer-first-ocr-required.md)     | Social / flyer-first — OCR required        | Accepted |
 
 ## Milestone reviews
 

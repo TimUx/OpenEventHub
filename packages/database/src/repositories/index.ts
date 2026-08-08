@@ -20,6 +20,7 @@ export {
   type RegionUpdateInput,
   type RegionWriteInput,
 } from './region.repository.js';
+export { CoverageScopeRepository } from './coverage-scope.repository.js';
 export { SubmissionRepository, type CreateSubmissionInput } from './submission.repository.js';
 export {
   ModerationRepository,

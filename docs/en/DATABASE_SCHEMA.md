@@ -127,6 +127,12 @@ to `regions` via `region_id`.
 Hierarchical geography (`parent_id` self-reference). Types follow
 `docs/REGIONS_AND_CATEGORIES.md`.
 
+## coverage_scope_regions
+
+Operator-selected **coverage area** roots (`region_id` PK/FK → `regions`, cascade
+delete). Empty = no geo filter on AI ingest. A selected district includes descendants
+(municipalities) without storing them individually.
+
 ## categories / tags
 
 Categories are hierarchical (`parent_id`). Tags are flat. Events link via

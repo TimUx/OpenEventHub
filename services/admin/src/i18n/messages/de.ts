@@ -287,10 +287,17 @@ export const de = {
     fieldParent: 'Übergeordnete Region',
     fieldIso: 'ISO-Code (optional)',
     noParent: 'Keine (Wurzel)',
+    coverageTitle: 'Abdeckungsgebiet',
+    coverageDescription:
+      'Wähle eine oder mehrere Regionen, für die Events übernommen werden. Ein Landkreis schließt alle untergeordneten Gemeinden ein — Extra-Orte (z. B. Alsfeld) separat anhaken. Leer = kein Geo-Filter.',
+    coverageSave: 'Abdeckung speichern',
+    coverageSaved: 'Abdeckungsgebiet aktualisiert',
+    coverageEmpty: 'Keine Region gewählt (Filter aus).',
+    coverageSelected: '{count} Region(en) gewählt',
     type: {
       country: 'Land',
       state: 'Bundesland / Staat',
-      district: 'Kreis / Bezirk',
+      district: 'Landkreis / Bezirk',
       municipality: 'Gemeinde',
       city: 'Stadt',
       suburb: 'Stadtteil',

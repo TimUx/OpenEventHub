@@ -15,14 +15,32 @@ Filter bleiben moderierbar: neu angelegte Einträge erscheinen in Admin und kön
 
 ## Regionen-Hierarchie
 
-Country
-→ State
-→ District
-→ Municipality
-→ City
-→ District/Suburb
+Country (Land)
+→ State (Bundesland)
+→ District (Landkreis / Bezirk)
+→ Municipality / City (Gemeinde / Stadt)
+→ Suburb (Stadtteil)
 
-Bei Auto-Anlage aus Crawls typischerweise: `region` → State, `municipality` → Municipality, `district` → District (unter dem jeweils gefundenen/erzeugten Parent).
+Bei Auto-Anlage aus Crawls:
+
+| Klassifikationsfeld | RegionType | Parent |
+|---------------------|------------|--------|
+| `region` | `state` | — |
+| `district` | `district` | State |
+| `municipality` | `municipality` | District (oder State, falls kein Kreis) |
+
+## Abdeckungsgebiet (Coverage Scope)
+
+Unter Admin → Regionen kann ein **Abdeckungsgebiet** gesetzt werden (eine oder mehrere
+Regionen als Wurzeln).
+
+- Ein gewählter **Landkreis** gilt inkl. aller untergeordneten Gemeinden/Städte — diese
+  müssen nicht einzeln angehakt werden.
+- Zusätzliche Orte außerhalb (z. B. Alsfeld im Vogelsbergkreis neben Schwalm-Eder-Kreis)
+  werden separat gewählt.
+- **Leeres** Abdeckungsgebiet = kein Geo-Filter (wie bisher).
+- Beim AI-Ingest werden neue Events mit erkanntem Ort **außerhalb** des Gebiets
+  nicht angelegt. Ohne Ortshinweis bleibt die Übernahme möglich (Moderation).
 
 ## Kategorien
 

@@ -247,7 +247,7 @@ Never implement multiple large milestones in parallel.
 ## Post-M11 — Portal and ops follow-ups
 
 After roadmap packages M1–M11, these product/ops enhancements were added
-(see `CHANGELOG.md`, latest **v0.20.1**):
+(see `CHANGELOG.md`, latest **v0.20.2**):
 
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list
@@ -262,6 +262,7 @@ After roadmap packages M1–M11, these product/ops enhancements were added
 - Admin Events: multi-select status/delete; table column filter/sort (status, date, venue, search, all-day); header hint for events awaiting review
 - Cross-source event consolidation (title+day, venue-compatible) with field fill-in; place from title when venue is missing
 - Admin: collapsible nav groups; optional white-label (`NEXT_PUBLIC_ADMIN_TITLE` / `_LOGO_URL`)
+- Coverage scope: Admin selects regions (district includes children + extra municipalities); AI ingest drops out-of-area places
 - HTML plugin multi-format (`1.3.0`): tables/lists/div/JSON-LD/`<time>`/plain text; embedded EMS **Toubiz** (all future dates)
 - Dedicated `toubiz` plugin (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: one tick per distinct cron; serial crawls
