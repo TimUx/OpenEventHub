@@ -117,8 +117,6 @@ function BrandLogo({ className }: { readonly className?: string }) {
   const logoUrl = getAdminLogoUrl();
   if (logoUrl) {
     return (
-      // Custom white-label mark (PNG/SVG URL); operators replace via env or public/brand.
-      // eslint-disable-next-line @next/next/no-img-element
       <img src={logoUrl} alt="" className={cn('h-8 w-8 shrink-0 object-contain', className)} />
     );
   }

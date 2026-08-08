@@ -105,7 +105,7 @@ export function inferPlaceFromTitle(title: string | null | undefined): string | 
   if (!head) return null;
 
   // "Scherzmarkt in Treysa", "Konzert in Homberg"
-  const inPlace = /\bin\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]+)\b/u.exec(head);
+  const inPlace = /\bin\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß-]+)\b/u.exec(head);
   if (inPlace?.[1] && looksLikePlaceToken(inPlace[1])) {
     return demotePlaceAdjective(inPlace[1]);
   }

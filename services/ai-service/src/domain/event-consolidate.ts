@@ -108,7 +108,7 @@ export function utcDayBounds(startAt: Date): { readonly gte: Date; readonly lt: 
 export function titlesMatch(a: string, b: string): boolean {
   const keysFor = (title: string): string[] => {
     const full = normalizeTitleKey(title);
-    const head = normalizeTitleKey(title.split(/\s*[—–|\-]\s*/)[0] ?? title);
+    const head = normalizeTitleKey(title.split(/\s*[—–|-]\s*/)[0] ?? title);
     return [...new Set([full, head].filter((value) => value.length > 0))];
   };
 
