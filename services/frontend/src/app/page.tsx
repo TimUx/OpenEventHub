@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { CalendarDays, List, MapPinned, PlusCircle } from 'lucide-react';
+import { CalendarDays, Flame, List, MapPinned, PlusCircle } from 'lucide-react';
 
 import { EventCard } from '../components/event-card';
 import { SiteJsonLd } from '../components/site-json-ld';
@@ -49,6 +49,12 @@ export default async function HomePage() {
       icon: CalendarDays,
       title: dictionary.home.features.calendar.title,
       description: dictionary.home.features.calendar.description,
+    },
+    {
+      href: '/heatmap',
+      icon: Flame,
+      title: dictionary.home.features.heatmap.title,
+      description: dictionary.home.features.heatmap.description,
     },
     {
       href: '/map',

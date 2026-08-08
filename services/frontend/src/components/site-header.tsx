@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, List, MapPinned, PlusCircle, Search } from 'lucide-react';
+import { CalendarDays, Flame, List, MapPinned, PlusCircle, Search } from 'lucide-react';
 
 import { useI18n } from '../i18n/i18n-provider';
 import { LocaleSwitcher } from '../i18n/locale-switcher';
@@ -17,6 +17,7 @@ export function SiteHeader() {
   const links = [
     { href: '/events', label: t('nav.events'), icon: List },
     { href: '/calendar', label: t('nav.calendar'), icon: CalendarDays },
+    { href: '/heatmap', label: t('nav.heatmap'), icon: Flame },
     { href: '/map', label: t('nav.map'), icon: MapPinned },
     { href: '/search', label: t('nav.search'), icon: Search },
     { href: '/submit', label: t('nav.submit'), icon: PlusCircle },
@@ -64,7 +65,7 @@ export function SiteHeader() {
         aria-label={t('nav.mobile')}
         className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--card)] pb-[env(safe-area-inset-bottom)] shadow-soft lg:hidden"
       >
-        <ul className="mx-auto grid max-w-6xl grid-cols-5 gap-0 px-1 pt-1">
+        <ul className="mx-auto grid max-w-6xl grid-cols-6 gap-0 px-0.5 pt-1">
           {links.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (

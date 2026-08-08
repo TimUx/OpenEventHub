@@ -142,6 +142,11 @@ export function CalendarBrowser() {
         <div className="space-y-2">
           <h1 className="font-bold text-3xl">{t('calendar.title')}</h1>
           <p className="text-[var(--muted)]">{t('calendar.description')}</p>
+          <p className="text-sm text-[var(--muted)]">
+            <Link href="/heatmap" className="font-semibold text-primary hover:underline">
+              {t('calendar.toHeatmap')}
+            </Link>
+          </p>
         </div>
         <ViewModeToggle
           label={t('calendar.viewMode')}

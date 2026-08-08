@@ -8,6 +8,8 @@ Stack:
 - TailwindCSS
 - shadcn/ui
 - TanStack Query
+- Leaflet (map)
+- Apache ECharts (event density heatmap)
 
 ## Visual language
 
@@ -27,6 +29,7 @@ Views:
 - Home
 - Event list (display modes: list, details, tiles)
 - Calendar (day, week, month, year)
+- Event density heatmap (separate `/heatmap`: year → month → week → weekend → day)
 - Map
 - Event detail
 - Search results
@@ -67,6 +70,13 @@ Event actions (list, tiles, details, and detail page):
 - Navigation including “Today”; clicking a day opens day view
 
 Selected modes persist in the browser (`oeh_view_*`).
+
+### Event density (heatmap)
+- Separate route `/heatmap` (classic calendar unchanged)
+- Visualized with **Apache ECharts** (`heatmap` + `calendar` coordinate system)
+- Zoom: **Year** / **Month** / **Week** / **Weekend** (Fri–Sun) / **Day** (click drills deeper)
+- Filters (collapsible): category, region
+- Dependency: `echarts` in the frontend workspace
 
 ## Map
 

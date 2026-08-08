@@ -247,11 +247,12 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 ## Post-M11 — Portal- und Ops-Nachzüge
 
 Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
-(siehe `CHANGELOG.md`, zuletzt **v0.20.2**):
+(siehe `CHANGELOG.md`, zuletzt **v0.21.0**):
 
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste
 - Kalender-Abonnement (`/calendar.ics`) und Bulk-`.ics`-Export gefilterter Events
+- Termindichte-Heatmap unter `/heatmap` (Apache ECharts Kalender-Heatmap; Jahr→Monat→Woche→Wochenende→Tag) mit Kategorie-/Region-Filter; klassischer Kalender unverändert
 - Eingebettete Karte mit Suche, Filtern und Auto-Zoom; Deep-Link `?event=`
 - Öffentliche Einreichung von Veranstaltungen und Quellen (Schedule-Presets)
 - Admin: Quellen bearbeiten; Kategorien/Regionen/Events CRUD; Fehler-Log; AI Settings Provider-CRUD
