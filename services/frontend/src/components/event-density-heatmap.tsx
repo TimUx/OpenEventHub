@@ -24,9 +24,10 @@ echarts.use([
   VisualMapComponent,
 ]);
 
+/** Density scale: few (green) → many (red). Independent of brand accent. */
+const DENSITY_COLORS = ['#43a047', '#fdd835', '#fb8c00', '#e53935'] as const;
+
 function readThemeColors(): {
-  readonly primary: string;
-  readonly soft: string;
   readonly card: string;
   readonly muted: string;
   readonly foreground: string;
@@ -34,8 +35,6 @@ function readThemeColors(): {
 } {
   if (typeof window === 'undefined') {
     return {
-      primary: '#1565c0',
-      soft: '#e3f2fd',
       card: '#ffffff',
       muted: '#5f6b7a',
       foreground: '#1a1a1a',
@@ -45,8 +44,6 @@ function readThemeColors(): {
   const styles = getComputedStyle(document.documentElement);
   const pick = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
   return {
-    primary: pick('--primary', '#1565c0'),
-    soft: pick('--primary-soft', '#e3f2fd'),
     card: pick('--card', '#ffffff'),
     muted: pick('--muted', '#5f6b7a'),
     foreground: pick('--foreground', '#1a1a1a'),
@@ -60,6 +57,8 @@ function buildOption(args: {
   readonly eventsByDay: ReadonlyMap<string, { readonly length: number }>;
   readonly locale: 'de' | 'en';
   readonly eventsLabel: string;
+  readonly fewLabel: string;
+  readonly manyLabel: string;
 }): EChartsOption {
   const theme = readThemeColors();
   const range = calendarRangeForMode(args.mode, args.cursor);
@@ -87,17 +86,19 @@ function buildOption(args: {
       bottom: 4,
       itemWidth: 14,
       itemHeight: 10,
+      text: [args.manyLabel, args.fewLabel],
       textStyle: { color: theme.muted, fontSize: 11 },
       inRange: {
-        color: [theme.soft, theme.primary],
+        color: [...DENSITY_COLORS],
       },
     },
     calendar: {
-      top: args.mode === 'year' ? 40 : 52,
-      left: 52,
-      right: 20,
-      bottom: 44,
-      cellSize: args.mode === 'year' ? ['auto', 15] : ['auto', 32],
+      top: args.mode === 'year' ? 48 : 56,
+      left: 56,
+      right: 24,
+      bottom: 52,
+      cellSize:
+        args.mode === 'year' ? ['auto', 28] : args.mode === 'month' ? ['auto', 56] : ['auto', 64],
       range,
       itemStyle: {
         borderWidth: 1,
@@ -151,6 +152,8 @@ export function EventDensityHeatmap({
   eventsByDay,
   locale,
   eventsLabel,
+  fewLabel,
+  manyLabel,
   className,
   onDateClick,
 }: {
@@ -159,6 +162,8 @@ export function EventDensityHeatmap({
   readonly eventsByDay: ReadonlyMap<string, { readonly length: number }>;
   readonly locale: 'de' | 'en';
   readonly eventsLabel: string;
+  readonly fewLabel: string;
+  readonly manyLabel: string;
   readonly className?: string;
   readonly onDateClick?: (isoDay: string) => void;
 }) {
@@ -194,10 +199,11 @@ export function EventDensityHeatmap({
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart) return;
-    chart.setOption(buildOption({ mode, cursor, eventsByDay, locale, eventsLabel }), {
-      notMerge: true,
-    });
-  }, [mode, cursor, eventsByDay, locale, eventsLabel]);
+    chart.setOption(
+      buildOption({ mode, cursor, eventsByDay, locale, eventsLabel, fewLabel, manyLabel }),
+      { notMerge: true },
+    );
+  }, [mode, cursor, eventsByDay, locale, eventsLabel, fewLabel, manyLabel]);
 
   return (
     <div

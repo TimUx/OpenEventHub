@@ -4,7 +4,13 @@ import { randomUUID } from 'node:crypto';
 
 import type { Category, Region, Tag, Venue } from '@prisma/client';
 
-import { linkEventTaxonomy, normalizeLabel, slugify, type TaxonomyDb } from './taxonomy-link.js';
+import {
+  linkEventTaxonomy,
+  matchCategoryIdsFromCatalog,
+  normalizeLabel,
+  slugify,
+  type TaxonomyDb,
+} from './taxonomy-link.js';
 
 function createMemoryDb(): TaxonomyDb & {
   categories: Category[];
@@ -56,10 +62,14 @@ function createMemoryDb(): TaxonomyDb & {
     },
     region: {
       findFirst: async ({ where }) => {
-        if (where.name) {
-          return regions.find((row) => nameEq(row.name, where.name!.equals)) ?? null;
-        }
-        return null;
+        return (
+          regions.find((row) => {
+            if (where.type && row.type !== where.type) return false;
+            if (where.name && !nameEq(row.name, where.name.equals)) return false;
+            if (where.slug && row.slug !== where.slug) return false;
+            return Boolean(where.name || where.slug || where.type);
+          }) ?? null
+        );
       },
       findUnique: async ({ where }) => regions.find((row) => row.slug === where.slug) ?? null,
       create: async ({ data }) => {
@@ -174,9 +184,27 @@ describe('taxonomy-link', () => {
     assert.equal(slugify('Schwalm-Bräu'), 'schwalm-braeu');
   });
 
-  it('creates places and categories on demand and links the event', async () => {
+  it('maps labels onto curated categories without inventing new ones', async () => {
     const db = createMemoryDb();
     const eventId = randomUUID();
+    db.categories.push(
+      {
+        id: randomUUID(),
+        name: 'Kirmes',
+        slug: 'kirmes',
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        name: 'Theater',
+        slug: 'theater',
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    );
 
     const result = await linkEventTaxonomy(db, {
       eventId,
@@ -199,6 +227,7 @@ describe('taxonomy-link', () => {
         tags: ['schwalm'],
         region: 'Hessen',
         municipality: 'Schwalmstadt',
+        place: null,
         district: 'Schwalm-Eder-Kreis',
         classificationConfidence: 0.8,
       },
@@ -214,15 +243,12 @@ describe('taxonomy-link', () => {
     assert.equal(db.regions[2]?.type, 'municipality');
     assert.equal(db.regions[2]?.parentId, db.regions[1]?.id);
 
+    // Culture → theater alias; Kirmes → kirmes; no new category rows created
     assert.equal(db.categories.length, 2);
-    assert.equal(db.categories[0]?.name, 'Culture');
-    assert.equal(db.categories[1]?.name, 'Kirmes');
-    assert.equal(db.categories[1]?.parentId, db.categories[0]?.id);
-
+    assert.equal(db.eventCategories.length, 2);
     assert.equal(db.venues.length, 1);
     assert.equal(db.venues[0]?.regionId, db.regions[2]?.id);
     assert.equal(db.eventVenue.get(eventId), db.venues[0]?.id);
-    assert.equal(db.eventCategories.length, 2);
     assert.equal(db.eventTags.length, 1);
     assert.equal(result.regionId, db.regions[2]?.id);
   });
@@ -261,6 +287,7 @@ describe('taxonomy-link', () => {
         tags: [],
         region: 'hessen',
         municipality: 'Ziegenhain',
+        place: null,
         district: null,
         classificationConfidence: 0.5,
       },
@@ -268,5 +295,17 @@ describe('taxonomy-link', () => {
 
     assert.equal(db.regions.length, 2);
     assert.equal(db.regions[1]?.parentId, db.regions[0]?.id);
+  });
+
+  it('matchCategoryIdsFromCatalog maps aliases without inventing rows', () => {
+    const catalog = [
+      { id: '1', name: 'Kirmes', slug: 'kirmes' },
+      { id: '2', name: 'Konzert', slug: 'konzert' },
+    ];
+    const ids = matchCategoryIdsFromCatalog(
+      ['traditionskirmes', 'Concerts', 'unknown-xyz'],
+      catalog,
+    );
+    assert.deepEqual(ids, ['1', '2']);
   });
 });

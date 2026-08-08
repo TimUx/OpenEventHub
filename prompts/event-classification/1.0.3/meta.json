@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.3",
+  "task": "classification",
+  "description": "Assign taxonomy from curated rural DE categories; places may still be created; no free-form category invention.",
+  "responseFormat": "json"
+}

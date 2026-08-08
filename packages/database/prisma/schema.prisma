@@ -297,12 +297,25 @@ model Category {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  parent   Category?       @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
-  children Category[]      @relation("CategoryHierarchy")
-  events   EventCategory[]
+  parent            Category?                  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children          Category[]                 @relation("CategoryHierarchy")
+  events            EventCategory[]
+  importAllowlists  CategoryImportAllowlist[]
 
   @@index([parentId])
   @@map("categories")
+}
+
+/// Operator-selected category roots for import allowlist.
+/// Selecting a parent includes all descendant categories.
+/// Empty set = no category filter (all categories accepted).
+model CategoryImportAllowlist {
+  categoryId String   @id @map("category_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("category_import_allowlist")
 }
 
 model Tag {

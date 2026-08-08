@@ -33,8 +33,9 @@ export function parseClassificationJson(raw: string): ClassificationFields {
     subcategories: asStringArray(parsed['subcategories']),
     tags: asStringArray(parsed['tags']),
     region: asNullableString(parsed['region']),
-    municipality: asNullableString(parsed['municipality']),
     district: asNullableString(parsed['district']),
+    municipality: asNullableString(parsed['municipality']),
+    place: asNullableString(parsed['place']),
     classificationConfidence: asConfidence(parsed['classificationConfidence']),
   };
 }

@@ -5,7 +5,9 @@ import {
   buildDailyHeatmapData,
   calendarRangeForMode,
   drillModeAfterClick,
+  eventsInIsoRange,
   resolveRangeBounds,
+  showHeatmapPeriodList,
 } from './heatmap-chart-data.js';
 
 describe('heatmap-chart-data', () => {
@@ -42,5 +44,26 @@ describe('heatmap-chart-data', () => {
     assert.equal(drillModeAfterClick('month'), 'week');
     assert.equal(drillModeAfterClick('week'), 'weekend');
     assert.equal(drillModeAfterClick('weekend'), 'day');
+  });
+
+  it('shows period lists from month zoom downward', () => {
+    assert.equal(showHeatmapPeriodList('year'), false);
+    assert.equal(showHeatmapPeriodList('month'), true);
+    assert.equal(showHeatmapPeriodList('week'), true);
+    assert.equal(showHeatmapPeriodList('weekend'), true);
+    assert.equal(showHeatmapPeriodList('day'), true);
+  });
+
+  it('collects events in an inclusive ISO day range', () => {
+    const byDay = new Map([
+      ['2026-08-07', [{ id: 'b', title: 'B', startAt: '2026-08-07T18:00:00.000Z' } as never]],
+      ['2026-08-08', [{ id: 'a', title: 'A', startAt: '2026-08-08T10:00:00.000Z' } as never]],
+      ['2026-08-10', [{ id: 'c', title: 'C', startAt: '2026-08-10T10:00:00.000Z' } as never]],
+    ]);
+    const listed = eventsInIsoRange(byDay, '2026-08-07', '2026-08-08');
+    assert.deepEqual(
+      listed.map((e) => e.id),
+      ['b', 'a'],
+    );
   });
 });

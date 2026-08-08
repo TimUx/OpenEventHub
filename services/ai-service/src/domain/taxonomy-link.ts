@@ -1,4 +1,8 @@
-import type { ClassificationFields, ExtractedEventFields } from '@openeventhub/shared';
+import {
+  resolveDefaultCategorySlug,
+  type ClassificationFields,
+  type ExtractedEventFields,
+} from '@openeventhub/shared';
 import type { Category, Region, RegionType, Tag, Venue } from '@prisma/client';
 
 /** Minimal DB surface used by taxonomy linking (Prisma client or transaction). */
@@ -14,7 +18,11 @@ export type TaxonomyDb = {
   };
   region: {
     findFirst(args: {
-      where: { name?: { equals: string; mode: 'insensitive' }; slug?: string };
+      where: {
+        name?: { equals: string; mode: 'insensitive' };
+        slug?: string;
+        type?: RegionType;
+      };
     }): Promise<Region | null>;
     findUnique(args: { where: { slug: string } }): Promise<Region | null>;
     create(args: {
@@ -132,27 +140,65 @@ export async function linkEventTaxonomy(
   return { categoryIds, tagIds, regionId, venueId };
 }
 
+export type CategoryMatchRow = {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+};
+
+/**
+ * Resolve classification labels onto existing catalog rows (no create).
+ * Prefers curated default-category slug aliases, then case-insensitive name.
+ */
+export function matchCategoryIdsFromCatalog(
+  labels: readonly string[],
+  catalog: readonly CategoryMatchRow[],
+): string[] {
+  const bySlug = new Map(catalog.map((row) => [row.slug, row]));
+  const byName = new Map(catalog.map((row) => [row.name.toLowerCase(), row]));
+  const ids: string[] = [];
+
+  for (const raw of labels) {
+    const name = normalizeLabel(raw);
+    if (!name) continue;
+
+    const curatedSlug = resolveDefaultCategorySlug(name);
+    const category = curatedSlug
+      ? (bySlug.get(curatedSlug) ?? byName.get(name.toLowerCase()) ?? null)
+      : (byName.get(name.toLowerCase()) ?? null);
+
+    if (category) {
+      ids.push(category.id);
+    }
+  }
+
+  return [...new Set(ids)];
+}
+
 async function resolveCategories(
   db: TaxonomyDb,
   classification: ClassificationFields,
 ): Promise<string[]> {
   const ids: string[] = [];
-  const parentIds: string[] = [];
+  const labels = [...classification.categories, ...classification.subcategories];
 
-  for (const raw of classification.categories) {
+  for (const raw of labels) {
     const name = normalizeLabel(raw);
     if (!name) continue;
-    const category = await findOrCreateCategory(db, name, null);
-    ids.push(category.id);
-    parentIds.push(category.id);
-  }
 
-  const parentId = parentIds[0] ?? null;
-  for (const raw of classification.subcategories) {
-    const name = normalizeLabel(raw);
-    if (!name) continue;
-    const category = await findOrCreateCategory(db, name, parentId);
-    ids.push(category.id);
+    const curatedSlug = resolveDefaultCategorySlug(name);
+    const category = curatedSlug
+      ? ((await db.category.findUnique({ where: { slug: curatedSlug } })) ??
+        (await db.category.findFirst({
+          where: { name: { equals: name, mode: 'insensitive' } },
+        })))
+      : await db.category.findFirst({
+          where: { name: { equals: name, mode: 'insensitive' } },
+        });
+
+    if (category) {
+      ids.push(category.id);
+    }
   }
 
   return [...new Set(ids)];
@@ -176,15 +222,18 @@ async function resolvePlaceRegion(
   let parentId: string | null = null;
   let leafId: string | null = null;
 
-  // Bundesland / state
+  // Bundesland / state (optionally under Land if a country root exists)
   const regionName = normalizeLabel(classification.region);
   if (regionName) {
-    const region = await findOrCreateRegion(db, regionName, 'state', null);
+    const country = await db.region.findFirst({
+      where: { type: 'country', name: { equals: 'Deutschland', mode: 'insensitive' } },
+    });
+    const region = await findOrCreateRegion(db, regionName, 'state', country?.id ?? null);
     parentId = region.id;
     leafId = region.id;
   }
 
-  // Landkreis / district under state (docs: Country → State → District → Municipality)
+  // Landkreis / district under state
   const districtName = normalizeLabel(classification.district);
   if (districtName) {
     const district = await findOrCreateRegion(db, districtName, 'district', parentId);
@@ -192,11 +241,19 @@ async function resolvePlaceRegion(
     leafId = district.id;
   }
 
-  // Gemeinde / Stadt under Landkreis (or directly under state when no district)
+  // Kommune (Gemeinde/Stadt) under Landkreis
   const municipalityName = normalizeLabel(classification.municipality);
   if (municipalityName) {
     const municipality = await findOrCreateRegion(db, municipalityName, 'municipality', parentId);
+    parentId = municipality.id;
     leafId = municipality.id;
+  }
+
+  // Ort / Dorf / Ortsteil under Kommune (or under Landkreis if Kommune unknown)
+  const placeName = normalizeLabel(classification.place);
+  if (placeName) {
+    const place = await findOrCreateRegion(db, placeName, 'suburb', parentId);
+    leafId = place.id;
   }
 
   return leafId;
@@ -246,24 +303,6 @@ async function resolveVenue(
     },
   });
   return created.id;
-}
-
-async function findOrCreateCategory(
-  db: TaxonomyDb,
-  name: string,
-  parentId: string | null,
-): Promise<Category> {
-  const existing = await db.category.findFirst({
-    where: { name: { equals: name, mode: 'insensitive' } },
-  });
-  if (existing) {
-    return existing;
-  }
-
-  const slug = await allocateUniqueSlug(db, 'category', name);
-  return db.category.create({
-    data: { name, slug, parentId },
-  });
 }
 
 async function findOrCreateRegion(

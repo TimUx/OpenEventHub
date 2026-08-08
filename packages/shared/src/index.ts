@@ -79,6 +79,16 @@ export { inferAllDay, temporalHasClockTime } from './temporal-all-day.js';
 
 export { demotePlaceAdjective, inferPlaceFromTitle } from './place-from-title.js';
 
+export { REGION_TYPE_RANK, regionTypeGroupKey, regionTypeRank } from './region-types.js';
+
+export {
+  DEFAULT_CATEGORY_SLUGS,
+  DEFAULT_EVENT_CATEGORIES,
+  normalizeCategoryKey,
+  resolveDefaultCategorySlug,
+  type DefaultEventCategory,
+} from './default-categories.js';
+
 export {
   ancestorIds,
   evaluateCoverageScope,
@@ -87,3 +97,10 @@ export {
   type CoverageDecision,
   type CoverageRegionNode,
 } from './coverage-scope.js';
+
+export {
+  evaluateCategoryAllowlist,
+  expandAllowlistCategoryIds,
+  type AllowlistCategoryNode,
+  type CategoryAllowlistDecision,
+} from './category-import-allowlist.js';

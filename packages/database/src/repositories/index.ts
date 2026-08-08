@@ -21,6 +21,7 @@ export {
   type RegionWriteInput,
 } from './region.repository.js';
 export { CoverageScopeRepository } from './coverage-scope.repository.js';
+export { CategoryImportAllowlistRepository } from './category-import-allowlist.repository.js';
 export { SubmissionRepository, type CreateSubmissionInput } from './submission.repository.js';
 export {
   ModerationRepository,

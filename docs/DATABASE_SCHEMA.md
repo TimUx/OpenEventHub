@@ -18,7 +18,7 @@ Verbindliche Referenz für das PostgreSQL-Schema, umgesetzt in
 | `SubmissionType` | `event`, `source`, `correction` |
 | `SubmissionStatus` | `pending`, `processing`, `accepted`, `rejected` |
 | `MediaType` | `image`, `video`, `document`, `audio`, `other` |
-| `RegionType` | `country`, `state`, `district`, `municipality`, `city`, `suburb` |
+| `RegionType` | `country`, `state`, `district`, `municipality`, `city`, `suburb` (UI: Land / Bundesland / Landkreis / Kommune / Ort; `city`≡Kommune, `suburb`≡Ort) |
 
 ## events
 
@@ -133,6 +133,12 @@ Operator-gewählte Wurzeln des **Abdeckungsgebiets** (`region_id` PK/FK → `reg
 Cascade-Delete). Leer = kein Geo-Filter beim AI-Ingest. Ein gewählter Landkreis
 schließt Nachfahren (Gemeinden) ein, ohne sie einzeln zu speichern.
 
+## category_import_allowlist
+
+Operator-gewählte Wurzeln der **Kategorie-Allowlist** (`category_id` PK/FK →
+`categories`, Cascade-Delete). Leer = kein Kategorie-Filter beim AI-Ingest. Eine
+gewählte Elternkategorie schließt Nachfahren ein, ohne sie einzeln zu speichern.
+
 ## categories / tags
 
 Kategorien sind hierarchisch (`parent_id`). Tags sind flach. Events verknüpfen über
@@ -170,5 +176,4 @@ npm run db:migrate          # or: bash scripts/db-migrate.sh
 npm run db:seed             # or: bash scripts/db-seed.sh
 ```
 
-Seed-Daten: Germany → Bayern → München; Music/Sports/Culture mit beispielhaften
-Unterkategorien.
+Seed-Daten: Germany → Bayern → München; flacher ländlicher Kategoriekatalog (Kirmes, Konzert, Dorffest, …).

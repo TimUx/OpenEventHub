@@ -34,8 +34,12 @@ export interface ClassificationFields {
   readonly subcategories: readonly string[];
   readonly tags: readonly string[];
   readonly region: string | null;
-  readonly municipality: string | null;
+  /** Landkreis / county */
   readonly district: string | null;
+  /** Kommune (Gemeinde oder Stadt als Verwaltungseinheit) */
+  readonly municipality: string | null;
+  /** Ort / Dorf / Ortsteil under the Kommune */
+  readonly place: string | null;
   readonly classificationConfidence: number;
 }
 

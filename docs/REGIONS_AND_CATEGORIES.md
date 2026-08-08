@@ -6,35 +6,41 @@
 
 | Aspekt | Verhalten |
 |--------|-----------|
-| Startwerte | Seed (`db:seed`) legt eine Start-Hierarchie an (z. B. Germany → Bayern → München; Music/Sports/Culture) |
-| Crawls / KI | **Find-or-create:** bekannte Namen werden wiederverwendet; fehlende Kategorien, Tags und Orte werden automatisch angelegt und dem Event zugeordnet |
-| Orte | Kein vollständiger Ortskatalog nötig — Gemeinden/Städte entstehen aus der Klassifikation (`municipality` / `region` / `district`) und optional über Venues |
-| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen |
+| Startwerte | Seed (`db:seed`) legt Regionen (z. B. Deutschland → Bayern → München) und einen **kuratierten flachen Kategoriekatalog** für den ländlichen Raum an (Kirmes, Schützenfest, Dorffest, Konzert, …) |
+| Crawls / KI | **Orte/Tags:** Find-or-create. **Kategorien:** nur Zuordnung auf bestehende Katalog-Einträge (Alias-Mapping DE/EN); keine Auto-Anlage neuer Kategorien |
+| Orte | Kein vollständiger Ortskatalog nötig — Kommunen/Orte entstehen aus der Klassifikation (`municipality` / `place` / `region` / `district`) und optional über Venues |
+| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen; DEV-Bereinigung Kategorien: `bash scripts/reset-categories.sh`; Regionen: `bash scripts/repair-dev-regions.sh` |
 
 Filter bleiben moderierbar: neu angelegte Einträge erscheinen in Admin und können bereinigt oder zusammengeführt werden.
 
 ## Regionen-Hierarchie
 
-Country (Land)
-→ State (Bundesland)
-→ District (Landkreis / Bezirk)
-→ Municipality / City (Gemeinde / Stadt)
-→ Suburb (Stadtteil)
+Land
+→ Bundesland
+→ Landkreis
+→ **Kommune** (Gemeinde oder Stadt als Verwaltungseinheit)
+→ **Ort** (Dorf / Stadtteil / Ortsteil)
+
+Beispiel: `Deutschland › Hessen › Schwalm-Eder-Kreis › Willingshausen › Merzhausen`
 
 Bei Auto-Anlage aus Crawls:
 
-| Klassifikationsfeld | RegionType | Parent |
-|---------------------|------------|--------|
-| `region` | `state` | — |
-| `district` | `district` | State |
-| `municipality` | `municipality` | District (oder State, falls kein Kreis) |
+| Klassifikationsfeld | RegionType (DB) | UI-Bezeichnung | Parent |
+|---------------------|-----------------|----------------|--------|
+| *(Land)* | `country` | Land | — |
+| `region` | `state` | Bundesland | Land (wenn vorhanden) |
+| `district` | `district` | Landkreis | Bundesland |
+| `municipality` | `municipality` | Kommune | Landkreis |
+| `place` | `suburb` | Ort | Kommune (sonst Landkreis) |
+
+Hinweis: DB-Enum behält `city` / `suburb` aus Kompatibilität; `city` wird wie Kommune behandelt, `suburb` ist Ort.
 
 ## Abdeckungsgebiet (Coverage Scope)
 
-Unter Admin → Regionen kann ein **Abdeckungsgebiet** gesetzt werden (eine oder mehrere
-Regionen als Wurzeln).
+Unter Admin → **Import-Einstellungen** wird das **Abdeckungsgebiet** gesetzt (eine oder
+mehrere Regionen als Wurzeln). Der Regionen-Katalog selbst bleibt unter Admin → Regionen.
 
-- Ein gewählter **Landkreis** gilt inkl. aller untergeordneten Gemeinden/Städte — diese
+- Ein gewählter **Landkreis** gilt inkl. aller untergeordneten Kommunen und Orte — diese
   müssen nicht einzeln angehakt werden.
 - Zusätzliche Orte außerhalb (z. B. Alsfeld im Vogelsbergkreis neben Schwalm-Eder-Kreis)
   werden separat gewählt.
@@ -42,8 +48,36 @@ Regionen als Wurzeln).
 - Beim AI-Ingest werden neue Events mit erkanntem Ort **außerhalb** des Gebiets
   nicht angelegt. Ohne Ortshinweis bleibt die Übernahme möglich (Moderation).
 
+## Kategorie-Allowlist (Import)
+
+Unter Admin → **Import-Einstellungen** kann eine **Kategorie-Allowlist** gesetzt
+werden (eine oder mehrere Kategorien als Wurzeln). Der Kategoriekatalog bleibt unter
+Admin → Kategorien.
+
+- Eine gewählte **Elternkategorie** gilt inkl. aller Unterkategorien.
+- **Leere** Allowlist = kein Kategorie-Filter (wie bisher).
+- Beim AI-Ingest werden neue Events mit aufgelöster Katalog-Kategorie **außerhalb**
+  der Allowlist nicht angelegt. Ohne auflösbare Kategorie bleibt die Übernahme
+  möglich (Moderation).
+
 ## Kategorien
 
-Kategorien sind hierarchisch und konfigurierbar.
-Veranstaltungen können mehreren Kategorien angehören.
-Subkategorien aus der KI werden unter der ersten Hauptkategorie angelegt, sofern neu.
+Bei **Neuinstallation** legt `db:seed` / `bash scripts/db-seed.sh` genau den kuratierten
+Starterkatalog an (Quelle: `packages/shared` → `DEFAULT_EVENT_CATEGORIES`):
+
+- Kirmes
+- Schützenfest
+- Dorffest
+- Konzert
+- Tag der Offenen Tür
+- Sportveranstaltung
+- Vereinsveranstaltung
+- Markt
+- Feuerwehrfest
+- Theater
+- Weihnachtsmarkt
+- Sonstiges
+
+Weitere Kategorien werden **nur manuell** im Admin Center ergänzt (anlegen / umbenennen /
+Hierarchie / löschen). Die KI erfindet keine neuen Kategorien; sie mappt Labels auf den
+bestehenden Katalog (inkl. Aliases). Veranstaltungen können mehreren Kategorien angehören.

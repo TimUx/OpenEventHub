@@ -46,7 +46,9 @@ in die `ai`-Queue. Die EIE:
    Venue-kompatibel) → bestehendes Event anreichern und `EventSource` verknüpfen;
    sonst neues Event mit Status `pending_moderation` (inkl. `EventVersion`),
 4. speichert `AIAnalysis` (Confidence berücksichtigt Source-Anzahl),
-5. löst Klassifikations-Labels per **Find-or-create** auf und verknüpft Kategorien,
+5. löst Klassifikations-Labels auf und verknüpft Kategorien
+   (nur Katalog-Match / Aliases — keine Auto-Anlage neuer Kategorien),
+   Tags und Orte (Find-or-create),
    Tags, Regionen und optional Venue.
 
 Listen mit mehreren Terminen:

@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/frontend",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "private": true,
   "description": "OpenEventHub public event portal",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start -p 3100",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts src/lib/calendar-utils.test.ts src/lib/heatmap-chart-data.test.ts src/lib/map-events.test.ts src/lib/event-calendar.test.ts src/lib/accent-theme.test.ts src/lib/event-list-filters.test.ts"
+    "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts src/lib/calendar-utils.test.ts src/lib/heatmap-chart-data.test.ts src/lib/region-tree.test.ts src/lib/map-events.test.ts src/lib/event-calendar.test.ts src/lib/accent-theme.test.ts src/lib/event-list-filters.test.ts"
   },
   "dependencies": {
     "@openeventhub/shared": "0.2.0",

@@ -78,7 +78,8 @@ docker compose -f docker/compose/docker-compose.yml \
 Host `npm run db:migrate` needs the `docker-compose.dev-ports.yml` overlay (or a matching `DATABASE_URL`).
 
 Seed creates the bootstrap admin from `ADMIN_BOOTSTRAP_EMAIL` /
-`ADMIN_BOOTSTRAP_PASSWORD`. AI providers are configured in the Admin UI (not via env).
+`ADMIN_BOOTSTRAP_PASSWORD` and the **curated category catalog** (rural starter types;
+further categories only via Admin). AI providers are configured in the Admin UI (not via env).
 
 ## Traefik URLs (defaults from `.env.example`)
 

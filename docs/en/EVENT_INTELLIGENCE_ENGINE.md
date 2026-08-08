@@ -46,7 +46,9 @@ the `ai` queue. The EIE then:
    enrich the existing event and link `EventSource`; otherwise create a new event
    with status `pending_moderation` (plus `EventVersion`),
 4. stores `AIAnalysis` (confidence accounts for source count),
-5. resolves classification labels via **find-or-create** and links categories, tags,
+5. resolves classification labels and links categories
+   (catalog match / aliases only — no auto-creation of new categories),
+   tags and places (find-or-create),
    regions, and optionally a venue.
 
 Multi-event listing pages:
