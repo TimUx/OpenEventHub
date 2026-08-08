@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2026-08-08
+
+### Added
+
+- Admin **left sidebar** navigation (grouped, always visible; mobile overlay drawer)
+- **My profile** (`/profile`, `GET|PATCH /api/v1/admin/me`): any signed-in admin can change email/password (current password required); session reloads user from `/me`
+- Admin users: **Edit** (email/role/optional password) beside delete
+- Admin regions **place lookup** via OpenStreetMap Nominatim (DE): auto hierarchy Land→…→Ort, ambiguous-name picker, `GET /api/v1/admin/regions/lookup`, `POST /api/v1/admin/regions/from-lookup`
+
+### Changed
+
+- Admin chrome: slim top header (pending/locale/user); docs (DE/EN) Admin Center, Regions, Geocoding, REST
+
 ## [0.22.0] - 2026-08-08
 
 ### Added

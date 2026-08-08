@@ -22,12 +22,14 @@
   Header zeigt Anzahl `pending_moderation`)
 - Kategorien (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
   Seed liefert den ländlichen Starterkatalog; KI legt **keine** neuen Kategorien an)
-- Regionen (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
+- Regionen (Tabelle mit Spaltenfilter/-sortierung; Ortssuche legt Hierarchie an;
+  Mehrdeutigkeit mit Auswahl; manuell bearbeiten / löschen;
   KI kann Orte/Hierarchie per Find-or-create ergänzen)
 - **Import-Einstellungen** (Abdeckungsgebiet und Kategorie-Allowlist für den Ingest;
   getrennt vom Regionen-/Kategoriekatalog)
 - Moderation
-- Benutzer & Rollen
+- Benutzer & Rollen (Bearbeiten: E-Mail/Rolle/Passwort; Löschen)
+- **Mein Profil** (jeder angemeldete Admin: E-Mail/Passwort mit aktuellem Passwort)
 - AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama; Profil-Test mit sofortigem Dialog inkl. Warteanzeige)
 - Scheduler (lesbare Intervalle + nächster Lauf; Konfiguration unter Quellen)
 
@@ -40,7 +42,7 @@
 
 ## Visuelle Sprache
 
-Flaches UI analog zum öffentlichen Portal (Primärblau-AppBar, abgerundete Buttons, keine Hintergrund-Verläufe).
+Flaches UI mit linker Sidebar und schlankem Top-Header (Primärblau als Marken-/Akzentfarbe, abgerundete Buttons, keine Hintergrund-Verläufe).
 
 ## Branding (White-Label)
 
@@ -51,7 +53,8 @@ Flaches UI analog zum öffentlichen Portal (Primärblau-AppBar, abgerundete Butt
 
 ## Navigation
 
-Gruppiertes, aufklappbares Menü:
+Feste **linke Sidebar** (Desktop dauerhaft, Mobil als Overlay) mit immer sichtbaren
+Gruppen — analog HaushaltsRadar:
 
 | Gruppe | Einträge |
 |--------|----------|
@@ -60,6 +63,9 @@ Gruppiertes, aufklappbares Menü:
 | Quellen | Quellen, Crawler, Scheduler, Import-Einstellungen |
 | Betrieb | Warteschlangen, Fehler-Log |
 | System | KI-Einstellungen, Benutzer |
+| Konto | Mein Profil |
+
+Schlanker Top-Header: Pending-Hinweis, Sprache, Benutzer, Abmelden.
 
 ## Screenshots
 

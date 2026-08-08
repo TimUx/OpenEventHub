@@ -247,7 +247,7 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 ## Post-M11 — Portal- und Ops-Nachzüge
 
 Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
-(siehe `CHANGELOG.md`, zuletzt **v0.22.0**):
+(siehe `CHANGELOG.md`, zuletzt **v0.23.0**):
 
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste

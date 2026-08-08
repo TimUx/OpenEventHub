@@ -9,7 +9,7 @@
 | Startwerte | Seed (`db:seed`) legt Regionen (z. B. Deutschland → Bayern → München) und einen **kuratierten flachen Kategoriekatalog** für den ländlichen Raum an (Kirmes, Schützenfest, Dorffest, Konzert, …) |
 | Crawls / KI | **Orte/Tags:** Find-or-create. **Kategorien:** nur Zuordnung auf bestehende Katalog-Einträge (Alias-Mapping DE/EN); keine Auto-Anlage neuer Kategorien |
 | Orte | Kein vollständiger Ortskatalog nötig — Kommunen/Orte entstehen aus der Klassifikation (`municipality` / `place` / `region` / `district`) und optional über Venues |
-| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen; DEV-Bereinigung Kategorien: `bash scripts/reset-categories.sh`; Regionen: `bash scripts/repair-dev-regions.sh` |
+| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen; **Regionen-Anlage** per Ortssuche (OpenStreetMap/Nominatim) legt fehlende Eltern mit an; bei Mehrdeutigkeit Auswahl; DEV-Bereinigung Kategorien: `bash scripts/reset-categories.sh`; Regionen: `bash scripts/repair-dev-regions.sh` |
 
 Filter bleiben moderierbar: neu angelegte Einträge erscheinen in Admin und können bereinigt oder zusammengeführt werden.
 
@@ -34,6 +34,20 @@ Bei Auto-Anlage aus Crawls:
 | `place` | `suburb` | Ort | Kommune (sonst Landkreis) |
 
 Hinweis: DB-Enum behält `city` / `suburb` aus Kompatibilität; `city` wird wie Kommune behandelt, `suburb` ist Ort.
+
+### Ortssuche im Admin (Hierarchie-Anlage)
+
+Unter Admin → Regionen → **Region hinzufügen** sucht die API in Deutschland
+(OpenStreetMap Nominatim, `countrycodes=de`):
+
+1. Name eingeben (z. B. `Wasenberg`)
+2. Vorschlagskette: `Deutschland › Hessen › Schwalm-Eder-Kreis › Willingshausen › Wasenberg`
+3. Bei mehreren Treffern (z. B. `Merzhausen`, `Neustadt`) Auswahlpflicht
+4. **Hierarchie anlegen** erzeugt fehlende Knoten per Find-or-create (bestehende Namen/Typen unter demselben Parent werden wiederverwendet)
+
+API: `GET /api/v1/admin/regions/lookup?q=…`, `POST /api/v1/admin/regions/from-lookup`
+(`{ chain: [{ type, name, isoCode }] }`). Optional `NOMINATIM_BASE_URL` /
+`NOMINATIM_USER_AGENT`.
 
 ## Abdeckungsgebiet (Coverage Scope)
 

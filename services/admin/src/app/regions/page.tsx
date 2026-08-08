@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
@@ -30,6 +30,22 @@ type RegionFilters = {
 
 type SortKey = 'name' | 'slug' | 'type' | 'parent' | 'iso';
 type SortDir = 'asc' | 'desc';
+
+type HierarchyNode = {
+  type: RegionType;
+  name: string;
+  isoCode: string | null;
+};
+
+type LookupCandidate = {
+  id: string;
+  label: string;
+  name: string;
+  leafType: RegionType;
+  chain: HierarchyNode[];
+  lat: number | null;
+  lon: number | null;
+};
 
 const EMPTY_FILTERS: RegionFilters = {
   name: '',
@@ -75,12 +91,21 @@ export default function RegionsPage() {
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
-  const [type, setType] = useState<RegionType>('municipality');
+  const [type, setType] = useState<RegionType>('suburb');
   const [parentId, setParentId] = useState('');
   const [isoCode, setIsoCode] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
+
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [candidates, setCandidates] = useState<LookupCandidate[]>([]);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map((data ?? []).map((item) => [item.id, item])), [data]);
+  const selectedCandidate = useMemo(
+    () => candidates.find((item) => item.id === selectedCandidateId) ?? null,
+    [candidates, selectedCandidateId],
+  );
 
   function parentLabel(id: string | null): string {
     if (!id) return t('regions.noParent');
@@ -133,6 +158,48 @@ export default function RegionsPage() {
     return filtered;
   }, [data, filters, sortKey, sortDir, byId, t]);
 
+  useEffect(() => {
+    if (!token || editingId || manualMode || !formOpen) {
+      return;
+    }
+    const q = name.trim();
+    if (q.length < 2) {
+      setCandidates([]);
+      setSelectedCandidateId(null);
+      setLookupLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLookupLoading(true);
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const result = await adminFetch<{ candidates: LookupCandidate[] }>(
+            `/api/v1/admin/regions/lookup?q=${encodeURIComponent(q)}`,
+            token,
+          );
+          if (cancelled) return;
+          const list = result.candidates ?? [];
+          setCandidates(list);
+          setSelectedCandidateId(list.length === 1 ? (list[0]?.id ?? null) : null);
+        } catch (err) {
+          if (cancelled) return;
+          setCandidates([]);
+          setSelectedCandidateId(null);
+          setFormError(err instanceof Error ? err.message : String(err));
+        } finally {
+          if (!cancelled) setLookupLoading(false);
+        }
+      })();
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [name, token, editingId, manualMode, formOpen]);
+
   function patchFilter<K extends keyof RegionFilters>(key: K, value: RegionFilters[K]): void {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
@@ -160,10 +227,14 @@ export default function RegionsPage() {
     setFormOpen(false);
     setName('');
     setSlug('');
-    setType('city');
+    setType('suburb');
     setParentId('');
     setIsoCode('');
     setSlugTouched(false);
+    setManualMode(false);
+    setCandidates([]);
+    setSelectedCandidateId(null);
+    setLookupLoading(false);
     setFormError(null);
   }
 
@@ -172,10 +243,13 @@ export default function RegionsPage() {
     setFormOpen(true);
     setName('');
     setSlug('');
-    setType('city');
+    setType('suburb');
     setParentId('');
     setIsoCode('');
     setSlugTouched(false);
+    setManualMode(false);
+    setCandidates([]);
+    setSelectedCandidateId(null);
     setFormError(null);
     setMessage(null);
   }
@@ -195,12 +269,16 @@ export default function RegionsPage() {
     setParentId(item.parentId ?? '');
     setIsoCode(item.isoCode ?? '');
     setSlugTouched(true);
+    setManualMode(true);
+    setCandidates([]);
+    setSelectedCandidateId(null);
     setMessage(null);
     setFormError(null);
   }
 
   function onNameChange(value: string): void {
     setName(value);
+    setFormError(null);
     if (!slugTouched && !editingId) {
       setSlug(
         value
@@ -224,14 +302,38 @@ export default function RegionsPage() {
     if (!token) return;
     setSaving(true);
     setFormError(null);
-    const body = {
-      name: name.trim(),
-      slug: slug.trim() || undefined,
-      type,
-      parentId: parentId || null,
-      isoCode: isoCode.trim() || null,
-    };
     try {
+      if (!editingId && !manualMode && selectedCandidate) {
+        const result = await adminFetch<{ createdCount: number; leaf: Region }>(
+          '/api/v1/admin/regions/from-lookup',
+          token,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              candidateId: selectedCandidate.id,
+              label: selectedCandidate.label,
+              chain: selectedCandidate.chain,
+            }),
+          },
+        );
+        setMessage(
+          t('regions.chainCreated', {
+            name: result.leaf.name,
+            count: String(result.createdCount),
+          }),
+        );
+        resetForm();
+        await reload();
+        return;
+      }
+
+      const body = {
+        name: name.trim(),
+        slug: slug.trim() || undefined,
+        type,
+        parentId: parentId || null,
+        isoCode: isoCode.trim() || null,
+      };
       if (editingId) {
         await adminFetch(`/api/v1/admin/regions/${editingId}`, token, {
           method: 'PATCH',
@@ -272,6 +374,7 @@ export default function RegionsPage() {
 
   const parentOptions = (data ?? []).filter((item) => item.id !== editingId);
   const hasFilters = filtersActive(filters);
+  const createViaLookup = !editingId && !manualMode;
 
   return (
     <div className="space-y-4">
@@ -295,75 +398,152 @@ export default function RegionsPage() {
 
       {formOpen ? (
         <Panel>
-          <h2 className="mb-3 font-bold text-lg">
+          <h2 className="mb-1 font-bold text-lg">
             {editingId ? t('regions.edit') : t('regions.add')}
           </h2>
+          {!editingId ? (
+            <p className="mb-3 text-sm text-[var(--muted)]">{t('regions.lookupHint')}</p>
+          ) : null}
           <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onSubmit(e)}>
-            <label className="text-sm">
+            <label className="text-sm md:col-span-2">
               {t('regions.fieldName')}
               <input
                 className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
                 value={name}
                 required
                 onChange={(e) => onNameChange(e.target.value)}
+                autoComplete="off"
               />
             </label>
-            <label className="text-sm">
-              {t('regions.fieldSlug')}
-              <input
-                className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3 font-mono text-sm"
-                value={slug}
-                onChange={(e) => {
-                  setSlugTouched(true);
-                  setSlug(e.target.value);
-                }}
-              />
-            </label>
-            <label className="text-sm">
-              {t('regions.fieldType')}
-              <select
-                className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
-                value={type}
-                onChange={(e) => setType(e.target.value as RegionType)}
-              >
-                {REGION_TYPES.map((value) => (
-                  <option key={value} value={value}>
-                    {t(`regions.type.${value}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm">
-              {t('regions.fieldIso')}
-              <input
-                className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
-                value={isoCode}
-                placeholder="DE"
-                onChange={(e) => setIsoCode(e.target.value)}
-              />
-            </label>
-            <label className="text-sm md:col-span-2">
-              {t('regions.fieldParent')}
-              <select
-                className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
-                value={parentId}
-                onChange={(e) => setParentId(e.target.value)}
-              >
-                <option value="">{t('regions.noParent')}</option>
-                {parentOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} ({t(regionTypeLabelKey(item.type))})
-                  </option>
-                ))}
-              </select>
-            </label>
+
+            {createViaLookup ? (
+              <div className="space-y-3 md:col-span-2">
+                {lookupLoading ? (
+                  <p className="text-sm text-[var(--muted)]">{t('regions.lookupLoading')}</p>
+                ) : null}
+                {!lookupLoading && name.trim().length >= 2 && candidates.length === 0 ? (
+                  <p className="text-sm text-[var(--muted)]">{t('regions.lookupEmpty')}</p>
+                ) : null}
+                {candidates.length > 1 ? (
+                  <fieldset className="space-y-2 rounded-md border border-[var(--border)] p-3">
+                    <legend className="px-1 text-sm font-semibold">
+                      {t('regions.lookupAmbiguous')}
+                    </legend>
+                    {candidates.map((item) => (
+                      <label
+                        key={item.id}
+                        className="flex cursor-pointer items-start gap-2 rounded px-1 py-1 text-sm hover:bg-[var(--background)]"
+                      >
+                        <input
+                          type="radio"
+                          className="mt-1"
+                          name="region-candidate"
+                          checked={selectedCandidateId === item.id}
+                          onChange={() => setSelectedCandidateId(item.id)}
+                        />
+                        <span>{item.label}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : null}
+                {selectedCandidate ? (
+                  <div className="rounded-md border border-[var(--border)] bg-[var(--background)]/60 px-3 py-2 text-sm">
+                    <p className="mb-1 font-semibold">{t('regions.lookupPreview')}</p>
+                    <p className="text-[var(--muted)]">
+                      {selectedCandidate.chain
+                        .map((node) => `${t(regionTypeLabelKey(node.type))}: ${node.name}`)
+                        .join(' › ')}
+                    </p>
+                  </div>
+                ) : null}
+                <button
+                  type="button"
+                  className="text-sm font-semibold text-primary hover:underline"
+                  onClick={() => {
+                    setManualMode(true);
+                    setCandidates([]);
+                    setSelectedCandidateId(null);
+                  }}
+                >
+                  {t('regions.switchManual')}
+                </button>
+              </div>
+            ) : null}
+
+            {!createViaLookup ? (
+              <>
+                <label className="text-sm">
+                  {t('regions.fieldSlug')}
+                  <input
+                    className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3 font-mono text-sm"
+                    value={slug}
+                    onChange={(e) => {
+                      setSlugTouched(true);
+                      setSlug(e.target.value);
+                    }}
+                  />
+                </label>
+                <label className="text-sm">
+                  {t('regions.fieldType')}
+                  <select
+                    className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                    value={type}
+                    onChange={(e) => setType(e.target.value as RegionType)}
+                  >
+                    {REGION_TYPES.map((value) => (
+                      <option key={value} value={value}>
+                        {t(`regions.type.${value}`)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm">
+                  {t('regions.fieldIso')}
+                  <input
+                    className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                    value={isoCode}
+                    placeholder="DE"
+                    onChange={(e) => setIsoCode(e.target.value)}
+                  />
+                </label>
+                <label className="text-sm md:col-span-2">
+                  {t('regions.fieldParent')}
+                  <select
+                    className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                    value={parentId}
+                    onChange={(e) => setParentId(e.target.value)}
+                  >
+                    <option value="">{t('regions.noParent')}</option>
+                    {parentOptions.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name} ({t(regionTypeLabelKey(item.type))})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {!editingId ? (
+                  <button
+                    type="button"
+                    className="text-left text-sm font-semibold text-primary hover:underline md:col-span-2"
+                    onClick={() => setManualMode(false)}
+                  >
+                    {t('regions.switchLookup')}
+                  </button>
+                ) : null}
+              </>
+            ) : null}
+
             <div className="flex flex-wrap gap-2 md:col-span-2">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || (createViaLookup && !selectedCandidate)}
                 className="h-10 rounded-xl bg-primary px-4 text-white disabled:opacity-60"
               >
-                {editingId ? t('regions.saveChanges') : t('regions.create')}
+                {editingId
+                  ? t('regions.saveChanges')
+                  : createViaLookup
+                    ? t('regions.createChain')
+                    : t('regions.create')}
               </button>
               <button
                 type="button"

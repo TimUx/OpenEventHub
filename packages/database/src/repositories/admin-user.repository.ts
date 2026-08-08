@@ -61,12 +61,24 @@ export class AdminUserRepository {
     return toPublic(user);
   }
 
+  async updateEmail(id: string, email: string): Promise<PublicAdminUser> {
+    const user = await this.prisma.adminUser.update({
+      where: { id },
+      data: { email: email.trim().toLowerCase() },
+    });
+    return toPublic(user);
+  }
+
   async updatePassword(id: string, passwordHash: string): Promise<PublicAdminUser> {
     const user = await this.prisma.adminUser.update({
       where: { id },
       data: { passwordHash },
     });
     return toPublic(user);
+  }
+
+  async findAuthById(id: string): Promise<AdminUser | null> {
+    return this.prisma.adminUser.findUnique({ where: { id } });
   }
 
   async delete(id: string): Promise<PublicAdminUser> {
