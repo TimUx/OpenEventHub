@@ -39,6 +39,25 @@
 
 Flat UI matching the public portal (primary-blue app bar, rounded buttons, no background gradients).
 
+## Branding (white-label)
+
+- **Logo:** replace files under `services/admin/public/brand/` and/or set
+  `NEXT_PUBLIC_ADMIN_LOGO_URL` (e.g. `/brand/mark.png`)
+- **Title:** `NEXT_PUBLIC_ADMIN_TITLE` (header, login, document title); default `OpenEventHub Admin`
+- `NEXT_PUBLIC_*` values are embedded at **image build** time — rebuild the Admin image after changes
+
+## Navigation
+
+Grouped, collapsible menu:
+
+| Group | Items |
+|-------|-------|
+| Overview | Dashboard |
+| Content | Events, Moderation, Categories, Regions |
+| Ingest | Sources, Crawler, Scheduler |
+| Ops | Queues, Error log |
+| System | AI Settings, Users |
+
 ## Screenshots
 
 ![Admin login](../assets/screenshots/admin-login.png)

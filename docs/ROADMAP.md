@@ -247,7 +247,7 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 ## Post-M11 — Portal- und Ops-Nachzüge
 
 Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
-(siehe `CHANGELOG.md`, zuletzt **v0.20.0**):
+(siehe `CHANGELOG.md`, zuletzt **v0.20.1**):
 
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste
@@ -260,6 +260,8 @@ Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiter
 - Crawl nur **zukünftige/laufende** Termine; Scheduler löscht abgelaufene Events stündlich
 - Ganztägige Events (`allDay`): keine erfundenen Uhrzeiten in UI/ICS
 - Admin Events: Mehrfachauswahl Status/Löschen; Tabellenfilter/-sortierung (Status, Datum, Ort, Suche, ganztägig); Header-Hinweis auf prüfpflichtige Events
+- Quellübergreifende Event-Konsolidierung (Titel+Tag, Venue-kompatibel) inkl. Feld-Auffüllung; Ort aus Titel wenn Venue fehlt
+- Admin: collapsible Nav-Gruppen; optionales White-Label (`NEXT_PUBLIC_ADMIN_TITLE` / `_LOGO_URL`)
 - HTML-Plugin multi-format (`1.3.0`): Tabellen/Listen/Div/JSON-LD/`<time>`/Klartext; Embedded EMS **Toubiz** (alle zukünftigen Termine)
 - Dediziertes Plugin `toubiz` (`mein.toubiz.de` / `<toubiz-widget>`)
 - Scheduler: ein Tick pro Distinct-Cron; serielle Crawls

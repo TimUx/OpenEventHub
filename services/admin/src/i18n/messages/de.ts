@@ -30,6 +30,13 @@ export const de = {
     admin: 'Admin',
     pendingReview: '{count} zur Prüfung',
     pendingReviewHint: '{count} Events warten auf Moderation',
+    group: {
+      overview: 'Übersicht',
+      content: 'Inhalt',
+      ingest: 'Quellen',
+      ops: 'Betrieb',
+      system: 'System',
+    },
   },
   auth: {
     title: 'OpenEventHub Admin',

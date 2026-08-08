@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.2",
+  "task": "classification",
+  "description": "Assign taxonomy labels; unknown places/categories may be created; place-from-title into municipality.",
+  "responseFormat": "json"
+}

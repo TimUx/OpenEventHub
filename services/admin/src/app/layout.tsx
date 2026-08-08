@@ -6,6 +6,7 @@ import { AdminShell } from '../components/admin-shell';
 import { Providers } from '../components/providers';
 import { getDictionary } from '../i18n/get-dictionary';
 import { getRequestLocale } from '../i18n/request-locale';
+import { getAdminTitle } from '../lib/branding';
 import './globals.css';
 
 const sans = Roboto({
@@ -18,10 +19,11 @@ const sans = Roboto({
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
   const dictionary = getDictionary(locale);
+  const title = getAdminTitle(dictionary.auth.title);
   return {
     title: {
-      default: 'OpenEventHub Admin',
-      template: '%s · Admin',
+      default: title,
+      template: `%s · ${title}`,
     },
     description: dictionary.meta.description,
     icons: {

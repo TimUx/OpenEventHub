@@ -76,3 +76,5 @@ export {
 } from './event-timing.js';
 
 export { inferAllDay, temporalHasClockTime } from './temporal-all-day.js';
+
+export { demotePlaceAdjective, inferPlaceFromTitle } from './place-from-title.js';
