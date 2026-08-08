@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/crawler",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "private": true,
   "description": "OpenEventHub crawler service with plugin pipeline",
   "type": "module",

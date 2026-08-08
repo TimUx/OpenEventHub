@@ -17,4 +17,7 @@ Runtime-Kopien:
 - Favicon/App-Icon: `src/app/icon.png`, `apple-icon.png` (Next.js Metadata)
 - PWA-Manifest: `services/frontend/src/app/manifest.ts` → `/manifest.webmanifest`
 
-Header nutzt die SVG-Komponente `BrandMark` mit `currentColor` auf der Primär-AppBar.
+Header nutzt die SVG-Komponente `BrandMark` mit `currentColor` auf der Primär-AppBar
+(Fallback). White-Label: Brand-Dateien unter `services/admin/public/brand/` ersetzen
+und/oder `NEXT_PUBLIC_ADMIN_LOGO_URL` / `NEXT_PUBLIC_ADMIN_TITLE` setzen
+(siehe `docs/ADMIN_CENTER.md`).

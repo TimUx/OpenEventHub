@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.1] - 2026-08-08
+
+### Added
+
+- Cross-source event consolidation on AI ingest: title + UTC-day match (venue-compatible) links `EventSource` and fills missing fields instead of creating duplicates
+- Place-from-title enrichment when venue is missing (shared helper + prompts `event-extraction` / `event-classification` **1.0.2**)
+- Admin white-label build args: `NEXT_PUBLIC_ADMIN_TITLE`, `NEXT_PUBLIC_ADMIN_LOGO_URL`
+
+### Changed
+
+- Admin nav: collapsible groups (Übersicht / Inhalt / Quellen / Betrieb / System)
+- Docs (DE/EN): Deduplication, EIE, LLM extraction, Admin Center
+
 ## [0.20.0] - 2026-08-06
 
 ### Added

@@ -40,11 +40,12 @@ in die `ai`-Queue. Die EIE:
 
 1. bereitet den Inhalt für das LLM auf (HTML → Klartext, Längenbegrenzung),
 2. extrahiert und klassifiziert,
-3. legt bei `isEvent` + Titel + `startAt` (und **noch nicht abgelaufen**: effektives
-   Ende `endAt` bzw. `startAt` ≥ jetzt) und fehlendem `eventId` ein neues `Event`
-   mit Status `pending_moderation` an (inkl. `EventVersion` und optional `EventSource`
-   über `sourceId`),
-4. speichert `AIAnalysis`,
+3. **Duplikaterkennung / Konsolidierung**: bei `isEvent` + Titel + `startAt` (und
+   **noch nicht abgelaufen**: effektives Ende `endAt` bzw. `startAt` ≥ jetzt) —
+   gleicher Source-`externalId` oder plattformweiter Match (Titel + UTC-Tag,
+   Venue-kompatibel) → bestehendes Event anreichern und `EventSource` verknüpfen;
+   sonst neues Event mit Status `pending_moderation` (inkl. `EventVersion`),
+4. speichert `AIAnalysis` (Confidence berücksichtigt Source-Anzahl),
 5. löst Klassifikations-Labels per **Find-or-create** auf und verknüpft Kategorien,
    Tags, Regionen und optional Venue.
 
@@ -56,10 +57,13 @@ Listen mit mehreren Terminen:
 - Der Crawler enqueued dann **einen AI-Job pro Kandidat** (strukturierter Kurztext),
   statt die komplette HTML-Seite einmalig an das LLM zu senden.
 - Dediziertes Plugin `toubiz` für Quellen, die direkt als EMS angebunden werden.
-- Fallback ohne Plugin-Treffer: Extraction-Prompt (`event-extraction` **1.0.1**)
+- Fallback ohne Plugin-Treffer: Extraction-Prompt (`event-extraction` **1.0.2**)
   liefert weiterhin **ein** primäres Event pro Job (frühester datierter Eintrag).
 - Strukturierte Plugin-Kandidaten werden auch dann persistiert, wenn das LLM
   `isEvent=false` setzt (Guard im AI-Service).
+- Fehlt ein Ort, aber der **Titel** enthält einen Ortsnamen (z. B. `Kirmes Niedergrenzebach`,
+  `Scherzmarkt in Treysa`), setzen Prompt und deterministische Nachverarbeitung
+  `venueName` / `municipality` (Shared-Helper `inferPlaceFromTitle`).
 - Überall gilt: **nur nicht abgelaufene** Termine (Plugins, Crawler-Filter, AI-Ingest).
 - Ohne Uhrzeit in der Quelle: Events werden als **ganztägig** (`allDay`) gespeichert;
   UI und ICS zeigen dann **kein** erfundenes Uhrzeitfeld (kein `01:00`/`02:00` aus UTC-Mitternacht).

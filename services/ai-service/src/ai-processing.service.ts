@@ -1,9 +1,18 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult, ExtractedEventFields } from '@openeventhub/shared';
-import { inferAllDay, isEventNotExpired } from '@openeventhub/shared';
+import { inferAllDay, inferPlaceFromTitle, isEventNotExpired } from '@openeventhub/shared';
 import { EventStatus, Prisma, PrismaClient } from '@prisma/client';
 
+import { calculateConfidenceScore } from './domain/confidence.score.js';
+import {
+  appendEventVersion,
+  buildExternalId,
+  coalesceEventFields,
+  ensureEventSourceLink,
+  extractionToCoalesceInput,
+  findMatchingEvent,
+} from './domain/event-consolidate.js';
 import { EventIntelligencePipeline } from './domain/intelligence.pipeline.js';
 import { linkEventTaxonomy } from './domain/taxonomy-link.js';
 import { LLM_PROVIDER, type LlmProvider } from './ports/llm.provider.js';
@@ -39,12 +48,12 @@ export class AiProcessingService {
 
   private async persistResult(payload: AiJobPayload, result: AiJobResult): Promise<AiJobResult> {
     const extraction = this.resolveExtraction(payload, result.extraction);
-    result = { ...result, extraction };
+    result = this.enrichPlaceFromTitle({ ...result, extraction });
 
     let eventId = payload.eventId ?? null;
 
     if (!eventId && this.canCreateEvent(extraction)) {
-      eventId = await this.createEventFromExtraction(payload, result);
+      eventId = await this.upsertEventFromExtraction(payload, result);
     }
 
     if (!eventId) {
@@ -52,6 +61,18 @@ export class AiProcessingService {
         `AI result not persisted (no eventId and extraction not creatable) crawlResult=${payload.crawlResultId ?? 'n/a'} isEvent=${extraction.isEvent} title=${extraction.title ? 'yes' : 'no'} startAt=${extraction.startAt ? 'yes' : 'no'}`,
       );
       return result;
+    }
+
+    const sourceCount = await this.prisma.eventSource.count({ where: { eventId } });
+    const confidenceScore = calculateConfidenceScore(result.extraction, {
+      sourceCount: Math.max(1, sourceCount),
+    });
+    if (confidenceScore !== result.confidenceScore) {
+      await this.prisma.event.update({
+        where: { id: eventId },
+        data: { confidenceScore },
+      });
+      result = { ...result, confidenceScore };
     }
 
     const extractedFields = {
@@ -131,7 +152,47 @@ export class AiProcessingService {
     return extraction;
   }
 
-  private async createEventFromExtraction(
+  /**
+   * When listings omit venue, derive place from the title (e.g. "Kirmes Niedergrenzebach").
+   * Does not override existing venueName / municipality.
+   */
+  private enrichPlaceFromTitle(result: AiJobResult): AiJobResult {
+    const place = inferPlaceFromTitle(result.extraction.title);
+    if (!place) {
+      return result;
+    }
+
+    const venueName = result.extraction.venueName?.trim() || place;
+    const municipality = result.classification.municipality?.trim() || place;
+    if (
+      venueName === result.extraction.venueName &&
+      municipality === result.classification.municipality
+    ) {
+      return result;
+    }
+
+    this.logger.log(
+      `Inferred place from title=${JSON.stringify(result.extraction.title)} place=${JSON.stringify(place)}`,
+    );
+
+    return {
+      ...result,
+      extraction: {
+        ...result.extraction,
+        venueName,
+      },
+      classification: {
+        ...result.classification,
+        municipality,
+      },
+    };
+  }
+
+  /**
+   * Upsert path: same-source externalId → update; cross-source title+day match → consolidate;
+   * otherwise create a new logical event.
+   */
+  private async upsertEventFromExtraction(
     payload: AiJobPayload,
     result: AiJobResult,
   ): Promise<string> {
@@ -146,8 +207,14 @@ export class AiProcessingService {
         ? new Date(extraction.endAt)
         : null;
     const allDay = inferAllDay(extraction.startAt, extraction.endAt, extraction.allDay);
-
-    const externalId = `${title}|${startAt.toISOString()}`.slice(0, 240);
+    const externalId = buildExternalId(title, startAt);
+    const incoming = extractionToCoalesceInput(
+      extraction,
+      startAt,
+      endAt,
+      allDay,
+      result.confidenceScore,
+    );
 
     if (payload.sourceId) {
       const existingLink = await this.prisma.eventSource.findUnique({
@@ -159,21 +226,36 @@ export class AiProcessingService {
         },
       });
       if (existingLink) {
-        await this.prisma.event.update({
-          where: { id: existingLink.eventId },
-          data: {
-            title,
-            summary: extraction.summary,
-            description: extraction.description,
-            startAt,
-            endAt,
-            allDay,
-            confidenceScore: result.confidenceScore,
-          },
-        });
-        this.logger.log(`Updated existing event ${existingLink.eventId} from AI ingest`);
+        await this.mergeIntoEvent(existingLink.eventId, incoming, 'ai.ingest');
+        this.logger.log(
+          `Updated existing event ${existingLink.eventId} from same-source AI ingest`,
+        );
         return existingLink.eventId;
       }
+    }
+
+    const match = await findMatchingEvent(this.prisma, {
+      title,
+      startAt,
+      venueName: extraction.venueName,
+    });
+    if (match) {
+      await this.mergeIntoEvent(match.id, incoming, 'ai.consolidate');
+      if (payload.sourceId) {
+        const linked = await ensureEventSourceLink(this.prisma, {
+          eventId: match.id,
+          sourceId: payload.sourceId,
+          externalId,
+          sourceUrl: payload.sourceUrl ?? null,
+          confidenceScore: result.confidenceScore,
+        });
+        this.logger.log(
+          `Consolidated into event ${match.id} sourceLinked=${linked.linked} sources=${linked.sourceCount}`,
+        );
+      } else {
+        this.logger.log(`Consolidated into event ${match.id} (no sourceId on payload)`);
+      }
+      return match.id;
     }
 
     const slug = await this.allocateSlug(title, startAt);
@@ -228,6 +310,35 @@ export class AiProcessingService {
       `Created event ${event.id} from AI ingest title=${JSON.stringify(title)} status=${event.status}`,
     );
     return event.id;
+  }
+
+  private async mergeIntoEvent(
+    eventId: string,
+    incoming: ReturnType<typeof extractionToCoalesceInput>,
+    changeReason: string,
+  ): Promise<void> {
+    const existing = await this.prisma.event.findUnique({ where: { id: eventId } });
+    if (!existing) {
+      throw new Error(`Event ${eventId} not found for consolidate`);
+    }
+
+    const merged = coalesceEventFields(existing, incoming);
+    if (!merged.changed) {
+      return;
+    }
+
+    const updated = await this.prisma.event.update({
+      where: { id: eventId },
+      data: {
+        title: merged.title,
+        summary: merged.summary,
+        description: merged.description,
+        endAt: merged.endAt,
+        allDay: merged.allDay,
+        confidenceScore: merged.confidenceScore,
+      },
+    });
+    await appendEventVersion(this.prisma, updated, changeReason);
   }
 
   private async allocateSlug(title: string, startAt: Date): Promise<string> {

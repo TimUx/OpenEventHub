@@ -19,11 +19,13 @@ prompts/
       user.md      # user template with {{variables}}
 ```
 
-## Catalog (M4)
+## Catalog (M4+)
 
 | Prompt ID              | Version | Task                     |
 | ---------------------- | ------- | ------------------------ |
-| `event-extraction`     | `1.0.0` | LLM extraction           |
-| `event-classification` | `1.0.0` | Category / region / tags |
+| `event-extraction`     | `1.0.2` | LLM extraction           |
+| `event-classification` | `1.0.2` | Category / region / tags |
+
+Older versions under each prompt id remain available for audit. Active versions are selected in the AI service pipeline.
 
 Confidence scoring is deterministic (see `docs/CONFIDENCE_SCORE.md`) and does not use an LLM prompt.

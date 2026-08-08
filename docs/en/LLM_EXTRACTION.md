@@ -11,6 +11,8 @@ Tasks:
 - identify recurring events
 - identify organizer
 - identify venue
+- if no venue is given, derive a place name from the title
+  (e.g. `Kirmes Niedergrenzebach` → place `Niedergrenzebach`)
 - estimate confidence
 
 Output is deterministic JSON validated against a schema.

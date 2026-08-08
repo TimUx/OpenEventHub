@@ -40,11 +40,12 @@ the `ai` queue. The EIE then:
 
 1. prepares content for the LLM (HTML → plain text, length cap),
 2. extracts and classifies,
-3. when `isEvent` + title + `startAt` are present (and **not expired**: effective end
-   `endAt` or `startAt` ≥ now) and `eventId` is missing, creates a
-   new `Event` with status `pending_moderation` (plus `EventVersion` and optional
-   `EventSource` via `sourceId`),
-4. stores `AIAnalysis`,
+3. **duplicate detection / consolidation**: when `isEvent` + title + `startAt` are
+   present (and **not expired**: effective end `endAt` or `startAt` ≥ now) — same
+   source `externalId` or cross-source match (title + UTC day, venue-compatible) →
+   enrich the existing event and link `EventSource`; otherwise create a new event
+   with status `pending_moderation` (plus `EventVersion`),
+4. stores `AIAnalysis` (confidence accounts for source count),
 5. resolves classification labels via **find-or-create** and links categories, tags,
    regions, and optionally a venue.
 
@@ -56,10 +57,13 @@ Multi-event listing pages:
 - The crawler then enqueues **one AI job per candidate** (structured short text)
   instead of sending the full HTML page once to the LLM.
 - Dedicated `toubiz` plugin for sources wired directly as EMS.
-- Fallback with no plugin hits: extraction prompt `event-extraction` **1.0.1**
+- Fallback with no plugin hits: extraction prompt `event-extraction` **1.0.2**
   still returns **one** primary event per job (earliest dated entry).
 - Structured plugin candidates are persisted even if the LLM sets `isEvent=false`
   (guard in the AI service).
+- When no venue is given but the **title** embeds a place (e.g. `Kirmes Niedergrenzebach`,
+  `Scherzmarkt in Treysa`), prompts and deterministic post-processing set
+  `venueName` / `municipality` (shared helper `inferPlaceFromTitle`).
 - Everywhere: **only non-expired** events (plugins, crawler filter, AI ingest).
 - Without a clock time in the source: events are stored as **all-day** (`allDay`);
   UI and ICS must not invent times (no `01:00`/`02:00` from UTC midnight).

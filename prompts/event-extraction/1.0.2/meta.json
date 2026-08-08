@@ -1,0 +1,7 @@
+{
+  "id": "event-extraction",
+  "version": "1.0.2",
+  "task": "extraction",
+  "description": "Detect whether content describes a public event and extract structured fields (listing-aware; place-from-title).",
+  "responseFormat": "json"
+}
