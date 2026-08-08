@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.20.2 — Coverage scope & flyer-first OCR ADR** (post-M11)
+**v0.21.0 — Event density heatmap (Apache ECharts)** (post-M11)
 
-Previous: v0.20.1 — Cross-source consolidate, place-from-title, Admin chrome
+Previous: v0.20.2 — Coverage scope & flyer-first OCR ADR
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

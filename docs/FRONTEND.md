@@ -8,6 +8,8 @@ Stack:
 - TailwindCSS
 - shadcn/ui
 - TanStack Query
+- Leaflet (Karte)
+- Apache ECharts (Termindichte-Heatmap)
 
 ## Visuelle Sprache
 
@@ -27,6 +29,7 @@ Ansichten:
 - Startseite
 - Veranstaltungsliste (Anzeigemodi: Liste, Details, Kacheln)
 - Kalender (Tag, Woche, Monat, Jahr)
+- Termindichte / Heatmap (eigene Seite: Jahr → Monat → Woche → Wochenende → Tag)
 - Karte
 - Veranstaltungsdetail
 - Suchergebnisse
@@ -67,6 +70,13 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - Navigation inkl. „Heute“; Klick auf Tag wechselt in die Tagesansicht
 
 Gewählte Modi werden lokal im Browser gespeichert (`oeh_view_*`).
+
+### Termindichte (Heatmap)
+- Eigene Route `/heatmap` (Kalender bleibt unverändert)
+- Visualisierung mit **Apache ECharts** (`heatmap` + `calendar`-Koordinatensystem)
+- Zoom: **Jahr** / **Monat** / **Woche** / **Wochenende** (Fr–So) / **Tag** (Klick zoomt tiefer)
+- Filter (aufklappbar): Kategorie, Region
+- Dependency: `echarts` im Frontend-Workspace
 
 ## Karte
 

@@ -12,6 +12,7 @@ Suchmaschinen sollen das öffentliche Portal indexieren können. Die Umsetzung l
 | `/events` | ja | Event-Liste |
 | `/events/[id]` | ja | Detail + Event JSON-LD |
 | `/calendar` | ja | Interaktive UI + serverseitige Event-Links |
+| `/heatmap` | ja | Termindichte-Heatmap + serverseitige Event-Links |
 | `/map` | ja | Interaktive UI + serverseitige Event-Links |
 | `/submit` | ja | Niedrige Sitemap-Priorität |
 | `/search` | **nein** | `noindex`, nicht in der Sitemap (Filter-/Query-URLs) |

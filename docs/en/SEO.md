@@ -12,6 +12,7 @@ Search engines should be able to discover and index the public portal. Implement
 | `/events` | yes | Event list |
 | `/events/[id]` | yes | Detail + Event JSON-LD |
 | `/calendar` | yes | Interactive UI + server-rendered event links |
+| `/heatmap` | yes | Event density heatmap + server-rendered event links |
 | `/map` | yes | Interactive UI + server-rendered event links |
 | `/submit` | yes | Lower sitemap priority |
 | `/search` | **no** | `noindex`, excluded from sitemap (filter/query URLs) |
