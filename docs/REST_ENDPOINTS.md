@@ -28,6 +28,7 @@ PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventV
 DELETE /api/v1/admin/events/{id}               (admin only)
 GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; delete: admin)
 GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
+GET|PUT /api/v1/admin/coverage-scope             (Abdeckungsgebiet; PUT body `{ regionIds: string[] }`)
 
 GET|POST|PATCH|DELETE /api/v1/admin/sources*   (mutations: admin|moderator; delete: admin)
 POST   /api/v1/admin/sources/{id}/crawl

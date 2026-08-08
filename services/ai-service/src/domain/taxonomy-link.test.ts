@@ -199,17 +199,20 @@ describe('taxonomy-link', () => {
         tags: ['schwalm'],
         region: 'Hessen',
         municipality: 'Schwalmstadt',
-        district: null,
+        district: 'Schwalm-Eder-Kreis',
         classificationConfidence: 0.8,
       },
     });
 
-    assert.equal(db.regions.length, 2);
+    assert.equal(db.regions.length, 3);
     assert.equal(db.regions[0]?.name, 'Hessen');
     assert.equal(db.regions[0]?.type, 'state');
-    assert.equal(db.regions[1]?.name, 'Schwalmstadt');
-    assert.equal(db.regions[1]?.type, 'municipality');
+    assert.equal(db.regions[1]?.name, 'Schwalm-Eder-Kreis');
+    assert.equal(db.regions[1]?.type, 'district');
     assert.equal(db.regions[1]?.parentId, db.regions[0]?.id);
+    assert.equal(db.regions[2]?.name, 'Schwalmstadt');
+    assert.equal(db.regions[2]?.type, 'municipality');
+    assert.equal(db.regions[2]?.parentId, db.regions[1]?.id);
 
     assert.equal(db.categories.length, 2);
     assert.equal(db.categories[0]?.name, 'Culture');
@@ -217,11 +220,11 @@ describe('taxonomy-link', () => {
     assert.equal(db.categories[1]?.parentId, db.categories[0]?.id);
 
     assert.equal(db.venues.length, 1);
-    assert.equal(db.venues[0]?.regionId, db.regions[1]?.id);
+    assert.equal(db.venues[0]?.regionId, db.regions[2]?.id);
     assert.equal(db.eventVenue.get(eventId), db.venues[0]?.id);
     assert.equal(db.eventCategories.length, 2);
     assert.equal(db.eventTags.length, 1);
-    assert.equal(result.regionId, db.regions[1]?.id);
+    assert.equal(result.regionId, db.regions[2]?.id);
   });
 
   it('reuses existing region names case-insensitively', async () => {

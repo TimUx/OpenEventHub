@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.20.1 — Cross-source consolidate, place-from-title, Admin chrome** (post-M11)
+**v0.20.2 — Coverage scope & flyer-first OCR ADR** (post-M11)
 
-Vorher: v0.20.0 — Admin Events filters
+Vorher: v0.20.1 — Cross-source consolidate, place-from-title, Admin chrome
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

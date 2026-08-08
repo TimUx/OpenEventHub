@@ -16,13 +16,27 @@ Filters stay moderatable: newly created entries show up in Admin and can be clea
 ## Region hierarchy
 
 Country
-→ State
-→ District
-→ Municipality
-→ City
-→ District/Suburb
+→ State (Bundesland)
+→ District (Landkreis / county)
+→ Municipality / City
+→ Suburb
 
-On crawl auto-create typically: `region` → State, `municipality` → Municipality, `district` → District (under the matched/created parent).
+On crawl auto-create:
+
+| Classification field | RegionType | Parent |
+|----------------------|------------|--------|
+| `region` | `state` | — |
+| `district` | `district` | State |
+| `municipality` | `municipality` | District (or State if no county) |
+
+## Coverage scope
+
+Under Admin → Regions, operators set a **coverage area** (one or more region roots).
+
+- A selected **district** includes all child municipalities — they need not be checked individually.
+- Extra places outside that tree (e.g. Alsfeld in Vogelsbergkreis plus Schwalm-Eder-Kreis) are selected separately.
+- **Empty** coverage = no geo filter (previous behaviour).
+- On AI ingest, new events with a recognized place **outside** coverage are not created. Events without place signals may still be ingested (moderation).
 
 ## Categories
 

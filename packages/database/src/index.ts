@@ -54,6 +54,7 @@ export {
   RegionRepository,
   type RegionUpdateInput,
   type RegionWriteInput,
+  CoverageScopeRepository,
   SubmissionRepository,
   ModerationRepository,
   AdminUserRepository,

@@ -289,10 +289,17 @@ export const en = {
     fieldParent: 'Parent region',
     fieldIso: 'ISO code (optional)',
     noParent: 'None (root)',
+    coverageTitle: 'Coverage area',
+    coverageDescription:
+      'Select one or more regions for which events are ingested. A district includes all child municipalities — add extra places (e.g. Alsfeld) separately. Empty = no geo filter.',
+    coverageSave: 'Save coverage',
+    coverageSaved: 'Coverage area updated',
+    coverageEmpty: 'No region selected (filter off).',
+    coverageSelected: '{count} region(s) selected',
     type: {
       country: 'Country',
       state: 'State',
-      district: 'District',
+      district: 'District / county',
       municipality: 'Municipality',
       city: 'City',
       suburb: 'Suburb',

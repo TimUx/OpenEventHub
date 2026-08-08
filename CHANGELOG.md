@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.2] - 2026-08-08
+
+### Added
+
+- Admin **coverage scope** (Abdeckungsgebiet): select one or more regions; Landkreis includes descendants; AI ingest drops out-of-area events (`coverage_scope_regions`, `GET|PUT /api/v1/admin/coverage-scope`)
+- ADR 0007: Social / flyer-first — OCR mandatory; no Meta/Instagram OAuth in v1
+
+### Changed
+
+- Region auto-link hierarchy: State → District (Landkreis) → Municipality
+- Classification prompt wording for Bundesland / Landkreis; docs (DE/EN) for regions, OCR, REST, Admin
+
 ## [0.20.1] - 2026-08-08
 
 ### Added

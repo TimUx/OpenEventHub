@@ -22,7 +22,8 @@
 - Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
   AI find-or-creates missing labels and links them)
 - Regions (spreadsheet table with column filter/sort; manual create / edit / delete;
-  AI may find-or-create places/hierarchy)
+  AI may add places/hierarchy via find-or-create; **coverage area** selectable:
+  a district includes child places; extra municipalities can be added separately)
 - Moderation
 - Users & Roles
 - AI Settings (create / edit / delete provider profiles; default: Local Ollama; profile test opens a dialog with a waiting indicator)

@@ -267,13 +267,26 @@ model Region {
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
-  parent   Region?  @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
-  children Region[] @relation("RegionHierarchy")
-  venues   Venue[]
+  parent         Region?               @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Region[]              @relation("RegionHierarchy")
+  venues         Venue[]
+  coverageScopes CoverageScopeRegion[]
 
   @@index([parentId])
   @@index([type])
   @@map("regions")
+}
+
+/// Operator-selected coverage roots (Abdeckungsgebiet).
+/// Selecting a Landkreis includes all descendant municipalities without listing them.
+/// Empty set = no geographic filter (all places accepted).
+model CoverageScopeRegion {
+  regionId  String   @id @map("region_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  region Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@map("coverage_scope_regions")
 }
 
 model Category {

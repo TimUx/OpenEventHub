@@ -127,6 +127,12 @@ Standard-Entity-Tabellen mit Slug sowie Kontakt-/Standortfeldern. Venues können
 Hierarchische Geografie (`parent_id` Selbstreferenz). Typen folgen
 `docs/REGIONS_AND_CATEGORIES.md`.
 
+## coverage_scope_regions
+
+Operator-gewählte Wurzeln des **Abdeckungsgebiets** (`region_id` PK/FK → `regions`,
+Cascade-Delete). Leer = kein Geo-Filter beim AI-Ingest. Ein gewählter Landkreis
+schließt Nachfahren (Gemeinden) ein, ohne sie einzeln zu speichern.
+
 ## categories / tags
 
 Kategorien sind hierarchisch (`parent_id`). Tags sind flach. Events verknüpfen über

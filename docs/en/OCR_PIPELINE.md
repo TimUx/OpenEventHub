@@ -24,6 +24,11 @@ In the running system (M5+): steps 1–3 are handled by `ocr-service` (Tesseract
 Steps 4–6 are handled by `ai-service` after OCR enqueues an `ai` job with the
 extracted text. Image-only PDF rasterization (poppler) is a follow-up.
 
+**Social / flyer sources:** When event data lives primarily in images (flyers), OCR
+is **mandatory** — see ADR
+[`architecture/adr/0007-social-flyer-first-ocr-required.md`](../../architecture/adr/0007-social-flyer-first-ocr-required.md).
+No Meta/Instagram OAuth in v1; public URLs remain plugin sources.
+
 Output fields:
 
 - title
