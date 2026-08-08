@@ -21,10 +21,11 @@
   mit kompakter Bulk-Leiste für Status/Löschen; Bearbeiten je Zeile;
   Header zeigt Anzahl `pending_moderation`)
 - Kategorien (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
-  KI legt fehlende per Find-or-create an und verknüpft)
+  Seed liefert den ländlichen Starterkatalog; KI legt **keine** neuen Kategorien an)
 - Regionen (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
-  KI kann Orte/Hierarchie per Find-or-create ergänzen; **Abdeckungsgebiet** wählbar:
-  Landkreis schließt Unterorte ein, zusätzliche Gemeinden separat)
+  KI kann Orte/Hierarchie per Find-or-create ergänzen)
+- **Import-Einstellungen** (Abdeckungsgebiet und Kategorie-Allowlist für den Ingest;
+  getrennt vom Regionen-/Kategoriekatalog)
 - Moderation
 - Benutzer & Rollen
 - AI-Einstellungen (Provider-Profile anlegen / bearbeiten / löschen; Standard: Local Ollama; Profil-Test mit sofortigem Dialog inkl. Warteanzeige)
@@ -56,7 +57,7 @@ Gruppiertes, aufklappbares Menü:
 |--------|----------|
 | Übersicht | Dashboard |
 | Inhalt | Events, Moderation, Kategorien, Regionen |
-| Quellen | Quellen, Crawler, Scheduler |
+| Quellen | Quellen, Crawler, Scheduler, Import-Einstellungen |
 | Betrieb | Warteschlangen, Fehler-Log |
 | System | KI-Einstellungen, Benutzer |
 

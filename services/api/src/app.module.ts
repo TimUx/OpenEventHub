@@ -8,6 +8,7 @@ import {
   AdminUserRepository,
   AiSettingsRepository,
   CategoryRepository,
+  CategoryImportAllowlistRepository,
   CoverageScopeRepository,
   CrawlJobRepository,
   EventRepository,
@@ -21,6 +22,7 @@ import { QUEUE_NAMES } from '@openeventhub/shared';
 
 import { AdminAiController } from './admin/admin-ai.controller.js';
 import { AdminCategoriesController } from './admin/admin-categories.controller.js';
+import { AdminCategoryImportAllowlistController } from './admin/admin-category-import-allowlist.controller.js';
 import { AdminCoverageScopeController } from './admin/admin-coverage-scope.controller.js';
 import { AdminDashboardController } from './admin/admin-dashboard.controller.js';
 import { AdminEventsController } from './admin/admin-events.controller.js';
@@ -112,6 +114,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminCategoriesController,
     AdminRegionsController,
     AdminCoverageScopeController,
+    AdminCategoryImportAllowlistController,
     AdminSourcesController,
     AdminModerationController,
     AdminUsersController,
@@ -156,6 +159,11 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
       provide: CoverageScopeRepository,
       inject: [PrismaClient],
       useFactory: (prisma: PrismaClient) => new CoverageScopeRepository(prisma),
+    },
+    {
+      provide: CategoryImportAllowlistRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new CategoryImportAllowlistRepository(prisma),
     },
     {
       provide: SubmissionRepository,

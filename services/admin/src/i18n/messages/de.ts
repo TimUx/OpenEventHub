@@ -24,6 +24,7 @@ export const de = {
     events: 'Events',
     categories: 'Kategorien',
     regions: 'Regionen',
+    importSettings: 'Import-Einstellungen',
     users: 'Benutzer',
     aiSettings: 'KI-Einstellungen',
     language: 'Sprache',
@@ -287,20 +288,13 @@ export const de = {
     fieldParent: 'Übergeordnete Region',
     fieldIso: 'ISO-Code (optional)',
     noParent: 'Keine (Wurzel)',
-    coverageTitle: 'Abdeckungsgebiet',
-    coverageDescription:
-      'Wähle eine oder mehrere Regionen, für die Events übernommen werden. Ein Landkreis schließt alle untergeordneten Gemeinden ein — Extra-Orte (z. B. Alsfeld) separat anhaken. Leer = kein Geo-Filter.',
-    coverageSave: 'Abdeckung speichern',
-    coverageSaved: 'Abdeckungsgebiet aktualisiert',
-    coverageEmpty: 'Keine Region gewählt (Filter aus).',
-    coverageSelected: '{count} Region(en) gewählt',
     type: {
       country: 'Land',
-      state: 'Bundesland / Staat',
-      district: 'Landkreis / Bezirk',
-      municipality: 'Gemeinde',
-      city: 'Stadt',
-      suburb: 'Stadtteil',
+      state: 'Bundesland',
+      district: 'Landkreis',
+      municipality: 'Kommune',
+      city: 'Kommune',
+      suburb: 'Ort',
     },
   },
   users: {
@@ -352,6 +346,29 @@ export const de = {
     providerDeleted: 'Provider-Profil gelöscht',
     activeUpdated: 'Aktiver Provider aktualisiert',
     testOk: 'Test OK ({provider}/{model}): {sample}',
+  },
+  importSettings: {
+    title: 'Import-Einstellungen',
+    description:
+      'Steuert, welche Events beim Import übernommen werden — getrennt vom Regionen- und Kategoriekatalog.',
+    coverageTitle: 'Abdeckungsgebiet',
+    coverageDescription:
+      'Wähle eine oder mehrere Regionen, für die Events übernommen werden. Ein Landkreis schließt alle untergeordneten Kommunen und Orte ein — Extra-Orte (z. B. Alsfeld) separat anhaken. Leer = kein Geo-Filter.',
+    coverageSave: 'Abdeckung speichern',
+    coverageSaved: 'Abdeckungsgebiet aktualisiert',
+    coverageEmpty: 'Keine Region gewählt (Filter aus).',
+    coverageSelected: '{count} Region(en) gewählt',
+    noRegions: 'Noch keine Regionen im Katalog.',
+    manageRegions: 'Regionen verwalten',
+    categoriesTitle: 'Kategorie-Filter (Import)',
+    categoriesDescription:
+      'Optional nur bestimmte Event-Arten importieren. Eine übergeordnete Kategorie schließt Unterkategorien ein. Leer = kein Kategorie-Filter. Der Katalog selbst bleibt unter Kategorien editierbar.',
+    categoriesSave: 'Kategorie-Filter speichern',
+    categoriesSaved: 'Kategorie-Filter aktualisiert',
+    categoriesEmpty: 'Keine Kategorie gewählt (Filter aus).',
+    categoriesSelected: '{count} Kategorie(n) gewählt',
+    noCategories: 'Noch keine Kategorien im Katalog.',
+    manageCategories: 'Kategorien verwalten',
   },
 };
 

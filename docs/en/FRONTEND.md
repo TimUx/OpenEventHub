@@ -63,7 +63,7 @@ Event actions (list, tiles, details, and detail page):
 - **List** — compact rows
 - **Details** — expanded rows with summary/description
 - **Tiles** — card grid
-- Filters and sorting as a collapsible panel (collapsed by default): category, region, date range (from/to), sort by (start date/title), ascending/descending — active filters show a badge on the toggle
+- Filters and sorting as a collapsible panel (collapsed by default): category, region (hierarchical autocomplete: state → district → Kommune → Ort), date range (from/to), sort by (start date/title), ascending/descending — active filters show a badge on the toggle
 
 ### Calendar
 - **Day** / **Week** / **Month** / **Year**
@@ -74,15 +74,17 @@ Selected modes persist in the browser (`oeh_view_*`).
 ### Event density (heatmap)
 - Separate route `/heatmap` (classic calendar unchanged)
 - Visualized with **Apache ECharts** (`heatmap` + `calendar` coordinate system)
+- Color scale **green → yellow → orange → red** (few → many events)
 - Zoom: **Year** / **Month** / **Week** / **Weekend** (Fri–Sun) / **Day** (click drills deeper)
-- Filters (collapsible): category, region
+- From month zoom downward: list of all events in the visible period under the chart
+- Filters and zoom level share one toolbar on desktop; category + region (hierarchical autocomplete)
 - Dependency: `echarts` in the frontend workspace
 
 ## Map
 
 - Embedded OpenStreetMap (Leaflet)
 - Markers for all published events with venue coordinates
-- Search + filters (category, region, date); markers and list follow the filter
+- Search + filters (category, region with hierarchical autocomplete, date); markers and list follow the filter
 - Auto-zoom (`fitBounds`) to current matches, with padding and max zoom
 - Deep link: `/map?event=<id>` selects the marker (from list/detail actions)
 

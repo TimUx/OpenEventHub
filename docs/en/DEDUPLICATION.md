@@ -39,4 +39,4 @@ Merge **fills / enriches** only — it does not impoverish:
 - `endAt` is set when previously missing
 - `confidenceScore` takes the maximum; multiple sources enable the multi-source confidence bonus
 
-Taxonomy (categories, regions, venue) still runs via find-or-create afterward and can add missing places.
+Taxonomy: categories are catalog-match only; regions/venue still use find-or-create (missing places possible).

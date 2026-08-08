@@ -1,4 +1,10 @@
+/**
+ * Fresh-install reference data: regions, curated rural categories, bootstrap admin, Ollama profile.
+ * Categories come from `@openeventhub/shared` (`DEFAULT_EVENT_CATEGORIES`); Admin can add more later.
+ * AI does not auto-create categories — see docs/REGIONS_AND_CATEGORIES.md.
+ */
 import { PrismaClient, RegionType } from '@prisma/client';
+import { DEFAULT_EVENT_CATEGORIES } from '@openeventhub/shared';
 
 const prisma = new PrismaClient();
 
@@ -31,7 +37,7 @@ const regionTree: RegionSeed[] = [
           {
             slug: 'muenchen',
             name: 'München',
-            type: RegionType.city,
+            type: RegionType.municipality,
           },
         ],
       },
@@ -39,32 +45,10 @@ const regionTree: RegionSeed[] = [
   },
 ];
 
-const categoryTree: CategorySeed[] = [
-  {
-    slug: 'music',
-    name: 'Music',
-    children: [
-      { slug: 'music-concerts', name: 'Concerts' },
-      { slug: 'music-festivals', name: 'Festivals' },
-    ],
-  },
-  {
-    slug: 'sports',
-    name: 'Sports',
-    children: [
-      { slug: 'sports-football', name: 'Football' },
-      { slug: 'sports-running', name: 'Running' },
-    ],
-  },
-  {
-    slug: 'culture',
-    name: 'Culture',
-    children: [
-      { slug: 'culture-theatre', name: 'Theatre' },
-      { slug: 'culture-exhibitions', name: 'Exhibitions' },
-    ],
-  },
-];
+const categoryTree: CategorySeed[] = DEFAULT_EVENT_CATEGORIES.map((category) => ({
+  slug: category.slug,
+  name: category.name,
+}));
 
 async function upsertRegion(node: RegionSeed, parentId?: string): Promise<void> {
   const region = await prisma.region.upsert({
@@ -116,6 +100,9 @@ async function main(): Promise<void> {
   for (const category of categoryTree) {
     await upsertCategory(category);
   }
+  console.warn(
+    `Seeded ${categoryTree.length} starter categories: ${categoryTree.map((c) => c.name).join(', ')}`,
+  );
 
   const bcrypt = await import('bcryptjs');
   const adminEmail = process.env.ADMIN_BOOTSTRAP_EMAIL ?? 'admin@openeventhub.local';

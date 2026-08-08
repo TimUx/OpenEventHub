@@ -19,6 +19,7 @@ import { cn } from '../lib/utils';
 import { CalendarExportBar } from './calendar-export-bar';
 import { CollapsiblePanel } from './collapsible-panel';
 import { EventCard, type EventDisplayMode } from './event-card';
+import { RegionFilter } from './region-filter';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ViewModeToggle } from './view-mode-toggle';
@@ -145,19 +146,13 @@ export function EventsBrowser({
                 >
                   {t('events.filterRegion')}
                 </label>
-                <select
+                <RegionFilter
                   id="events-region"
-                  className={selectClass}
+                  regions={regions}
                   value={filters.regionId}
-                  onChange={(event) => patch({ regionId: event.target.value })}
-                >
-                  <option value="">{t('events.filterAny')}</option>
-                  {regions.map((region) => (
-                    <option key={region.id} value={region.id}>
-                      {region.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(regionId) => patch({ regionId })}
+                  anyLabel={t('events.filterAny')}
+                />
               </div>
 
               <div>

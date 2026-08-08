@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult, ExtractedEventFields } from '@openeventhub/shared';
 import {
+  evaluateCategoryAllowlist,
   evaluateCoverageScope,
   inferAllDay,
   inferPlaceFromTitle,
@@ -19,7 +20,7 @@ import {
   findMatchingEvent,
 } from './domain/event-consolidate.js';
 import { EventIntelligencePipeline } from './domain/intelligence.pipeline.js';
-import { linkEventTaxonomy } from './domain/taxonomy-link.js';
+import { linkEventTaxonomy, matchCategoryIdsFromCatalog } from './domain/taxonomy-link.js';
 import { LLM_PROVIDER, type LlmProvider } from './ports/llm.provider.js';
 import { PROMPT_REPOSITORY, type PromptRepository } from './ports/prompt.repository.js';
 
@@ -62,6 +63,13 @@ export class AiProcessingService {
       if (!coverage.inScope) {
         this.logger.log(
           `Skipped out-of-coverage event title=${JSON.stringify(extraction.title)} reason=${coverage.reason}`,
+        );
+        return result;
+      }
+      const categories = await this.evaluateCategoryImportAllowlist(result);
+      if (!categories.allowed) {
+        this.logger.log(
+          `Skipped category-filtered event title=${JSON.stringify(extraction.title)} reason=${categories.reason}`,
         );
         return result;
       }
@@ -192,6 +200,35 @@ export class AiProcessingService {
     });
   }
 
+  /**
+   * Drop new events whose resolved categories lie outside the operator allowlist.
+   * Empty allowlist = filter disabled. Unknown category = allow (moderation).
+   */
+  private async evaluateCategoryImportAllowlist(
+    result: AiJobResult,
+  ): Promise<{ readonly allowed: boolean; readonly reason: string }> {
+    const allowlistRootIds = (
+      await this.prisma.categoryImportAllowlist.findMany({ select: { categoryId: true } })
+    ).map((row) => row.categoryId);
+
+    if (allowlistRootIds.length === 0) {
+      return { allowed: true, reason: 'allowlist_disabled' };
+    }
+
+    const categories = await this.prisma.category.findMany({
+      select: { id: true, name: true, slug: true, parentId: true },
+    });
+
+    const labels = [...result.classification.categories, ...result.classification.subcategories];
+    const resolvedCategoryIds = matchCategoryIdsFromCatalog(labels, categories);
+
+    return evaluateCategoryAllowlist({
+      allowlistRootIds,
+      categories,
+      resolvedCategoryIds,
+    });
+  }
+
   /** Prefer plugin-structured candidates when the LLM flips isEvent off. */
   private resolveExtraction(
     payload: AiJobPayload,
@@ -219,7 +256,7 @@ export class AiProcessingService {
 
   /**
    * When listings omit venue, derive place from the title (e.g. "Kirmes Niedergrenzebach").
-   * Does not override existing venueName / municipality.
+   * Prefer `place` (Ort) over inventing a Kommune; does not override existing fields.
    */
   private enrichPlaceFromTitle(result: AiJobResult): AiJobResult {
     const place = inferPlaceFromTitle(result.extraction.title);
@@ -228,11 +265,8 @@ export class AiProcessingService {
     }
 
     const venueName = result.extraction.venueName?.trim() || place;
-    const municipality = result.classification.municipality?.trim() || place;
-    if (
-      venueName === result.extraction.venueName &&
-      municipality === result.classification.municipality
-    ) {
+    const placeField = result.classification.place?.trim() || place;
+    if (venueName === result.extraction.venueName && placeField === result.classification.place) {
       return result;
     }
 
@@ -248,7 +282,7 @@ export class AiProcessingService {
       },
       classification: {
         ...result.classification,
-        municipality,
+        place: placeField,
       },
     };
   }

@@ -4,19 +4,19 @@
 
 The AI assigns taxonomy labels to events:
 
-- Category
-- Subcategory
-- Tags
-- Region
-- Municipality
-- District
+- Category / Subcategory / Tags
+- Region (federal state)
+- District (Landkreis)
+- Municipality (Kommune)
+- Place (Ort)
 
 Multiple categories are allowed.
 
-After classification the AI service resolves labels against the catalog (**find-or-create**) and links:
+After classification the AI service resolves labels against the catalog and links:
 
-- `EventCategory` / `EventTag`
-- `Region` hierarchy (State → District/Landkreis → Municipality)
+- `EventCategory` — match existing categories only (curated catalog + aliases; no auto-create)
+- `EventTag` / places — find-or-create
+- `Region` hierarchy Land → Bundesland → Landkreis → Kommune → Ort
 - optional `Venue` including `regionId` (for map/region filters)
 
 Existing entries are reused by name (case-insensitive). See `REGIONS_AND_CATEGORIES.md`.
@@ -24,5 +24,6 @@ Existing entries are reused by name (case-insensitive). See `REGIONS_AND_CATEGOR
 Field meaning:
 
 - `region` → federal state (`state`)
-- `district` → county / Landkreis (`district`)
-- `municipality` → municipality/city (`municipality`)
+- `district` → Landkreis (`district`)
+- `municipality` → Kommune (`municipality`)
+- `place` → Ort (`suburb`)

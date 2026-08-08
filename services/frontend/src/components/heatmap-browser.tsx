@@ -16,20 +16,12 @@ import { intlLocale } from '@openeventhub/shared';
 import { usePersistedViewMode } from '../hooks/use-persisted-view-mode';
 import { useI18n } from '../i18n/i18n-provider';
 import {
-  alignHeatmapCursor,
-  eventsOnDay,
-  groupEventsByDay,
-  HEATMAP_VIEW_MODES,
-  shiftHeatmapCursor,
-  startOfUtcDay,
-  toIsoDay,
-  type HeatmapViewMode,
-} from '../lib/calendar-utils';
-import {
   calendarRangeForMode,
   cursorAfterHeatmapClick,
   drillModeAfterClick,
+  eventsInIsoRange,
   resolveRangeBounds,
+  showHeatmapPeriodList,
 } from '../lib/heatmap-chart-data';
 import { filterListEvents } from '../lib/event-list-filters';
 import {
@@ -41,13 +33,22 @@ import {
 } from '../lib/api';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { CollapsiblePanel } from './collapsible-panel';
+import { RegionFilter } from './region-filter';
 import { ViewModeToggle } from './view-mode-toggle';
+import {
+  alignHeatmapCursor,
+  groupEventsByDay,
+  HEATMAP_VIEW_MODES,
+  shiftHeatmapCursor,
+  startOfUtcDay,
+  toIsoDay,
+  type HeatmapViewMode,
+} from '../lib/calendar-utils';
 
 const EventDensityHeatmap = dynamic(() => import('./event-density-heatmap'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-56 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--muted)]">
+    <div className="flex h-[min(50dvh,520px)] min-h-80 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--muted)]">
       …
     </div>
   ),
@@ -169,20 +170,19 @@ export function HeatmapBrowser() {
     setCursor(cursorAfterHeatmapClick(isoDay, nextMode));
   }
 
-  const dayEvents = mode === 'day' ? eventsOnDay(eventsByDay, cursor) : [];
+  const periodEvents = useMemo(() => {
+    if (!showHeatmapPeriodList(mode)) return [];
+    const { from, to } = resolveRangeBounds(calendarRangeForMode(mode, cursor));
+    return eventsInIsoRange(eventsByDay, from, to);
+  }, [cursor, eventsByDay, mode]);
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="font-bold text-3xl">{t('heatmap.title')}</h1>
-          <p className="text-[var(--muted)]">{t('heatmap.description')}</p>
-          <p className="text-sm text-[var(--muted)]">
-            <Link href="/calendar" className="font-semibold text-primary hover:underline">
-              {t('heatmap.toCalendar')}
-            </Link>
-          </p>
-        </div>
+      <header>
+        <h1 className="font-bold text-3xl">{t('heatmap.title')}</h1>
+      </header>
+
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:gap-4">
         <ViewModeToggle
           label={t('heatmap.viewMode')}
           value={mode}
@@ -215,18 +215,14 @@ export function HeatmapBrowser() {
             },
           ]}
         />
-      </header>
 
-      <CollapsiblePanel
-        title={t('heatmap.filtersToggle')}
-        {...(filtersActive ? { badge: t('heatmap.filtersActive') } : {})}
-        defaultOpen={false}
-      >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(12rem,1.4fr)_auto] lg:items-end">
           <label className="text-sm">
-            {t('heatmap.filterCategory')}
+            <span className="mb-1 block text-xs font-medium text-[var(--muted)]">
+              {t('heatmap.filterCategory')}
+            </span>
             <select
-              className="mt-1 h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3"
+              className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -239,25 +235,22 @@ export function HeatmapBrowser() {
             </select>
           </label>
           <label className="text-sm">
-            {t('heatmap.filterRegion')}
-            <select
-              className="mt-1 h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3"
+            <span className="mb-1 block text-xs font-medium text-[var(--muted)]">
+              {t('heatmap.filterRegion')}
+            </span>
+            <RegionFilter
+              id="heatmap-region"
+              regions={regions}
               value={regionId}
-              onChange={(e) => setRegionId(e.target.value)}
-            >
-              <option value="">{t('heatmap.filterAny')}</option>
-              {regions.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+              onChange={setRegionId}
+              anyLabel={t('heatmap.filterAny')}
+            />
           </label>
-          <div className="flex items-end">
+          <div className="flex items-end sm:col-span-2 lg:col-span-1">
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full lg:w-auto"
               disabled={!filtersActive}
               onClick={() => {
                 setCategory('');
@@ -268,13 +261,13 @@ export function HeatmapBrowser() {
             </Button>
           </div>
         </div>
-        <p className="mt-3 text-xs text-[var(--muted)]">
-          {t('heatmap.resultsCount', {
-            shown: String(filteredEvents.length),
-            total: String(events.length),
-          })}
-        </p>
-      </CollapsiblePanel>
+      </div>
+      <p className="text-xs text-[var(--muted)]">
+        {t('heatmap.resultsCount', {
+          shown: String(filteredEvents.length),
+          total: String(events.length),
+        })}
+      </p>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -312,18 +305,25 @@ export function HeatmapBrowser() {
         eventsByDay={eventsByDay}
         locale={locale}
         eventsLabel={t('heatmap.chartSeries')}
+        fewLabel={t('heatmap.few')}
+        manyLabel={t('heatmap.many')}
         onDateClick={onDateClick}
       />
       <p className="text-xs text-[var(--muted)]">{t('heatmap.chartHint')}</p>
 
-      {mode === 'day' ? (
+      {showHeatmapPeriodList(mode) ? (
         <Card className="space-y-3 p-5">
-          <p className="text-sm text-[var(--muted)]">{toIsoDay(cursor)}</p>
-          {dayEvents.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">{t('heatmap.noEvents')}</p>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold text-lg">{t('heatmap.periodListTitle')}</h2>
+            <p className="text-sm text-[var(--muted)]">
+              {t('heatmap.eventsCount', { count: String(periodEvents.length) })}
+            </p>
+          </div>
+          {periodEvents.length === 0 ? (
+            <p className="text-sm text-[var(--muted)]">{t('heatmap.noEventsPeriod')}</p>
           ) : (
             <ul className="space-y-3">
-              {dayEvents.map((event) => (
+              {periodEvents.map((event) => (
                 <li key={event.id} className="border-b border-[var(--border)] pb-3 last:border-0">
                   <Link
                     href={`/events/${event.id}`}

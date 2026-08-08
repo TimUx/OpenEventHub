@@ -169,6 +169,8 @@ export const de = {
     viewMonth: 'Monat',
     viewYear: 'Jahr',
     noEvents: 'Keine Veranstaltungen an diesem Tag.',
+    noEventsPeriod: 'Keine Veranstaltungen in diesem Zeitraum.',
+    periodListTitle: 'Termine im Zeitraum',
     eventsCount: '{count} Veranstaltungen',
     few: 'Wenige',
     many: 'Viele',
@@ -268,6 +270,19 @@ export const de = {
   notFound: {
     title: 'Seite nicht gefunden',
     body: 'Diese Seite konnte nicht gefunden werden.',
+  },
+  regionFilter: {
+    search: 'Region suchen…',
+    clear: 'Auswahl löschen',
+    noMatches: 'Keine Region gefunden',
+    type: {
+      country: 'Land',
+      state: 'Bundesland',
+      district: 'Landkreis',
+      municipality: 'Kommune',
+      city: 'Kommune',
+      suburb: 'Ort',
+    },
   },
   seo: {
     upcomingEvents: 'Veranstaltungen zum Entdecken',

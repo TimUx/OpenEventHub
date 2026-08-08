@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2026-08-08
+
+### Added
+
+- Admin **Import-Einstellungen** (`/import-settings`): coverage scope and category import allowlist on one page (nav under Quellen)
+- **Category import allowlist** (`category_import_allowlist`, `GET|PUT /api/v1/admin/category-import-allowlist`); AI ingest drops events whose resolved categories are outside the set; empty = filter off; parent includes children
+- Curated rural DE **default category catalog** (`DEFAULT_EVENT_CATEGORIES`); seed + AI alias match only (no invent); classification prompts **1.0.3** / **1.0.4**
+- Region hierarchy labels Land → Bundesland → Landkreis → Kommune → Ort; public `RegionFilter` / region-tree helpers; DEV repair/reset scripts
+
+### Changed
+
+- Coverage scope UI moved off Regionen CRUD onto Import-Einstellungen
+- Heatmap/list/map/search region filters use the hierarchical region picker
+- Docs (DE/EN): Admin Center, Regions & Categories, Database, REST, Roadmap
+
 ## [0.21.0] - 2026-08-08
 
 ### Added

@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.21.0 — Event density heatmap (Apache ECharts)** (post-M11)
+**v0.22.0 — Import settings, category allowlist & region hierarchy** (post-M11)
 
-Vorher: v0.20.2 — Coverage scope & flyer-first OCR ADR
+Vorher: v0.21.0 — Event density heatmap (Apache ECharts)
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

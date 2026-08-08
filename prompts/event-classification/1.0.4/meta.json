@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.4",
+  "task": "classification",
+  "description": "Assign taxonomy with Land→Bundesland→Landkreis→Kommune→Ort; curated categories; place-from-title into place (Ort).",
+  "responseFormat": "json"
+}

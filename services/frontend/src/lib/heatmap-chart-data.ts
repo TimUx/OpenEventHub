@@ -1,3 +1,4 @@
+import type { ApiEvent } from './api';
 import {
   addUtcDays,
   startOfUtcDay,
@@ -83,10 +84,10 @@ export function buildDailyHeatmapData(
 }
 
 export function chartHeightForMode(mode: HeatmapViewMode): number {
-  if (mode === 'year') return 240;
-  if (mode === 'month') return 320;
-  if (mode === 'week' || mode === 'weekend') return 220;
-  return 180;
+  if (mode === 'year') return 420;
+  if (mode === 'month') return 520;
+  if (mode === 'week' || mode === 'weekend') return 360;
+  return 300;
 }
 
 /** Next drill mode when clicking a cell in the current zoom. */
@@ -104,4 +105,29 @@ export function cursorAfterHeatmapClick(isoDay: string, nextMode: HeatmapViewMod
   if (nextMode === 'week') return startOfUtcWeek(day);
   if (nextMode === 'weekend') return startOfUtcWeekend(day);
   return day;
+}
+
+/** Period event list from month zoom downward (not year overview). */
+export function showHeatmapPeriodList(mode: HeatmapViewMode): boolean {
+  return mode !== 'year';
+}
+
+/** Events whose start day falls in `[fromIso, toIso]` (inclusive), sorted by start. */
+export function eventsInIsoRange(
+  eventsByDay: ReadonlyMap<string, readonly ApiEvent[]>,
+  fromIso: string,
+  toIso: string,
+): ApiEvent[] {
+  const out: ApiEvent[] = [];
+  for (const day of enumerateUtcDays(fromIso, toIso)) {
+    const dayEvents = eventsByDay.get(day);
+    if (dayEvents?.length) {
+      out.push(...dayEvents);
+    }
+  }
+  return out.sort(
+    (a, b) =>
+      a.startAt.localeCompare(b.startAt) ||
+      a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }),
+  );
 }

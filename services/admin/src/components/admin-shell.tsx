@@ -48,6 +48,7 @@ const navGroups: readonly NavGroup[] = [
       { href: '/sources', key: 'nav.sources' },
       { href: '/crawler', key: 'nav.crawler' },
       { href: '/scheduler', key: 'nav.scheduler' },
+      { href: '/import-settings', key: 'nav.importSettings' },
     ],
   },
   {

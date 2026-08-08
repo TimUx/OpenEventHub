@@ -20,10 +20,11 @@
 - Events (spreadsheet table: filter/sort via column headers; checkbox selection with a
   compact bulk bar for status/delete; edit per row; header shows `pending_moderation` count)
 - Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
-  AI find-or-creates missing labels and links them)
+  seed provides the rural starter catalog; AI does **not** create new categories)
 - Regions (spreadsheet table with column filter/sort; manual create / edit / delete;
-  AI may add places/hierarchy via find-or-create; **coverage area** selectable:
-  a district includes child places; extra municipalities can be added separately)
+  AI may add places/hierarchy via find-or-create)
+- **Import settings** (coverage area and category allowlist for ingest;
+  separate from the region/category catalogs)
 - Moderation
 - Users & Roles
 - AI Settings (create / edit / delete provider profiles; default: Local Ollama; profile test opens a dialog with a waiting indicator)
@@ -55,7 +56,7 @@ Grouped, collapsible menu:
 |-------|-------|
 | Overview | Dashboard |
 | Content | Events, Moderation, Categories, Regions |
-| Ingest | Sources, Crawler, Scheduler |
+| Ingest | Sources, Crawler, Scheduler, Import settings |
 | Ops | Queues, Error log |
 | System | AI Settings, Users |
 

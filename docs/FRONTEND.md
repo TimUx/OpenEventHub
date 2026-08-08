@@ -63,7 +63,7 @@ Event-Aktionen (Liste, Kacheln, Details und Detailseite):
 - **Liste** — kompakte Zeilen
 - **Details** — erweiterte Listeneinträge mit Summary/Beschreibung
 - **Kacheln** — Kartenraster
-- Filter und Sortierung als aufklappbares Panel (standardmäßig zugeklappt): Kategorie, Region, Zeitraum (Von/Bis), Sortieren nach (Startdatum/Titel), Auf-/Absteigend — aktiver Filter wird am Toggle als Badge angezeigt
+- Filter und Sortierung als aufklappbares Panel (standardmäßig zugeklappt): Kategorie, Region (hierarchische Suche mit Autocomplete: Bundesland → Landkreis → Kommune → Ort), Zeitraum (Von/Bis), Sortieren nach (Startdatum/Titel), Auf-/Absteigend — aktiver Filter wird am Toggle als Badge angezeigt
 
 ### Kalender
 - **Tag** / **Woche** / **Monat** / **Jahr**
@@ -74,15 +74,17 @@ Gewählte Modi werden lokal im Browser gespeichert (`oeh_view_*`).
 ### Termindichte (Heatmap)
 - Eigene Route `/heatmap` (Kalender bleibt unverändert)
 - Visualisierung mit **Apache ECharts** (`heatmap` + `calendar`-Koordinatensystem)
+- Farbspektrum **grün → gelb → orange → rot** (wenige → viele Termine)
 - Zoom: **Jahr** / **Monat** / **Woche** / **Wochenende** (Fr–So) / **Tag** (Klick zoomt tiefer)
-- Filter (aufklappbar): Kategorie, Region
+- Ab Monatszoom: Liste aller Termine im sichtbaren Zeitraum unter dem Chart
+- Filter und Zoomstufe auf Desktop in einer Werkzeugzeile; Kategorie + Region (hierarchische Autocomplete-Suche)
 - Dependency: `echarts` im Frontend-Workspace
 
 ## Karte
 
 - Eingebettete OpenStreetMap-Karte (Leaflet)
 - Marker für alle veröffentlichten Events mit Venue-Koordinaten
-- Suche + Filter (Kategorie, Region, Datum); Marker und Liste folgen dem Filter
+- Suche + Filter (Kategorie, Region mit hierarchischer Autocomplete-Suche, Datum); Marker und Liste folgen dem Filter
 - Auto-Zoom (`fitBounds`) auf die aktuellen Treffer, mit begrenztem Zoom und Padding
 - Deep-Link: `/map?event=<id>` wählt den Marker (aus Listen/Detail-Aktionen)
 

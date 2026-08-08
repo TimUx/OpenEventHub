@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, useTransition, type FormEvent } from 'react';
 
 import { EventCard } from './event-card';
+import { RegionFilter } from './region-filter';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useI18n } from '../i18n/i18n-provider';
@@ -133,19 +134,14 @@ function SearchInner() {
           >
             {t('search.region')}
           </label>
-          <select
+          <RegionFilter
             id="region"
-            className="h-11 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-3 text-sm"
+            regions={regions}
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          >
-            <option value="">{t('search.any')}</option>
-            {regions.map((item) => (
-              <option key={item.id} value={item.name}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+            onChange={setRegion}
+            anyLabel={t('search.any')}
+            valueKey="name"
+          />
         </div>
         <div>
           <label

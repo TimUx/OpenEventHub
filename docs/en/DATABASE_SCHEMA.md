@@ -18,7 +18,7 @@ Binding reference for the PostgreSQL schema implemented in
 | `SubmissionType` | `event`, `source`, `correction` |
 | `SubmissionStatus` | `pending`, `processing`, `accepted`, `rejected` |
 | `MediaType` | `image`, `video`, `document`, `audio`, `other` |
-| `RegionType` | `country`, `state`, `district`, `municipality`, `city`, `suburb` |
+| `RegionType` | `country`, `state`, `district`, `municipality`, `city`, `suburb` (UI: Land / State / District / Kommune / Ort; `city`≡Kommune, `suburb`≡Ort) |
 
 ## events
 
@@ -133,6 +133,12 @@ Operator-selected **coverage area** roots (`region_id` PK/FK → `regions`, casc
 delete). Empty = no geo filter on AI ingest. A selected district includes descendants
 (municipalities) without storing them individually.
 
+## category_import_allowlist
+
+Operator-selected **category import allowlist** roots (`category_id` PK/FK →
+`categories`, cascade delete). Empty = no category filter on AI ingest. A selected
+parent includes descendants without storing them individually.
+
 ## categories / tags
 
 Categories are hierarchical (`parent_id`). Tags are flat. Events link via
@@ -170,5 +176,4 @@ npm run db:migrate          # or: bash scripts/db-migrate.sh
 npm run db:seed             # or: bash scripts/db-seed.sh
 ```
 
-Seed data: Germany → Bayern → München; Music/Sports/Culture with sample child
-categories.
+Seed data: Germany → Bayern → München; flat rural category catalog (Kirmes, Konzert, Dorffest, …).

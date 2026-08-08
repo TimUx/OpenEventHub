@@ -168,6 +168,8 @@ export const en = {
     viewMonth: 'Month',
     viewYear: 'Year',
     noEvents: 'No events on this day.',
+    noEventsPeriod: 'No events in this period.',
+    periodListTitle: 'Events in this period',
     eventsCount: '{count} events',
     few: 'Few',
     many: 'Many',
@@ -265,6 +267,19 @@ export const en = {
   notFound: {
     title: 'Page not found',
     body: 'This page could not be found.',
+  },
+  regionFilter: {
+    search: 'Search region…',
+    clear: 'Clear selection',
+    noMatches: 'No region found',
+    type: {
+      country: 'Country',
+      state: 'State',
+      district: 'District',
+      municipality: 'Municipality',
+      city: 'Municipality',
+      suburb: 'Place',
+    },
   },
   seo: {
     upcomingEvents: 'Events to explore',

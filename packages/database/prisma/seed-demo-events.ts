@@ -10,9 +10,9 @@ const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
   const muenchen = await prisma.region.findUnique({ where: { slug: 'muenchen' } });
-  const concerts = await prisma.category.findUnique({ where: { slug: 'music-concerts' } });
-  const theatre = await prisma.category.findUnique({ where: { slug: 'culture-theatre' } });
-  const running = await prisma.category.findUnique({ where: { slug: 'sports-running' } });
+  const konzert = await prisma.category.findUnique({ where: { slug: 'konzert' } });
+  const theater = await prisma.category.findUnique({ where: { slug: 'theater' } });
+  const sport = await prisma.category.findUnique({ where: { slug: 'sportveranstaltung' } });
 
   const venue = await prisma.venue.upsert({
     where: { slug: 'gasteig-hp8' },
@@ -108,7 +108,7 @@ async function main(): Promise<void> {
       confidenceScore: 0.92,
       venueId: venue.id,
       organizerId: organizer.id,
-      categoryId: concerts?.id,
+      categoryId: konzert?.id,
     },
     {
       slug: 'sommerlauf-olympiapark-2026',
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
       confidenceScore: 0.88,
       venueId: venue2.id,
       organizerId: organizer.id,
-      categoryId: running?.id,
+      categoryId: sport?.id,
     },
     {
       slug: 'schiller-raeuber-residenztheater',
@@ -133,7 +133,7 @@ async function main(): Promise<void> {
       confidenceScore: 0.85,
       venueId: venue.id,
       organizerId: organizer.id,
-      categoryId: theatre?.id,
+      categoryId: theater?.id,
     },
   ] as const;
 

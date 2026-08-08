@@ -29,6 +29,7 @@ DELETE /api/v1/admin/events/{id}               (admin only)
 GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; delete: admin)
 GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
 GET|PUT /api/v1/admin/coverage-scope             (coverage area; PUT body `{ regionIds: string[] }`)
+GET|PUT /api/v1/admin/category-import-allowlist  (category allowlist; PUT body `{ categoryIds: string[] }`)
 
 GET|POST|PATCH|DELETE /api/v1/admin/sources*   (mutations: admin|moderator; delete: admin)
 POST   /api/v1/admin/sources/{id}/crawl

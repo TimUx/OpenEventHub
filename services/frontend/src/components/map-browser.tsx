@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { RegionFilter } from './region-filter';
 import { useI18n } from '../i18n/i18n-provider';
 import {
   formatEventDate,
@@ -153,19 +154,13 @@ export function MapBrowser() {
           >
             {t('map.region')}
           </label>
-          <select
+          <RegionFilter
             id="map-region"
-            className="h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm"
+            regions={regions}
             value={regionId}
-            onChange={(e) => setRegionId(e.target.value)}
-          >
-            <option value="">{t('map.any')}</option>
-            {regions.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
+            onChange={setRegionId}
+            anyLabel={t('map.any')}
+          />
         </div>
         <div>
           <label
