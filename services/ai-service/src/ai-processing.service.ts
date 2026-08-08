@@ -121,9 +121,9 @@ export class AiProcessingService {
   private canCreateEvent(extraction: ExtractedEventFields): boolean {
     return Boolean(
       extraction.isEvent &&
-        extraction.title?.trim() &&
-        extraction.startAt &&
-        isEventNotExpired(extraction.startAt, extraction.endAt),
+      extraction.title?.trim() &&
+      extraction.startAt &&
+      isEventNotExpired(extraction.startAt, extraction.endAt),
     );
   }
 
@@ -227,7 +227,9 @@ export class AiProcessingService {
       });
       if (existingLink) {
         await this.mergeIntoEvent(existingLink.eventId, incoming, 'ai.ingest');
-        this.logger.log(`Updated existing event ${existingLink.eventId} from same-source AI ingest`);
+        this.logger.log(
+          `Updated existing event ${existingLink.eventId} from same-source AI ingest`,
+        );
         return existingLink.eventId;
       }
     }

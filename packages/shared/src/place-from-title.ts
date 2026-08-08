@@ -34,7 +34,23 @@ const EVENT_KEYWORDS = new Set(
   ].map(normalizeKey),
 );
 
-const FILLER = new Set(['und', 'am', 'im', 'der', 'die', 'das', 'dem', 'den', 'zum', 'zur', 'fuer', 'für', 'mit', 'vom', 'von']);
+const FILLER = new Set([
+  'und',
+  'am',
+  'im',
+  'der',
+  'die',
+  'das',
+  'dem',
+  'den',
+  'zum',
+  'zur',
+  'fuer',
+  'für',
+  'mit',
+  'vom',
+  'von',
+]);
 
 function normalizeKey(value: string): string {
   return value

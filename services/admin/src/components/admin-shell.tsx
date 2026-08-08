@@ -122,7 +122,7 @@ function BrandLogo({ className }: { readonly className?: string }) {
       <img src={logoUrl} alt="" className={cn('h-8 w-8 shrink-0 object-contain', className)} />
     );
   }
-  return <BrandMark className={className} />;
+  return className ? <BrandMark className={className} /> : <BrandMark />;
 }
 
 export function AdminShell({ children }: { readonly children: ReactNode }) {

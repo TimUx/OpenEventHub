@@ -18,10 +18,7 @@ describe('inferPlaceFromTitle', () => {
   });
 
   it('strips dash subtitles and leading numbers', () => {
-    assert.equal(
-      inferPlaceFromTitle('777 Jahrfeier Treysa — Historisches Wochenende'),
-      'Treysa',
-    );
+    assert.equal(inferPlaceFromTitle('777 Jahrfeier Treysa — Historisches Wochenende'), 'Treysa');
   });
 
   it('demotes adjectival place forms', () => {

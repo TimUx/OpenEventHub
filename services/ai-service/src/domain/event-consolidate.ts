@@ -34,10 +34,7 @@ export type EventConsolidateDb = {
       >
     >;
     findUnique(args: { where: { id: string } }): Promise<Event | null>;
-    update(args: {
-      where: { id: string };
-      data: Prisma.EventUpdateInput;
-    }): Promise<Event>;
+    update(args: { where: { id: string }; data: Prisma.EventUpdateInput }): Promise<Event>;
   };
   eventSource: {
     findUnique(args: {
@@ -200,9 +197,7 @@ export function coalesceEventFields(
   readonly changed: boolean;
 } {
   const title =
-    existing.title.trim().length >= incoming.title.trim().length
-      ? existing.title
-      : incoming.title;
+    existing.title.trim().length >= incoming.title.trim().length ? existing.title : incoming.title;
   const summary = pickLongerText(existing.summary, incoming.summary);
   const description = pickLongerText(existing.description, incoming.description);
   const endAt = existing.endAt ?? incoming.endAt;
@@ -233,8 +228,7 @@ export function selectBestMatch(
 ): ConsolidateCandidate | null {
   const matches = candidates.filter(
     (row) =>
-      titlesMatch(title, row.title) &&
-      venuesCompatible(venueName, row.venueName, row.venueCity),
+      titlesMatch(title, row.title) && venuesCompatible(venueName, row.venueName, row.venueCity),
   );
   if (matches.length === 0) return null;
   // Prefer events that already have more filled fields / venue linked.
