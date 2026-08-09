@@ -15,6 +15,8 @@ Mehrere Kategorien sind erlaubt.
 Nach der Klassifikation löst der AI-Service die Labels gegen den Katalog auf und verknüpft:
 
 - `EventCategory` — nur Match auf bestehende Kategorien (kuratierter Katalog + Aliases; keine Auto-Anlage)
+- Fehlen klare Labels: Alias-Inferenz aus Titel/Summary/Beschreibung; bei 0 oder mehreren Treffern → Katalog-Kategorie **Sonstiges** (`slug: sonstiges`)
+- Admin kann Kategorien jederzeit manuell überschreiben
 - `EventTag` / Orte — Find-or-create
 - `Region`-Hierarchie Land → Bundesland → Landkreis → Kommune → Ort
 - optional `Venue` including `regionId` (for map/region filters)

@@ -301,11 +301,26 @@ describe('taxonomy-link', () => {
     const catalog = [
       { id: '1', name: 'Kirmes', slug: 'kirmes' },
       { id: '2', name: 'Konzert', slug: 'konzert' },
+      { id: '3', name: 'Sonstiges', slug: 'sonstiges' },
     ];
     const ids = matchCategoryIdsFromCatalog(
       ['traditionskirmes', 'Concerts', 'unknown-xyz'],
       catalog,
     );
     assert.deepEqual(ids, ['1', '2']);
+  });
+
+  it('matchCategoryIdsFromCatalog infers from title or falls back to Sonstiges', () => {
+    const catalog = [
+      { id: '1', name: 'Kirmes', slug: 'kirmes' },
+      { id: '3', name: 'Sonstiges', slug: 'sonstiges' },
+    ];
+    assert.deepEqual(
+      matchCategoryIdsFromCatalog([], catalog, { title: 'Kirmes Niedergrenzebach' }),
+      ['1'],
+    );
+    assert.deepEqual(matchCategoryIdsFromCatalog([], catalog, { title: 'Nachbarschaftstreffen' }), [
+      '3',
+    ]);
   });
 });

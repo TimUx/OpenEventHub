@@ -48,8 +48,12 @@ export class RegionLookupService {
   /**
    * Find-or-create every node in the candidate chain (root → leaf).
    * Returns the created/reused regions in chain order and the leaf.
+   * Optional coordinates are stored on the leaf (and fill existing leaf if missing).
    */
-  async createFromChain(chain: readonly RegionHierarchyNode[]): Promise<{
+  async createFromChain(
+    chain: readonly RegionHierarchyNode[],
+    coordinates?: { readonly latitude: number; readonly longitude: number } | null,
+  ): Promise<{
     readonly regions: Region[];
     readonly leaf: Region;
     readonly createdIds: string[];
@@ -62,11 +66,21 @@ export class RegionLookupService {
     const createdIds: string[] = [];
     let parentId: string | null = null;
 
-    for (const node of chain) {
+    for (let index = 0; index < chain.length; index += 1) {
+      const node = chain[index]!;
+      const isLeaf = index === chain.length - 1;
       const type = node.type as RegionType;
       const existing = await this.regions.findByNameTypeParent(node.name, type, parentId);
       if (existing) {
-        regions.push(existing);
+        if (isLeaf && coordinates && (existing.latitude == null || existing.longitude == null)) {
+          const updated = await this.regions.update(existing.id, {
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+          });
+          regions.push(updated);
+        } else {
+          regions.push(existing);
+        }
         parentId = existing.id;
         continue;
       }
@@ -79,6 +93,9 @@ export class RegionLookupService {
         type,
         parentId,
         isoCode: node.isoCode,
+        ...(isLeaf && coordinates
+          ? { latitude: coordinates.latitude, longitude: coordinates.longitude }
+          : {}),
       });
       createdIds.push(created.id);
       regions.push(created);

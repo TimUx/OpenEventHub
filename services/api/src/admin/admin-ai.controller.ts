@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   Body,
   Controller,
   Delete,
@@ -137,20 +138,61 @@ export class AdminAiController {
     }
     const config = this.settings.toProviderConfig(row);
     const provider = createLlmProvider(config);
-    const result = await provider.completeChat({
-      temperature: 0,
-      messages: [
-        { role: 'system', content: 'Reply with the single word pong.' },
-        { role: 'user', content: 'ping' },
-      ],
-    });
-    return {
-      ok: true,
-      provider: result.provider,
-      model: result.model,
-      sample: result.content.slice(0, 200),
-    };
+    try {
+      const result = await provider.completeChat({
+        temperature: 0,
+        messages: [
+          { role: 'system', content: 'Reply with the single word pong.' },
+          { role: 'user', content: 'ping' },
+        ],
+      });
+      return {
+        ok: true,
+        provider: result.provider,
+        model: result.model,
+        sample: result.content.slice(0, 200),
+      };
+    } catch (err) {
+      const message = formatProviderTestError(err, config.baseUrl);
+      throw new BadGatewayException(message);
+    }
   }
+}
+
+function formatProviderTestError(err: unknown, baseUrl: string | null | undefined): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  const cause =
+    err instanceof Error && err.cause instanceof Error
+      ? err.cause
+      : err instanceof Error && typeof err.cause === 'object' && err.cause && 'code' in err.cause
+        ? (err.cause as { code?: string; hostname?: string; message?: string })
+        : null;
+
+  const code =
+    cause && typeof cause === 'object' && 'code' in cause
+      ? String((cause as { code?: string }).code ?? '')
+      : '';
+  const hostname =
+    cause && typeof cause === 'object' && 'hostname' in cause
+      ? String((cause as { hostname?: string }).hostname ?? '')
+      : '';
+
+  if (code === 'ENOTFOUND' || /getaddrinfo ENOTFOUND/i.test(raw)) {
+    const host = hostname || baseUrl || 'provider host';
+    return (
+      `Cannot resolve ${host}. Use a URL reachable from the api/ai-service containers ` +
+      `(e.g. http://host.docker.internal:11434/v1 for host-published Ollama on 0.0.0.0, ` +
+      `or a LAN/remote URL). Binding Ollama only to 127.0.0.1 is not reachable from containers. ` +
+      `Optional: OLLAMA_EXTERNAL_NETWORK for a shared Docker network — see docs/AI_CONFIGURATION.md.`
+    );
+  }
+  if (code === 'ECONNREFUSED' || /ECONNREFUSED/i.test(raw)) {
+    return `Connection refused for ${baseUrl ?? 'provider'}. Is the LLM service running?`;
+  }
+  if (code === 'ETIMEDOUT' || /timeout|AbortError/i.test(raw)) {
+    return `Provider timed out (${baseUrl ?? 'unknown URL'}). Check model load time and timeoutMs.`;
+  }
+  return raw || 'Provider test failed';
 }
 
 function labelFor(type: AiProviderTypeName): string {

@@ -13,6 +13,7 @@ import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/u
 import { adminFetch } from '../../lib/api';
 import { useAuth } from '../../components/auth-provider';
 import { useI18n } from '../../i18n/i18n-provider';
+import { sourceStatusLabel } from '../../i18n/labels';
 import { formatScheduleLabel } from '../../lib/schedule-label';
 
 type Source = {
@@ -238,8 +239,8 @@ export default function SourcesPage() {
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="healthy">{t('sources.statusActive')}</option>
-                <option value="disabled">{t('sources.statusDisabled')}</option>
+                <option value="healthy">{t('sources.statuses.healthy')}</option>
+                <option value="disabled">{t('sources.statuses.disabled')}</option>
               </select>
             </label>
           ) : null}
@@ -287,7 +288,7 @@ export default function SourcesPage() {
                 ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <StatusPill value={source.status} />
+                <StatusPill value={sourceStatusLabel(t, source.status)} />
                 <button
                   type="button"
                   className="rounded-md border border-[var(--border)] px-2 py-1 text-xs"

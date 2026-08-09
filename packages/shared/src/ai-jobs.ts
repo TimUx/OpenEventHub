@@ -27,6 +27,8 @@ export interface ExtractedEventFields {
   readonly venueAddress: string | null;
   readonly isRecurring: boolean;
   readonly extractionConfidence: number;
+  /** Absolute or relative image URLs from the source (og:image, JSON-LD, etc.). */
+  readonly images?: readonly string[];
 }
 
 export interface ClassificationFields {

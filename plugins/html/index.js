@@ -84,6 +84,7 @@ function eventCandidate(fields, confidence = 0.8) {
   const startAt = fields.startAt ?? null;
   if (!title || !startAt || !isMeaningfulTitle(title)) return null;
   const endAt = fields.endAt ?? null;
+  const images = normalizeImageList(fields.images);
   return {
     isEvent: true,
     title,
@@ -97,7 +98,53 @@ function eventCandidate(fields, confidence = 0.8) {
     venueAddress: fields.venueAddress?.trim() || null,
     isRecurring: Boolean(fields.isRecurring),
     extractionConfidence: confidence,
+    ...(images.length > 0 ? { images } : {}),
   };
+}
+
+function normalizeImageList(value) {
+  if (!value) return [];
+  const items = Array.isArray(value) ? value : [value];
+  const out = [];
+  for (const item of items) {
+    if (typeof item === 'string' && item.trim()) {
+      out.push(item.trim());
+      continue;
+    }
+    if (item && typeof item === 'object') {
+      const url = item.url ?? item.contentUrl ?? item['@id'];
+      if (typeof url === 'string' && url.trim()) out.push(url.trim());
+    }
+  }
+  return [...new Set(out)];
+}
+
+function extractPageImages(html) {
+  const urls = [];
+  const ogRe =
+    /<meta\b[^>]*(?:property|name)=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/gi;
+  const ogReAlt =
+    /<meta\b[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']og:image["'][^>]*>/gi;
+  for (const match of html.matchAll(ogRe)) {
+    if (match[1]) urls.push(match[1].trim());
+  }
+  for (const match of html.matchAll(ogReAlt)) {
+    if (match[1]) urls.push(match[1].trim());
+  }
+  const twitterRe =
+    /<meta\b[^>]*(?:property|name)=["']twitter:image["'][^>]*content=["']([^"']+)["'][^>]*>/gi;
+  for (const match of html.matchAll(twitterRe)) {
+    if (match[1]) urls.push(match[1].trim());
+  }
+  return [...new Set(urls.filter(Boolean))];
+}
+
+function attachPageImages(events, pageImages) {
+  if (!pageImages.length) return events;
+  return events.map((event) => {
+    const images = [...new Set([...(event.images ?? []), ...pageImages])];
+    return images.length > 0 ? { ...event, images } : event;
+  });
 }
 
 function mergeEvents(groups) {
@@ -533,6 +580,7 @@ function parseJsonLdEvents(html) {
           venueAddress,
           organizerName:
             typeof node.organizer === 'string' ? node.organizer : (node.organizer?.name ?? null),
+          images: normalizeImageList(node.image ?? node.imageUrl ?? node.photo),
         },
         0.95,
       );
@@ -617,7 +665,7 @@ function parseBlockEvents(html) {
 }
 
 function extractAllEvents(html) {
-  return filterNotExpiredEvents(
+  const events = filterNotExpiredEvents(
     mergeEvents([
       parseJsonLdEvents(html),
       parseMarkedTableEvents(html),
@@ -627,6 +675,7 @@ function extractAllEvents(html) {
       parseListingEvents(html),
     ]),
   );
+  return attachPageImages(events, extractPageImages(html));
 }
 
 /** @internal exported for unit tests */
@@ -641,6 +690,8 @@ export const __test = {
   parseBlockEvents,
   parseTimeElementEvents,
   extractAllEvents,
+  extractPageImages,
+  normalizeImageList,
 };
 
 export function createPlugin() {

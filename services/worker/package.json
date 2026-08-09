@@ -1,8 +1,8 @@
 {
   "name": "@openeventhub/worker",
-  "version": "0.1.0",
+  "version": "0.24.0",
   "private": true,
-  "description": "OpenEventHub worker service shell",
+  "description": "OpenEventHub worker (geocoding and shared background jobs)",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -12,11 +12,14 @@
     "test": "node --import tsx --import reflect-metadata --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
+    "@openeventhub/database": "0.5.0",
     "@openeventhub/service-runtime": "0.1.0",
     "@openeventhub/shared": "0.2.0",
+    "bullmq": "^5.41.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

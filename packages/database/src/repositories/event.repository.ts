@@ -1,4 +1,4 @@
-import type { Category, Event, Prisma, PrismaClient, Venue } from '@prisma/client';
+import type { Category, Event, Media, Prisma, PrismaClient, Venue } from '@prisma/client';
 import { EventStatus } from '@prisma/client';
 
 export type EventListOptions = {
@@ -25,6 +25,7 @@ export type EventWithRelations = Event & {
   readonly categories: ReadonlyArray<{
     readonly category: Category;
   }>;
+  readonly media: readonly Media[];
 };
 
 export type EventUpdateInput = {
@@ -36,6 +37,8 @@ export type EventUpdateInput = {
   readonly endAt?: Date | null;
   readonly allDay?: boolean;
   readonly status?: EventStatus;
+  readonly venueId?: string | null;
+  readonly categoryIds?: readonly string[];
   readonly changeReason?: string | null;
 };
 
@@ -45,6 +48,9 @@ const publishedInclude = {
     include: {
       category: true,
     },
+  },
+  media: {
+    orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
   },
 } satisfies Prisma.EventInclude;
 
@@ -149,8 +155,20 @@ export class EventRepository {
           ...(data.endAt !== undefined ? { endAt: data.endAt } : {}),
           ...(data.allDay !== undefined ? { allDay: data.allDay } : {}),
           ...(data.status !== undefined ? { status: data.status } : {}),
+          ...(data.venueId !== undefined ? { venueId: data.venueId } : {}),
         },
       });
+
+      if (data.categoryIds !== undefined) {
+        const uniqueIds = [...new Set(data.categoryIds.map((cid) => cid.trim()).filter(Boolean))];
+        await tx.eventCategory.deleteMany({ where: { eventId: id } });
+        if (uniqueIds.length > 0) {
+          await tx.eventCategory.createMany({
+            data: uniqueIds.map((categoryId) => ({ eventId: id, categoryId })),
+            skipDuplicates: true,
+          });
+        }
+      }
 
       const last = await tx.eventVersion.findFirst({
         where: { eventId: id },

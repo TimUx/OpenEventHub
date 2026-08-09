@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/health.test.ts src/i18n/locale.test.ts src/ics.test.ts src/schedule-presets.test.ts src/crawl-jobs.test.ts src/event-timing.test.ts src/temporal-all-day.test.ts src/place-from-title.test.ts src/coverage-scope.test.ts src/category-import-allowlist.test.ts src/default-categories.test.ts src/nominatim-region-hierarchy.test.ts"
+    "test": "node --import tsx --test src/health.test.ts src/i18n/locale.test.ts src/ics.test.ts src/schedule-presets.test.ts src/crawl-jobs.test.ts src/event-timing.test.ts src/temporal-all-day.test.ts src/place-from-title.test.ts src/coverage-scope.test.ts src/category-import-allowlist.test.ts src/default-categories.test.ts src/nominatim-region-hierarchy.test.ts src/geocoding-jobs.test.ts"
   },
   "devDependencies": {
     "tsx": "^4.19.3"

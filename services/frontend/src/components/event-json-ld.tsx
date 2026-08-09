@@ -24,6 +24,10 @@ export function EventJsonLd({ event, url }: { readonly event: ApiEvent; readonly
             : {}),
         };
 
+  const imageUrls = (event.media ?? [])
+    .map((item) => item.url)
+    .filter((url): url is string => Boolean(url));
+
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -35,6 +39,7 @@ export function EventJsonLd({ event, url }: { readonly event: ApiEvent; readonly
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     url,
     location,
+    image: imageUrls.length === 1 ? imageUrls[0] : imageUrls.length > 1 ? imageUrls : undefined,
     keywords: event.categories?.map((category) => category.name).join(', ') || undefined,
   };
 

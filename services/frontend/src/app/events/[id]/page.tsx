@@ -32,9 +32,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: description ?? undefined,
         type: 'article',
         url,
+        ...(event.media?.find((item) => item.url)
+          ? { images: [{ url: event.media.find((item) => item.url)!.url! }] }
+          : {}),
       },
       twitter: {
-        card: 'summary',
+        card: event.media?.some((item) => item.url) ? 'summary_large_image' : 'summary',
         title: event.title,
         description: description ?? undefined,
       },
@@ -59,6 +62,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   }
 
   const pageUrl = `${getSiteUrl()}/events/${event.id}`;
+  const images = (event.media ?? []).filter((item) => item.url);
 
   return (
     <article className="mx-auto max-w-3xl space-y-6">
@@ -66,6 +70,20 @@ export default async function EventDetailPage({ params }: PageProps) {
       <Badge>{formatEventDate(event.startAt, locale, { allDay: Boolean(event.allDay) })}</Badge>
       <h1 className="font-bold text-4xl leading-tight">{event.title}</h1>
       {event.summary ? <p className="text-lg text-[var(--muted)]">{event.summary}</p> : null}
+      {images.length > 0 ? (
+        <div className="space-y-3">
+          {images.map((item) => (
+            // Remote crawl URLs vary by source; plain img avoids Next remotePatterns churn.
+            <img
+              key={item.id}
+              src={item.url!}
+              alt={item.altText ?? event.title}
+              className="max-h-[28rem] w-full rounded-lg object-contain bg-[var(--muted)]/10"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      ) : null}
       <EventActions event={event} />
       {event.description ? (
         <div className="prose prose-neutral dark:prose-invert max-w-none whitespace-pre-wrap text-[var(--foreground)]">

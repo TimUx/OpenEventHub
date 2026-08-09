@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseBackedLlmProvider } from './adapters/database-backed-llm.provider.js';
 import { FilePromptRepository } from './adapters/file-prompt.repository.js';
 import { AiProcessingService } from './ai-processing.service.js';
+import { GeocodingEnqueueService } from './geocoding-enqueue.service.js';
 import { LLM_PROVIDER } from './ports/llm.provider.js';
 import { PROMPT_REPOSITORY } from './ports/prompt.repository.js';
 import { probeTcp } from './probe-tcp.js';
@@ -49,6 +50,7 @@ function resolvePromptsRoot(): string {
       },
     }),
     BullModule.registerQueue({ name: QUEUE_NAMES.ai }),
+    BullModule.registerQueue({ name: QUEUE_NAMES.geocoding }),
   ],
   providers: [
     {
@@ -69,6 +71,7 @@ function resolvePromptsRoot(): string {
       provide: PROMPT_REPOSITORY,
       useFactory: () => new FilePromptRepository(resolvePromptsRoot()),
     },
+    GeocodingEnqueueService,
     AiProcessingService,
     AiQueueProcessor,
   ],

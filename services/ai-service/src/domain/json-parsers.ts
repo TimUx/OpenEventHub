@@ -10,6 +10,7 @@ export class ExtractionParseError extends Error {
 export function parseExtractionJson(raw: string): ExtractedEventFields {
   const parsed = parseJsonObject(raw);
   const allDay = typeof parsed['allDay'] === 'boolean' ? parsed['allDay'] : undefined;
+  const images = asStringArray(parsed['images']);
   return {
     isEvent: Boolean(parsed['isEvent']),
     title: asNullableString(parsed['title']),
@@ -23,6 +24,7 @@ export function parseExtractionJson(raw: string): ExtractedEventFields {
     venueAddress: asNullableString(parsed['venueAddress']),
     isRecurring: Boolean(parsed['isRecurring']),
     extractionConfidence: asConfidence(parsed['extractionConfidence']),
+    ...(images.length > 0 ? { images } : {}),
   };
 }
 

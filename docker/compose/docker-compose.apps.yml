@@ -10,7 +10,7 @@ x-nestjs-worker: &nestjs-worker
   restart: unless-stopped
   networks:
     - internal
-  # Reach host-published Ollama (e.g. 127.0.0.1:11434) when OLLAMA_DEPLOY=0.
+  # Reach host-published LLM endpoints (e.g. Ollama on 0.0.0.0:11434) via host.docker.internal.
   extra_hosts:
     - 'host.docker.internal:host-gateway'
   environment: &nestjs-env
@@ -40,7 +40,7 @@ x-nestjs-worker: &nestjs-worker
 services:
   api:
     <<: *nestjs-worker
-    image: openeventhub/api:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/api:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/api/Dockerfile
@@ -52,7 +52,7 @@ services:
       <<: *nestjs-env
       PORT: 3000
       SERVICE_NAME: api
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       API_RATE_LIMIT: ${API_RATE_LIMIT:-120}
       API_RATE_LIMIT_TTL_MS: ${API_RATE_LIMIT_TTL_MS:-60000}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8088,http://admin.localhost:8088}
@@ -66,7 +66,7 @@ services:
 
   scheduler:
     <<: *nestjs-worker
-    image: openeventhub/scheduler:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/scheduler:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/scheduler/Dockerfile
@@ -75,26 +75,35 @@ services:
       <<: *nestjs-env
       PORT: 3001
       SERVICE_NAME: scheduler
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
 
   worker:
     <<: *nestjs-worker
-    image: openeventhub/worker:${SERVICE_VERSION:-0.1.0}
+    image: openeventhub/worker:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/worker/Dockerfile
     container_name: oeh-worker
+    # edge: Nominatim outbound; internal: Postgres/Redis
+    networks:
+      - edge
+      - internal
     environment:
       <<: *nestjs-env
       PORT: 3002
       SERVICE_NAME: worker
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
+      NOMINATIM_BASE_URL: ${NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
+      NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-OpenEventHub/0.24 (geocoding; https://github.com/TimUx/OpenEventHub)}
     depends_on:
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
 
   crawler:
     <<: *nestjs-worker
-    image: openeventhub/crawler:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/crawler:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/crawler/Dockerfile
@@ -106,7 +115,7 @@ services:
       <<: *nestjs-env
       PORT: 3003
       SERVICE_NAME: crawler
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       PLUGINS_DIR: /app/plugins
       OBJECT_STORAGE_ADAPTER: s3
     depends_on:
@@ -119,7 +128,7 @@ services:
 
   ai-service:
     <<: *nestjs-worker
-    image: openeventhub/ai-service:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/ai-service:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/ai-service/Dockerfile
@@ -131,7 +140,7 @@ services:
       <<: *nestjs-env
       PORT: 3004
       SERVICE_NAME: ai-service
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       PROMPTS_DIR: /app/prompts
     depends_on:
       redis:
@@ -153,7 +162,7 @@ services:
       <<: *nestjs-env
       PORT: 3005
       SERVICE_NAME: ocr-service
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       OBJECT_STORAGE_ADAPTER: s3
     depends_on:
       redis:
@@ -174,7 +183,7 @@ services:
       SERVICE_NAME: search
 
   frontend:
-    image: openeventhub/frontend:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/frontend:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/frontend/Dockerfile
@@ -185,7 +194,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       PORT: 3100
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}
@@ -204,7 +213,7 @@ services:
         condition: service_healthy
 
   admin:
-    image: openeventhub/admin:${SERVICE_VERSION:-0.23.0}
+    image: openeventhub/admin:${SERVICE_VERSION:-0.24.0}
     build:
       context: ../..
       dockerfile: services/admin/Dockerfile
@@ -216,7 +225,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      SERVICE_VERSION: ${SERVICE_VERSION:-0.23.0}
+      SERVICE_VERSION: ${SERVICE_VERSION:-0.24.0}
       PORT: 3101
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://api.localhost:8088}

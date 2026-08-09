@@ -12,7 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AdminRole, EventRepository, EventStatus } from '@openeventhub/database';
+import {
+  AdminRole,
+  CategoryRepository,
+  EventRepository,
+  EventStatus,
+  VenueRepository,
+} from '@openeventhub/database';
 import { Prisma } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service.js';
@@ -20,8 +26,17 @@ import { AdminJwtAuthGuard, type AdminJwtPayload } from '../auth/admin-jwt.guard
 import { CurrentAdmin } from '../auth/current-admin.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
+import { GeocodingEnqueueService } from '../geocoding/geocoding-enqueue.service.js';
 
 const EVENT_STATUSES = new Set<string>(Object.values(EventStatus));
+
+type VenuePatchBody = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly city?: string | null;
+  readonly address?: string | null;
+  readonly regionId?: string | null;
+};
 
 function parseOptionalDate(
   value: string | null | undefined,
@@ -44,6 +59,9 @@ function parseOptionalDate(
 export class AdminEventsController {
   constructor(
     private readonly events: EventRepository,
+    private readonly venues: VenueRepository,
+    private readonly categories: CategoryRepository,
+    private readonly geocoding: GeocodingEnqueueService,
     private readonly audit: AuditService,
   ) {}
 
@@ -118,6 +136,8 @@ export class AdminEventsController {
       endAt?: string | null;
       allDay?: boolean;
       status?: EventStatus;
+      venue?: VenuePatchBody | null;
+      categoryIds?: string[];
       changeReason?: string | null;
     },
     @CurrentAdmin() admin: AdminJwtPayload,
@@ -142,11 +162,30 @@ export class AdminEventsController {
       }
     }
 
+    let categoryIds: string[] | undefined;
+    if (body.categoryIds !== undefined) {
+      if (!Array.isArray(body.categoryIds)) {
+        throw new BadRequestException('categoryIds must be an array');
+      }
+      categoryIds = [...new Set(body.categoryIds.map((cid) => String(cid).trim()).filter(Boolean))];
+      for (const categoryId of categoryIds) {
+        const category = await this.categories.findById(categoryId);
+        if (!category) {
+          throw new BadRequestException(`Category ${categoryId} not found`);
+        }
+      }
+    }
+
     const startAt =
       body.startAt !== undefined ? parseOptionalDate(body.startAt, 'startAt') : undefined;
     const endAt = body.endAt !== undefined ? parseOptionalDate(body.endAt, 'endAt') : undefined;
     if (startAt === null) {
       throw new BadRequestException('startAt is required');
+    }
+
+    let venueId: string | null | undefined;
+    if (body.venue !== undefined) {
+      venueId = await this.resolveVenueId(body.venue);
     }
 
     try {
@@ -159,6 +198,8 @@ export class AdminEventsController {
         ...(endAt !== undefined ? { endAt } : {}),
         ...(body.allDay !== undefined ? { allDay: Boolean(body.allDay) } : {}),
         ...(body.status !== undefined ? { status: body.status } : {}),
+        ...(venueId !== undefined ? { venueId } : {}),
+        ...(categoryIds !== undefined ? { categoryIds } : {}),
         changeReason: body.changeReason?.trim() || 'admin.update',
       });
       this.audit.record({
@@ -170,8 +211,13 @@ export class AdminEventsController {
         metadata: {
           status: event.status,
           ...(body.changeReason ? { changeReason: body.changeReason } : {}),
+          ...(venueId !== undefined ? { venueId } : {}),
+          ...(categoryIds !== undefined ? { categoryIds } : {}),
         },
       });
+      if (venueId) {
+        await this.geocoding.enqueueVenue(venueId);
+      }
       return event;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
@@ -179,6 +225,61 @@ export class AdminEventsController {
       }
       throw err;
     }
+  }
+
+  private async resolveVenueId(venue: VenuePatchBody | null): Promise<string | null> {
+    if (venue === null) {
+      return null;
+    }
+
+    const name = typeof venue.name === 'string' ? venue.name.trim().replace(/\s+/g, ' ') : '';
+    const city =
+      venue.city === undefined ? undefined : venue.city === null ? null : venue.city.trim() || null;
+    const address =
+      venue.address === undefined
+        ? undefined
+        : venue.address === null
+          ? null
+          : venue.address.trim() || null;
+    const regionId =
+      venue.regionId === undefined
+        ? undefined
+        : venue.regionId === null
+          ? null
+          : venue.regionId.trim() || null;
+
+    if (venue.id) {
+      const existing = await this.venues.findById(venue.id);
+      if (!existing) {
+        throw new BadRequestException(`Venue ${venue.id} not found`);
+      }
+      if (
+        (name && name !== existing.name) ||
+        (city !== undefined && city !== existing.city) ||
+        (address !== undefined && address !== existing.address) ||
+        (regionId !== undefined && regionId !== existing.regionId)
+      ) {
+        await this.venues.update(existing.id, {
+          ...(name ? { name } : {}),
+          ...(city !== undefined ? { city } : {}),
+          ...(address !== undefined ? { address } : {}),
+          ...(regionId !== undefined ? { regionId } : {}),
+        });
+      }
+      return existing.id;
+    }
+
+    if (!name) {
+      return null;
+    }
+
+    const resolved = await this.venues.findOrCreate({
+      name,
+      ...(city !== undefined ? { city } : {}),
+      ...(address !== undefined ? { address } : {}),
+      ...(regionId !== undefined ? { regionId } : {}),
+    });
+    return resolved.id;
   }
 
   @Delete(':id')

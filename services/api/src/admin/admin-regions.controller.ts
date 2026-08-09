@@ -67,6 +67,8 @@ export class AdminRegionsController {
       chain?: RegionHierarchyNode[];
       candidateId?: string;
       label?: string;
+      lat?: number | null;
+      lon?: number | null;
     },
     @CurrentAdmin() admin: AdminJwtPayload,
   ) {
@@ -80,7 +82,15 @@ export class AdminRegionsController {
       }
     }
 
-    const result = await this.lookup.createFromChain(chain);
+    const coordinates =
+      typeof body.lat === 'number' &&
+      typeof body.lon === 'number' &&
+      Number.isFinite(body.lat) &&
+      Number.isFinite(body.lon)
+        ? { latitude: body.lat, longitude: body.lon }
+        : null;
+
+    const result = await this.lookup.createFromChain(chain, coordinates);
     this.audit.record({
       action: 'region.create_chain',
       actorId: admin.sub,

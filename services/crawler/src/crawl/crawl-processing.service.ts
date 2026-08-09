@@ -305,6 +305,7 @@ export class CrawlProcessingService {
 }
 
 function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string): string {
+  const images = resolveImageUrls(event.images, sourceUrl);
   const lines = [
     `Source URL: ${sourceUrl}`,
     'Structured event candidate from HTML plugin:',
@@ -319,10 +320,29 @@ function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string):
     `organizerName: ${event.organizerName ?? ''}`,
     `isRecurring: ${event.isRecurring ? 'true' : 'false'}`,
     `extractionConfidence: ${event.extractionConfidence}`,
+    ...(images.length > 0 ? [`images: ${images.join(', ')}`] : []),
     '',
     event.allDay
       ? 'This content describes exactly one public all-day event (date only, no clock time). Preserve the given title and ISO dates; do not invent times.'
       : 'This content describes exactly one public event. Preserve the given title and ISO datetimes.',
   ];
   return lines.join('\n');
+}
+
+function resolveImageUrls(urls: readonly string[] | undefined, baseUrl: string): string[] {
+  if (!urls?.length) return [];
+  const out: string[] = [];
+  for (const raw of urls) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    try {
+      const absolute = new URL(trimmed, baseUrl).toString();
+      if (/^https?:\/\//i.test(absolute)) {
+        out.push(absolute);
+      }
+    } catch {
+      // skip invalid
+    }
+  }
+  return [...new Set(out)];
 }

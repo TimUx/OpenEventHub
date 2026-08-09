@@ -20,8 +20,15 @@ export {
   type RegionUpdateInput,
   type RegionWriteInput,
 } from './region.repository.js';
+export {
+  VenueRepository,
+  type VenueListOptions,
+  type VenueUpdateInput,
+  type VenueWriteInput,
+} from './venue.repository.js';
 export { CoverageScopeRepository } from './coverage-scope.repository.js';
 export { CategoryImportAllowlistRepository } from './category-import-allowlist.repository.js';
+export { MediaRepository, type MediaWriteRow } from './media.repository.js';
 export { SubmissionRepository, type CreateSubmissionInput } from './submission.repository.js';
 export {
   ModerationRepository,

@@ -119,13 +119,15 @@ Raw fetch output references (object storage / S3) and content hash for change de
 
 ## organizers / venues
 
-Standard entity tables with slug, contact/location fields. Venues optionally link
-to `regions` via `region_id`.
+Standard entity tables with slug plus contact/location fields (`address`, `city`,
+`latitude`, `longitude`). Venues optionally link to `regions` via `region_id`.
+Coordinates come from the BullMQ geocoding pipeline (Nominatim).
 
 ## regions
 
 Hierarchical geography (`parent_id` self-reference). Types follow
-`docs/REGIONS_AND_CATEGORIES.md`.
+`docs/REGIONS_AND_CATEGORIES.md`. Optional `latitude` / `longitude` (Nominatim /
+geocoding worker or admin lookup).
 
 ## coverage_scope_regions
 

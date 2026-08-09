@@ -6,6 +6,8 @@ export type RegionWriteInput = {
   readonly type: RegionType;
   readonly parentId?: string | null;
   readonly isoCode?: string | null;
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
 };
 
 export type RegionUpdateInput = {
@@ -14,6 +16,8 @@ export type RegionUpdateInput = {
   readonly type?: RegionType;
   readonly parentId?: string | null;
   readonly isoCode?: string | null;
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
 };
 
 export class RegionRepository {
@@ -66,6 +70,8 @@ export class RegionRepository {
         type: data.type,
         parentId: data.parentId ?? null,
         isoCode: data.isoCode ?? null,
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
       },
     });
   }
@@ -79,7 +85,20 @@ export class RegionRepository {
         ...(data.type !== undefined ? { type: data.type } : {}),
         ...(data.parentId !== undefined ? { parentId: data.parentId } : {}),
         ...(data.isoCode !== undefined ? { isoCode: data.isoCode } : {}),
+        ...(data.latitude !== undefined ? { latitude: data.latitude } : {}),
+        ...(data.longitude !== undefined ? { longitude: data.longitude } : {}),
       },
+    });
+  }
+
+  listMissingCoordinates(limit = 200): Promise<Region[]> {
+    const take = Math.min(Math.max(limit, 1), 1000);
+    return this.prisma.region.findMany({
+      where: {
+        OR: [{ latitude: null }, { longitude: null }],
+      },
+      orderBy: { createdAt: 'asc' },
+      take,
     });
   }
 

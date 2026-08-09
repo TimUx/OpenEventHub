@@ -17,6 +17,7 @@ import {
   RegionRepository,
   SourceRepository,
   SubmissionRepository,
+  VenueRepository,
 } from '@openeventhub/database';
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
@@ -24,6 +25,7 @@ import { AdminAiController } from './admin/admin-ai.controller.js';
 import { AdminCategoriesController } from './admin/admin-categories.controller.js';
 import { AdminCategoryImportAllowlistController } from './admin/admin-category-import-allowlist.controller.js';
 import { AdminCoverageScopeController } from './admin/admin-coverage-scope.controller.js';
+import { AdminGeocodingController } from './admin/admin-geocoding.controller.js';
 import { AdminDashboardController } from './admin/admin-dashboard.controller.js';
 import { AdminEventsController } from './admin/admin-events.controller.js';
 import { AdminLogsController } from './admin/admin-logs.controller.js';
@@ -37,9 +39,11 @@ import {
 import { AdminQueuesService } from './admin/admin-queues.service.js';
 import { AdminRegionsController } from './admin/admin-regions.controller.js';
 import { RegionLookupService } from './geocoding/region-lookup.service.js';
+import { GeocodingEnqueueService } from './geocoding/geocoding-enqueue.service.js';
 import { AdminSchedulerService } from './admin/admin-scheduler.service.js';
 import { AdminSourcesController } from './admin/admin-sources.controller.js';
 import { AdminUsersController } from './admin/admin-users.controller.js';
+import { AdminVenuesController } from './admin/admin-venues.controller.js';
 import { AdminMeController } from './admin/admin-me.controller.js';
 import { AuditService } from './audit/audit.service.js';
 import { AdminJwtAuthGuard } from './auth/admin-jwt.guard.js';
@@ -113,6 +117,8 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminAiController,
     AdminDashboardController,
     AdminEventsController,
+    AdminVenuesController,
+    AdminGeocodingController,
     AdminCategoriesController,
     AdminRegionsController,
     AdminCoverageScopeController,
@@ -159,6 +165,11 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
       useFactory: (prisma: PrismaClient) => new RegionRepository(prisma),
     },
     {
+      provide: VenueRepository,
+      inject: [PrismaClient],
+      useFactory: (prisma: PrismaClient) => new VenueRepository(prisma),
+    },
+    {
       provide: CoverageScopeRepository,
       inject: [PrismaClient],
       useFactory: (prisma: PrismaClient) => new CoverageScopeRepository(prisma),
@@ -199,6 +210,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
     AdminQueuesService,
     AdminLogsService,
     RegionLookupService,
+    GeocodingEnqueueService,
     AdminJwtAuthGuard,
     RolesGuard,
     {

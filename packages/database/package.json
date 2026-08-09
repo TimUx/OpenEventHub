@@ -25,7 +25,7 @@
     "studio": "prisma studio",
     "build": "prisma generate && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/schema.test.ts src/integration.test.ts src/repositories/event.repository.test.ts src/repositories/source.repository.test.ts"
+    "test": "node --import tsx --test src/schema.test.ts src/integration.test.ts src/repositories/event.repository.test.ts src/repositories/source.repository.test.ts src/repositories/venue.repository.test.ts"
   },
   "dependencies": {
     "@openeventhub/ai-core": "0.5.0",

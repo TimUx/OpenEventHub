@@ -9,7 +9,7 @@ Queues:
 - Crawl
 - OCR
 - AI
-- Geocoding
+- Geocoding — worker (`services/worker`), Nominatim → venue/region coordinates
 - Search Index
 - Notifications
 
