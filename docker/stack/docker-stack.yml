@@ -309,10 +309,14 @@ services:
       <<: *app-env
       PORT: '3002'
       SERVICE_NAME: worker
+      NOMINATIM_BASE_URL: ${NOMINATIM_BASE_URL:-https://nominatim.openstreetmap.org}
+      NOMINATIM_USER_AGENT: ${NOMINATIM_USER_AGENT:-OpenEventHub/0.24 (geocoding; https://github.com/TimUx/OpenEventHub)}
     secrets:
       - redis_password
+      - database_url
     networks:
       - internal
+      - edge
     deploy:
       mode: replicated
       replicas: 1

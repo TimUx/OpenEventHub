@@ -119,13 +119,15 @@ Referenzen auf Raw-Fetch-Ausgaben (Objektspeicher / S3) und Content-Hash zur Än
 
 ## organizers / venues
 
-Standard-Entity-Tabellen mit Slug sowie Kontakt-/Standortfeldern. Venues können optional
-über `region_id` mit `regions` verknüpft werden.
+Standard-Entity-Tabellen mit Slug sowie Kontakt-/Standortfeldern (`address`, `city`,
+`latitude`, `longitude`). Venues können optional über `region_id` mit `regions`
+verknüpft werden. Koordinaten kommen aus der BullMQ-Geocoding-Pipeline (Nominatim).
 
 ## regions
 
 Hierarchische Geografie (`parent_id` Selbstreferenz). Typen folgen
-`docs/REGIONS_AND_CATEGORIES.md`.
+`docs/REGIONS_AND_CATEGORIES.md`. Optional `latitude` / `longitude` (Nominatim /
+Geocoding-Worker bzw. Admin-Lookup).
 
 ## coverage_scope_regions
 

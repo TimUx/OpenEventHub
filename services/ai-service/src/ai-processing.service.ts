@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { MediaRepository } from '@openeventhub/database';
 import { metricsRegistry } from '@openeventhub/service-runtime';
 import type { AiJobPayload, AiJobResult, ExtractedEventFields } from '@openeventhub/shared';
 import {
@@ -21,6 +22,7 @@ import {
 } from './domain/event-consolidate.js';
 import { EventIntelligencePipeline } from './domain/intelligence.pipeline.js';
 import { linkEventTaxonomy, matchCategoryIdsFromCatalog } from './domain/taxonomy-link.js';
+import { GeocodingEnqueueService } from './geocoding-enqueue.service.js';
 import { LLM_PROVIDER, type LlmProvider } from './ports/llm.provider.js';
 import { PROMPT_REPOSITORY, type PromptRepository } from './ports/prompt.repository.js';
 
@@ -33,6 +35,7 @@ export class AiProcessingService {
     @Inject(LLM_PROVIDER) llm: LlmProvider,
     @Inject(PROMPT_REPOSITORY) prompts: PromptRepository,
     private readonly prisma: PrismaClient,
+    private readonly geocoding: GeocodingEnqueueService,
   ) {
     this.pipeline = new EventIntelligencePipeline(llm, prompts);
   }
@@ -84,8 +87,10 @@ export class AiProcessingService {
     }
 
     const sourceCount = await this.prisma.eventSource.count({ where: { eventId } });
+    const imageUrls = collectImageUrls(result.extraction, payload);
     const confidenceScore = calculateConfidenceScore(result.extraction, {
       sourceCount: Math.max(1, sourceCount),
+      hasImages: imageUrls.length > 0,
     });
     if (confidenceScore !== result.confidenceScore) {
       await this.prisma.event.update({
@@ -127,9 +132,26 @@ export class AiProcessingService {
       this.logger.log(
         `Taxonomy linked event=${eventId} categories=${linked.categoryIds.length} tags=${linked.tagIds.length} region=${linked.regionId ?? 'n/a'} venue=${linked.venueId ?? 'n/a'}`,
       );
+      await this.geocoding.enqueueVenue(linked.venueId);
+      if (!linked.venueId) {
+        await this.geocoding.enqueueRegion(linked.regionId);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.logger.error(`Taxonomy link failed event=${eventId}: ${message}`);
+    }
+
+    if (imageUrls.length > 0) {
+      try {
+        const media = new MediaRepository(this.prisma);
+        const rows = await media.syncImageUrls(eventId, imageUrls, {
+          altText: result.extraction.title,
+        });
+        this.logger.log(`Media synced event=${eventId} images=${rows.length}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.error(`Media sync failed event=${eventId}: ${message}`);
+      }
     }
 
     return {
@@ -220,7 +242,11 @@ export class AiProcessingService {
     });
 
     const labels = [...result.classification.categories, ...result.classification.subcategories];
-    const resolvedCategoryIds = matchCategoryIdsFromCatalog(labels, categories);
+    const resolvedCategoryIds = matchCategoryIdsFromCatalog(labels, categories, {
+      title: result.extraction.title,
+      summary: result.extraction.summary,
+      description: result.extraction.description,
+    });
 
     return evaluateCategoryAllowlist({
       allowlistRootIds,
@@ -235,10 +261,15 @@ export class AiProcessingService {
     extraction: ExtractedEventFields,
   ): ExtractedEventFields {
     const fromPlugin = payload.content.includes('Structured event candidate from HTML plugin');
+    const pluginImages = parseImagesFromPluginContent(payload.content, payload.sourceUrl);
+    const mergedImages = [
+      ...new Set([...(extraction.images ?? []), ...pluginImages].filter(Boolean)),
+    ];
     if (extraction.isEvent) {
       return {
         ...extraction,
         allDay: inferAllDay(extraction.startAt, extraction.endAt, extraction.allDay),
+        ...(mergedImages.length > 0 ? { images: mergedImages } : {}),
       };
     }
     if (fromPlugin && extraction.title?.trim() && extraction.startAt) {
@@ -249,9 +280,10 @@ export class AiProcessingService {
         ...extraction,
         isEvent: true,
         allDay: inferAllDay(extraction.startAt, extraction.endAt, explicit),
+        ...(mergedImages.length > 0 ? { images: mergedImages } : {}),
       };
     }
-    return extraction;
+    return mergedImages.length > 0 ? { ...extraction, images: mergedImages } : extraction;
   }
 
   /**
@@ -465,4 +497,39 @@ function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function collectImageUrls(extraction: ExtractedEventFields, payload: AiJobPayload): string[] {
+  return [
+    ...new Set(
+      [
+        ...(extraction.images ?? []),
+        ...parseImagesFromPluginContent(payload.content, payload.sourceUrl),
+      ]
+        .map((url) => url.trim())
+        .filter((url) => /^https?:\/\//i.test(url)),
+    ),
+  ];
+}
+
+function parseImagesFromPluginContent(content: string, sourceUrl?: string): string[] {
+  const match = /^images:\s*(.+)$/m.exec(content);
+  if (!match?.[1]) {
+    return [];
+  }
+  const base = sourceUrl ?? 'https://example.invalid/';
+  const out: string[] = [];
+  for (const part of match[1].split(',')) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    try {
+      const absolute = new URL(trimmed, base).toString();
+      if (/^https?:\/\//i.test(absolute)) {
+        out.push(absolute);
+      }
+    } catch {
+      // skip invalid
+    }
+  }
+  return out;
 }

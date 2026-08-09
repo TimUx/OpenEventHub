@@ -313,6 +313,8 @@ export default function RegionsPage() {
               candidateId: selectedCandidate.id,
               label: selectedCandidate.label,
               chain: selectedCandidate.chain,
+              lat: selectedCandidate.lat,
+              lon: selectedCandidate.lon,
             }),
           },
         );

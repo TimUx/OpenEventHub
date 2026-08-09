@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { queueCountLabel, queueNameLabel } from '../../i18n/labels';
 
 type QueueRow = {
   name: string;
@@ -41,14 +42,14 @@ export default function QueuesPage() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {(data ?? []).map((queue) => (
           <Panel key={queue.name}>
-            <h2 className="font-bold text-lg">{queue.name}</h2>
+            <h2 className="font-bold text-lg">{queueNameLabel(t, queue.name)}</h2>
             <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {Object.entries(queue.counts).map(([key, value]) => (
                 <div
                   key={key}
                   className="flex justify-between rounded-md bg-[var(--background)] px-2 py-1"
                 >
-                  <dt className="text-[var(--muted)]">{key}</dt>
+                  <dt className="text-[var(--muted)]">{queueCountLabel(t, key)}</dt>
                   <dd className="font-medium">{value}</dd>
                 </div>
               ))}

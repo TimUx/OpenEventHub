@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.23.0 — Admin sidebar, profile & region place lookup** (post-M11)
+**v0.24.0 — Geocoding worker, event media & Admin events/i18n** (post-M11)
 
-Vorher: v0.22.0 — Import settings, category allowlist & region hierarchy
+Vorher: v0.23.0 — Admin sidebar, profile & region place lookup
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

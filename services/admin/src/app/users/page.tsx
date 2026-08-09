@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { adminRoleLabel } from '../../i18n/labels';
 import { adminFetch } from '../../lib/api';
 
 type User = {
@@ -140,7 +141,7 @@ export default function UsersPage() {
           >
             {ROLES.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {adminRoleLabel(t, value)}
               </option>
             ))}
           </select>
@@ -172,7 +173,7 @@ export default function UsersPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <StatusPill value={user.role} />
+                  <StatusPill value={adminRoleLabel(t, user.role)} />
                   {!isEditing ? (
                     <>
                       <button
@@ -220,7 +221,7 @@ export default function UsersPage() {
                     >
                       {ROLES.map((value) => (
                         <option key={value} value={value}>
-                          {value}
+                          {adminRoleLabel(t, value)}
                         </option>
                       ))}
                     </select>

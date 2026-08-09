@@ -15,6 +15,14 @@ export type ApiEventCategory = {
   readonly slug: string;
 };
 
+export type ApiEventMedia = {
+  readonly id: string;
+  readonly type: string;
+  readonly url: string | null;
+  readonly altText: string | null;
+  readonly sortOrder: number;
+};
+
 export type ApiEvent = {
   readonly id: string;
   readonly slug: string;
@@ -29,6 +37,7 @@ export type ApiEvent = {
   readonly organizerId?: string | null;
   readonly venue?: ApiEventVenue | null;
   readonly categories?: readonly ApiEventCategory[];
+  readonly media?: readonly ApiEventMedia[];
 };
 
 export type ApiCategory = {

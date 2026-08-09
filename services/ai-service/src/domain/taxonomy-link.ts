@@ -1,4 +1,5 @@
 import {
+  resolveCategorySlugsForEvent,
   resolveDefaultCategorySlug,
   type ClassificationFields,
   type ExtractedEventFields,
@@ -105,7 +106,7 @@ export async function linkEventTaxonomy(
     readonly classification: ClassificationFields;
   },
 ): Promise<TaxonomyLinkResult> {
-  const categoryIds = await resolveCategories(db, args.classification);
+  const categoryIds = await resolveCategories(db, args.classification, args.extraction);
   const tagIds = await resolveTags(db, args.classification.tags);
   const regionId = await resolvePlaceRegion(db, args.classification);
   const venueId = await resolveVenue(db, args.extraction, args.classification, regionId);
@@ -148,27 +149,49 @@ export type CategoryMatchRow = {
 
 /**
  * Resolve classification labels onto existing catalog rows (no create).
- * Prefers curated default-category slug aliases, then case-insensitive name.
+ * When labels do not map unambiguously, infer from title/summary/description
+ * aliases; otherwise fall back to curated `sonstiges` (never invents categories).
  */
 export function matchCategoryIdsFromCatalog(
   labels: readonly string[],
   catalog: readonly CategoryMatchRow[],
+  content?: {
+    readonly title?: string | null;
+    readonly summary?: string | null;
+    readonly description?: string | null;
+  },
 ): string[] {
   const bySlug = new Map(catalog.map((row) => [row.slug, row]));
   const byName = new Map(catalog.map((row) => [row.name.toLowerCase(), row]));
   const ids: string[] = [];
 
-  for (const raw of labels) {
-    const name = normalizeLabel(raw);
-    if (!name) continue;
+  const slugs = resolveCategorySlugsForEvent({
+    labels,
+    ...(content?.title !== undefined ? { title: content.title } : {}),
+    ...(content?.summary !== undefined ? { summary: content.summary } : {}),
+    ...(content?.description !== undefined ? { description: content.description } : {}),
+  });
 
-    const curatedSlug = resolveDefaultCategorySlug(name);
-    const category = curatedSlug
-      ? (bySlug.get(curatedSlug) ?? byName.get(name.toLowerCase()) ?? null)
-      : (byName.get(name.toLowerCase()) ?? null);
-
+  for (const slug of slugs) {
+    const category = bySlug.get(slug) ?? null;
     if (category) {
       ids.push(category.id);
+      continue;
+    }
+  }
+
+  // Preserve legacy name-only catalog hits when curated slug resolution is empty
+  // but operators added custom category names (still no create).
+  if (ids.length === 0) {
+    for (const raw of labels) {
+      const name = normalizeLabel(raw);
+      if (!name) continue;
+      const curatedSlug = resolveDefaultCategorySlug(name);
+      if (curatedSlug) continue;
+      const category = byName.get(name.toLowerCase()) ?? null;
+      if (category) {
+        ids.push(category.id);
+      }
     }
   }
 
@@ -178,26 +201,36 @@ export function matchCategoryIdsFromCatalog(
 async function resolveCategories(
   db: TaxonomyDb,
   classification: ClassificationFields,
+  extraction: ExtractedEventFields,
 ): Promise<string[]> {
-  const ids: string[] = [];
   const labels = [...classification.categories, ...classification.subcategories];
+  const slugs = resolveCategorySlugsForEvent({
+    labels,
+    title: extraction.title,
+    summary: extraction.summary,
+    description: extraction.description,
+  });
 
-  for (const raw of labels) {
-    const name = normalizeLabel(raw);
-    if (!name) continue;
-
-    const curatedSlug = resolveDefaultCategorySlug(name);
-    const category = curatedSlug
-      ? ((await db.category.findUnique({ where: { slug: curatedSlug } })) ??
-        (await db.category.findFirst({
-          where: { name: { equals: name, mode: 'insensitive' } },
-        })))
-      : await db.category.findFirst({
-          where: { name: { equals: name, mode: 'insensitive' } },
-        });
-
+  const ids: string[] = [];
+  for (const slug of slugs) {
+    const category = await db.category.findUnique({ where: { slug } });
     if (category) {
       ids.push(category.id);
+      continue;
+    }
+  }
+
+  if (ids.length === 0) {
+    for (const raw of labels) {
+      const name = normalizeLabel(raw);
+      if (!name) continue;
+      if (resolveDefaultCategorySlug(name)) continue;
+      const category = await db.category.findFirst({
+        where: { name: { equals: name, mode: 'insensitive' } },
+      });
+      if (category) {
+        ids.push(category.id);
+      }
     }
   }
 

@@ -15,6 +15,8 @@ Multiple categories are allowed.
 After classification the AI service resolves labels against the catalog and links:
 
 - `EventCategory` — match existing categories only (curated catalog + aliases; no auto-create)
+- If labels are unclear: alias inference from title/summary/description; if zero or multiple hits → curated **Sonstiges** (`slug: sonstiges`)
+- Admins can always override categories manually
 - `EventTag` / places — find-or-create
 - `Region` hierarchy Land → Bundesland → Landkreis → Kommune → Ort
 - optional `Venue` including `regionId` (for map/region filters)

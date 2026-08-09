@@ -22,6 +22,10 @@ export {
 
 export { type OcrJobPayload, type OcrJobResult } from './ocr-jobs.js';
 
+export { geocodingJobId, type GeocodingJobPayload } from './geocoding-jobs.js';
+
+export { NominatimClient, parseNominatimCoordinates } from './nominatim-client.js';
+
 export {
   createHealthResult,
   createReadinessResult,
@@ -84,7 +88,9 @@ export { REGION_TYPE_RANK, regionTypeGroupKey, regionTypeRank } from './region-t
 export {
   DEFAULT_CATEGORY_SLUGS,
   DEFAULT_EVENT_CATEGORIES,
+  inferDefaultCategorySlugsFromText,
   normalizeCategoryKey,
+  resolveCategorySlugsForEvent,
   resolveDefaultCategorySlug,
   type DefaultEventCategory,
 } from './default-categories.js';

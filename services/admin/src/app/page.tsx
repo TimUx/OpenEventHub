@@ -4,6 +4,13 @@ import Link from 'next/link';
 
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../components/ui';
 import { useI18n } from '../i18n/i18n-provider';
+import {
+  crawlJobStatusLabel,
+  eventStatusLabel,
+  moderationStatusLabel,
+  queueNameLabel,
+  sourceStatusLabel,
+} from '../i18n/labels';
 
 type Dashboard = {
   system: {
@@ -30,7 +37,15 @@ type Dashboard = {
   };
 };
 
-function CountGrid({ title, data }: { title: string; data: Record<string, number> }) {
+function CountGrid({
+  title,
+  data,
+  labelForKey,
+}: {
+  title: string;
+  data: Record<string, number>;
+  labelForKey: (key: string) => string;
+}) {
   const { t } = useI18n();
   const entries = Object.entries(data);
   return (
@@ -45,7 +60,7 @@ function CountGrid({ title, data }: { title: string; data: Record<string, number
               key={key}
               className="flex justify-between gap-2 rounded-md bg-[var(--background)] px-2 py-1.5"
             >
-              <dt className="text-[var(--muted)]">{key}</dt>
+              <dt className="text-[var(--muted)]">{labelForKey(key)}</dt>
               <dd className="font-medium">{value}</dd>
             </div>
           ))}
@@ -107,10 +122,26 @@ export default function DashboardPage() {
             </Panel>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <CountGrid title={t('dashboard.sources')} data={data.sources} />
-            <CountGrid title={t('dashboard.crawls')} data={data.crawls} />
-            <CountGrid title={t('dashboard.moderation')} data={data.moderation} />
-            <CountGrid title={t('dashboard.events')} data={data.events} />
+            <CountGrid
+              title={t('dashboard.sources')}
+              data={data.sources}
+              labelForKey={(key) => sourceStatusLabel(t, key)}
+            />
+            <CountGrid
+              title={t('dashboard.crawls')}
+              data={data.crawls}
+              labelForKey={(key) => crawlJobStatusLabel(t, key)}
+            />
+            <CountGrid
+              title={t('dashboard.moderation')}
+              data={data.moderation}
+              labelForKey={(key) => moderationStatusLabel(t, key)}
+            />
+            <CountGrid
+              title={t('dashboard.events')}
+              data={data.events}
+              labelForKey={(key) => eventStatusLabel(t, key)}
+            />
           </div>
           <Panel>
             <h2 className="mb-3 font-bold text-lg">{t('dashboard.queueStatus')}</h2>
@@ -128,7 +159,7 @@ export default function DashboardPage() {
                 <tbody>
                   {data.queues.map((queue) => (
                     <tr key={queue.name} className="border-b border-[var(--border)]/60">
-                      <td className="py-2 font-medium">{queue.name}</td>
+                      <td className="py-2 font-medium">{queueNameLabel(t, queue.name)}</td>
                       <td>{queue.counts.waiting}</td>
                       <td>{queue.counts.active}</td>
                       <td>{queue.counts.failed}</td>
@@ -146,7 +177,7 @@ export default function DashboardPage() {
                 {data.recentImports.map((job) => (
                   <li key={job.id} className="flex items-center justify-between gap-2">
                     <span>{job.source.name}</span>
-                    <StatusPill value={job.status} />
+                    <StatusPill value={crawlJobStatusLabel(t, job.status)} />
                   </li>
                 ))}
               </ul>
@@ -164,7 +195,10 @@ export default function DashboardPage() {
               <ul className="mt-2 space-y-1 text-sm text-[var(--muted)]">
                 {data.errors.failedQueues.map((q) => (
                   <li key={q.name}>
-                    {t('dashboard.queueFailed', { name: q.name, failed: q.failed })}
+                    {t('dashboard.queueFailed', {
+                      name: queueNameLabel(t, q.name),
+                      failed: q.failed,
+                    })}
                   </li>
                 ))}
                 {data.errors.failedQueues.length === 0 ? (

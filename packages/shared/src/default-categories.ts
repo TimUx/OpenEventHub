@@ -158,3 +158,97 @@ export function resolveDefaultCategorySlug(label: string): string | null {
   }
   return fallback;
 }
+
+const FALLBACK_CATEGORY_SLUG = 'sonstiges';
+
+/**
+ * Infer curated category slugs from free text (title/summary/description).
+ * Does not invent categories — only matches seeded aliases. Excludes `sonstiges`
+ * from positive hits so it can be used as an unambiguous fallback.
+ * Shorter aliases contained in a longer hit (e.g. `markt` in `weihnachtsmarkt`)
+ * are dropped so specific catalog rows win.
+ */
+export function inferDefaultCategorySlugsFromText(text: string): string[] {
+  const haystack = normalizeCategoryKey(text);
+  if (!haystack) return [];
+
+  const hits: Array<{ slug: string; alias: string }> = [];
+  for (const category of DEFAULT_EVENT_CATEGORIES) {
+    if (category.slug === FALLBACK_CATEGORY_SLUG) continue;
+    const aliases = [category.slug, category.name, ...category.aliases]
+      .map(normalizeCategoryKey)
+      .filter(Boolean);
+    aliases.sort((a, b) => b.length - a.length);
+    for (const alias of aliases) {
+      if (aliasInText(haystack, alias)) {
+        hits.push({ slug: category.slug, alias });
+        break;
+      }
+    }
+  }
+
+  if (hits.length <= 1) {
+    return hits.map((hit) => hit.slug);
+  }
+
+  hits.sort((a, b) => b.alias.length - a.alias.length);
+  const kept: Array<{ slug: string; alias: string }> = [];
+  for (const hit of hits) {
+    const subsumed = kept.some(
+      (prior) => prior.alias !== hit.alias && prior.alias.includes(hit.alias),
+    );
+    if (!subsumed) {
+      kept.push(hit);
+    }
+  }
+  return [...new Set(kept.map((hit) => hit.slug))];
+}
+
+/**
+ * Resolve classification labels; if none match, infer from content.
+ * Unambiguous inference → that slug; otherwise → `sonstiges`.
+ */
+export function resolveCategorySlugsForEvent(args: {
+  readonly labels: readonly string[];
+  readonly title?: string | null;
+  readonly summary?: string | null;
+  readonly description?: string | null;
+}): string[] {
+  const fromLabels = [
+    ...new Set(
+      args.labels
+        .map((label) => resolveDefaultCategorySlug(label))
+        .filter((slug): slug is string => Boolean(slug)),
+    ),
+  ].filter((slug) => slug !== FALLBACK_CATEGORY_SLUG);
+
+  if (fromLabels.length === 1) {
+    return fromLabels;
+  }
+  if (fromLabels.length > 1) {
+    // Multiple explicit catalog hits — keep all (operator/LLM was specific).
+    return fromLabels;
+  }
+
+  const content = [args.title, args.summary, args.description]
+    .filter((part): part is string => Boolean(part?.trim()))
+    .join(' ');
+  const inferred = inferDefaultCategorySlugsFromText(content);
+  if (inferred.length === 1) {
+    return inferred;
+  }
+  return [FALLBACK_CATEGORY_SLUG];
+}
+
+function aliasInText(haystack: string, alias: string): boolean {
+  if (!alias) return false;
+  if (alias.length < 4) {
+    const pattern = new RegExp(`(?:^|\\s)${escapeRegExp(alias)}(?:\\s|$)`);
+    return pattern.test(haystack);
+  }
+  return haystack.includes(alias);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

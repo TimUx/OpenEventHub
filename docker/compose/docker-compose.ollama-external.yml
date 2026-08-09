@@ -1,11 +1,14 @@
-# Optional overlay: attach API + AI service to an external Docker network that already
-# runs Ollama (e.g. Open WebUI / ownai). Used when OLLAMA_DEPLOY=0 and
+# Optional overlay: attach API + AI service to an operator-provided external Docker network
+# that already runs Ollama (or another LLM). Used only when OLLAMA_DEPLOY=0 and
 # OLLAMA_EXTERNAL_NETWORK is set (via scripts/oeh-compose.sh).
+#
+# Prefer publishing Ollama on the host/LAN and using a normal URL instead
+# (see docs/AI_CONFIGURATION.md). Shared networks are optional.
 #
 # Example (.env):
 #   OLLAMA_DEPLOY=0
-#   OLLAMA_EXTERNAL_NETWORK=ownai-net
-#   OLLAMA_BASE_URL=http://ownai-ollama:11434/v1
+#   OLLAMA_EXTERNAL_NETWORK=my-llm-net
+#   OLLAMA_BASE_URL=http://ollama:11434/v1
 
 networks:
   ollama_ext:

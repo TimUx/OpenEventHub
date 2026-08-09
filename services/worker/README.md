@@ -1,9 +1,10 @@
 # worker
 
-OpenEventHub `worker` service container.
+OpenEventHub background worker.
 
 - Runtime: NestJS + `@openeventhub/service-runtime`
 - Probes: `/health`, `/ready`, `/metrics`
 - Default port: `3002`
+- Queues: **Geocoding** (Nominatim → `venues` / `regions` latitude/longitude)
 
-Domain features arrive in later milestones.
+See `docs/GEOCODING.md`.

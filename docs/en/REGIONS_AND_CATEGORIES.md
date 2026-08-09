@@ -88,4 +88,7 @@ starter catalog (source: `packages/shared` → `DEFAULT_EVENT_CATEGORIES`):
 - Sonstiges
 
 Additional categories are added **only manually** in the Admin Center. The AI does not invent
-new categories; it maps labels onto the existing catalog (including aliases).
+new categories; it maps labels onto the existing catalog (including aliases). When signals are
+unclear it infers from title/description; if inference is not unambiguous it assigns
+**Sonstiges** (or leaves unset if `sonstiges` is missing from the catalog). Moderators can
+override categories on the admin event form.

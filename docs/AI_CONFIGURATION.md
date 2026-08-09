@@ -8,6 +8,8 @@
   (AI Settings) verwaltet, nicht über Umgebungsvariablen der Anwendung.
 - Prompts bleiben zentral unter `prompts/` und sind versioniert.
 - Der aktive Provider kann ohne Codeänderungen oder Redeploys gewechselt werden.
+- Ollama (oder jeder OpenAI-kompatible Endpunkt) ist für OpenEventHub ein **normaler HTTP-URL** —
+  Host, LAN, VPN oder Cloud. Es gibt keine feste Kopplung an einen bestimmten Stack oder Hostnamen.
 
 ## Standard: Local Ollama
 
@@ -17,15 +19,21 @@ kein Host-Port; Netz `edge`+`internal`). Steuerung:
 | Variable | Bedeutung |
 |----------|-----------|
 | `OLLAMA_DEPLOY=1` (Default) | Gebündeltes `oeh-ollama` (+ `ollama-pull`) starten |
-| `OLLAMA_DEPLOY=0` | Kein OEH-Ollama; externes Ollama nutzen (z. B. eigener Stack / Open WebUI) |
+| `OLLAMA_DEPLOY=0` | Kein OEH-Ollama; externes Ollama / anderer LLM-Endpunkt nutzen |
 
-Bei externem Ollama `OLLAMA_BASE_URL` setzen, erreichbar **aus den Containern**:
+### Externes Ollama / beliebiger OpenAI-kompatibler Endpunkt
 
-- **Empfohlen bei Port nur auf `127.0.0.1`:** gemeinsames Docker-Netz  
-  `OLLAMA_EXTERNAL_NETWORK=ownai-net` und z. B. `OLLAMA_BASE_URL=http://ownai-ollama:11434/v1`  
-  (`scripts/oeh-compose.sh` hängt `docker-compose.ollama-external.yml` an)
-- Host-Bind `0.0.0.0:11434`: `http://host.docker.internal:11434/v1`  
-  (App-Services haben `extra_hosts: host.docker.internal:host-gateway`)
+Empfohlen: Ollama (oder Proxy) so veröffentlichen, dass er **über das Außennetz** erreichbar ist,
+und in Admin → KI-Einstellungen (bzw. Seed über `OLLAMA_BASE_URL`) eine normale URL setzen.
+
+| Situation | Beispiel-URL | Hinweis |
+|-----------|--------------|---------|
+| Host-Port `0.0.0.0:11434` (empfohlen lokal) | `http://host.docker.internal:11434/v1` | App-Services haben `extra_hosts: host.docker.internal:host-gateway` |
+| LAN-/Server-IP oder Hostname | `http://192.168.1.50:11434/v1` | Beliebiger erreichbarer Host |
+| Remote / Reverse-Proxy | `https://llm.example.com/v1` | Wie ChatGPT-kompatible Gateways |
+
+**Wichtig:** Bind nur auf `127.0.0.1:11434` ist aus anderen Containern **nicht** erreichbar.
+Dann entweder auf `0.0.0.0` (oder eine LAN-Adresse) publishen — oder optional (unten) ein gemeinsames Docker-Netz.
 
 Seed und Admin-Profil **Local Ollama** verwenden `OLLAMA_BASE_URL` / `OLLAMA_MODEL`.
 Nach Umstellung ggf. Admin → KI-Einstellungen prüfen oder `db:seed` erneut ausführen.
@@ -35,6 +43,22 @@ aktiver Provider gesetzt, sofern noch keiner aktiv ist.
 
 Compose zieht das Default-Modell nur bei `OLLAMA_DEPLOY=1` über `ollama-pull`.
 Override: `OLLAMA_MODEL`, `OLLAMA_BASE_URL`, `OLLAMA_IMAGE` in `.env`.
+
+### Optional: gemeinsames Docker-Netz
+
+Wer Ollama absichtlich nur intern (ohne Host-Port) betreibt, kann ein **eigenes** externes
+Docker-Netz anlegen und Ollama + OpenEventHub dort verbinden:
+
+```bash
+# .env
+OLLAMA_DEPLOY=0
+OLLAMA_EXTERNAL_NETWORK=mein-llm-net
+OLLAMA_BASE_URL=http://ollama:11434/v1   # Container-DNS-Name im gemeinsamen Netz
+```
+
+`scripts/oeh-compose.sh` hängt dann `docker-compose.ollama-external.yml` an und verbindet
+`api` + `ai-service` mit diesem Netz. Das ist eine **individuelle** Betriebsvariante — nicht
+Voraussetzung und nicht an einen bestimmten Fremd-Stack gebunden.
 
 ### GPU (NVIDIA) — nur gebündeltes Ollama
 
@@ -65,7 +89,7 @@ Der Profil-Test öffnet sofort einen Dialog mit Warteanzeige und zeigt danach Er
 | `google` | Gemini | Google Generative Language |
 | `azure_openai` | Azure OpenAI | OpenAI-compatible |
 | `openrouter` | OpenRouter | OpenAI-compatible |
-| `ollama` | Local Ollama (optional Compose-Profil / optional Swarm-Overlay; oder externes Netz) | OpenAI-compatible (`/v1`) |
+| `ollama` | Ollama (gebündelt, Host, LAN oder Remote) | OpenAI-compatible (`/v1`) |
 | `custom_openai` | Any OpenAI-compatible gateway | OpenAI-compatible |
 
 ## Admin-Einstellungen

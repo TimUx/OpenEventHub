@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { moderationStatusLabel } from '../../i18n/labels';
 import { adminFetch } from '../../lib/api';
 
 type ModerationItem = {
@@ -26,10 +27,10 @@ type ModerationItem = {
 const STATUS_FILTERS = ['pending', 'approved', 'rejected', 'escalated'] as const;
 
 const STATUS_LABEL_KEYS = {
-  pending: 'moderation.statusPending',
-  approved: 'moderation.statusApproved',
-  rejected: 'moderation.statusRejected',
-  escalated: 'moderation.statusEscalated',
+  pending: 'moderation.status.pending',
+  approved: 'moderation.status.approved',
+  rejected: 'moderation.status.rejected',
+  escalated: 'moderation.status.escalated',
 } as const;
 
 export default function ModerationPage() {
@@ -79,7 +80,7 @@ export default function ModerationPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-2">
-                  <StatusPill value={item.status} />
+                  <StatusPill value={moderationStatusLabel(t, item.status)} />
                   <span className="text-[var(--muted)]">
                     {item.userSubmission?.type ?? t('moderation.item')} ·{' '}
                     {new Date(item.createdAt).toLocaleString()}

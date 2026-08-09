@@ -2,6 +2,7 @@
 
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { crawlJobStatusLabel } from '../../i18n/labels';
 
 type CrawlJob = {
   id: string;
@@ -41,7 +42,7 @@ export default function CrawlerPage() {
           <thead>
             <tr className="border-b border-[var(--border)] text-[var(--muted)]">
               <th className="py-2">{t('crawler.source')}</th>
-              <th>{t('crawler.status')}</th>
+              <th>{t('crawler.colStatus')}</th>
               <th>{t('crawler.scheduled')}</th>
               <th>{t('crawler.error')}</th>
             </tr>
@@ -51,7 +52,7 @@ export default function CrawlerPage() {
               <tr key={job.id} className="border-b border-[var(--border)]/50">
                 <td className="py-2">{job.source.name}</td>
                 <td>
-                  <StatusPill value={job.status} />
+                  <StatusPill value={crawlJobStatusLabel(t, job.status)} />
                 </td>
                 <td>{new Date(job.scheduledAt).toLocaleString()}</td>
                 <td className="text-red-700">{job.errorMessage ?? '—'}</td>

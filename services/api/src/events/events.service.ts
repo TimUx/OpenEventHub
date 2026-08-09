@@ -21,6 +21,14 @@ export type PublicEventCategory = {
   readonly slug: string;
 };
 
+export type PublicEventMedia = {
+  readonly id: string;
+  readonly type: string;
+  readonly url: string | null;
+  readonly altText: string | null;
+  readonly sortOrder: number;
+};
+
 export type PublicEvent = {
   readonly id: string;
   readonly slug: string;
@@ -35,6 +43,7 @@ export type PublicEvent = {
   readonly organizerId: string | null;
   readonly venue: PublicEventVenue | null;
   readonly categories: readonly PublicEventCategory[];
+  readonly media: readonly PublicEventMedia[];
 };
 
 function toNumber(
@@ -84,6 +93,15 @@ export function toPublicEvent(event: EventWithRelations): PublicEvent {
       name: category.name,
       slug: category.slug,
     })),
+    media: (event.media ?? [])
+      .filter((row) => Boolean(row.url))
+      .map((row) => ({
+        id: row.id,
+        type: row.type,
+        url: row.url,
+        altText: row.altText,
+        sortOrder: row.sortOrder,
+      })),
   };
 }
 

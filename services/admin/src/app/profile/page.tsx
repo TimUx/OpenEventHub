@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { adminRoleLabel } from '../../i18n/labels';
 import { adminFetch } from '../../lib/api';
 
 type ProfileUser = {
@@ -103,7 +104,7 @@ export default function ProfilePage() {
       {data ? (
         <Panel>
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <StatusPill value={data.role} />
+            <StatusPill value={adminRoleLabel(t, data.role)} />
             <span className="text-xs text-[var(--muted)]">
               {t('users.since', { date: new Date(data.createdAt).toLocaleDateString() })}
             </span>

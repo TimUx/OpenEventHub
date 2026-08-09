@@ -94,4 +94,7 @@ Starterkatalog an (Quelle: `packages/shared` → `DEFAULT_EVENT_CATEGORIES`):
 
 Weitere Kategorien werden **nur manuell** im Admin Center ergänzt (anlegen / umbenennen /
 Hierarchie / löschen). Die KI erfindet keine neuen Kategorien; sie mappt Labels auf den
-bestehenden Katalog (inkl. Aliases). Veranstaltungen können mehreren Kategorien angehören.
+bestehenden Katalog (inkl. Aliases). Fehlen eindeutige Signale, inferiert sie aus Titel/
+Beschreibung; ist die Inferenz nicht eindeutig, wird **Sonstiges** gesetzt (oder keine
+Kategorie, falls `sonstiges` im Katalog fehlt). Veranstaltungen können mehreren Kategorien
+angehören. Moderatoren überschreiben Kategorien im Admin-Event-Form.

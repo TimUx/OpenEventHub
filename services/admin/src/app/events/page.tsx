@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
+import { eventStatusLabel } from '../../i18n/labels';
 import { adminFetch } from '../../lib/api';
 
 const EVENT_STATUSES = [
@@ -28,10 +29,38 @@ type EventRow = {
   endAt: string | null;
   allDay?: boolean;
   venue?: {
+    id: string;
     name: string;
     city: string | null;
     address: string | null;
+    regionId?: string | null;
   } | null;
+  categories?: ReadonlyArray<{
+    category: { id: string; name: string; slug: string };
+  }>;
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+};
+
+type VenueSuggestion = {
+  id: string;
+  name: string;
+  city: string | null;
+  address: string | null;
+  regionId?: string | null;
+  kind: 'venue' | 'region';
+};
+
+type RegionRow = {
+  id: string;
+  name: string;
+  type: string;
+  parentId: string | null;
 };
 
 type EventFilters = {
@@ -40,10 +69,12 @@ type EventFilters = {
   dateTo: string;
   q: string;
   venue: string;
+  /** Category id — applied client-side on loaded rows (list API has no category filter). */
+  category: string;
   allDay: '' | 'true' | 'false';
 };
 
-type SortKey = 'title' | 'startAt' | 'venue' | 'status' | 'allDay';
+type SortKey = 'title' | 'startAt' | 'venue' | 'category' | 'status' | 'allDay';
 type SortDir = 'asc' | 'desc';
 
 const EMPTY_FILTERS: EventFilters = {
@@ -52,6 +83,7 @@ const EMPTY_FILTERS: EventFilters = {
   dateTo: '',
   q: '',
   venue: '',
+  category: '',
   allDay: '',
 };
 
@@ -79,14 +111,35 @@ function filtersActive(filters: EventFilters): boolean {
     filters.dateTo ||
     filters.q.trim() ||
     filters.venue.trim() ||
+    filters.category ||
     filters.allDay,
   );
 }
 
 function formatVenue(venue: EventRow['venue']): string {
   if (!venue) return '';
-  const parts = [venue.name, venue.city].filter((part): part is string => Boolean(part?.trim()));
-  return parts.join(', ');
+  const place = venue.name?.trim() || venue.city?.trim() || '';
+  const address = venue.address?.trim() || '';
+  if (place && address && address.toLowerCase() !== place.toLowerCase()) {
+    return `${place}, ${address}`;
+  }
+  return place || address;
+}
+
+function categoryNames(categories: EventRow['categories']): string[] {
+  return (categories ?? [])
+    .map((row) => row.category.name.trim())
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+}
+
+function formatCategories(categories: EventRow['categories']): string {
+  return categoryNames(categories).join(', ');
+}
+
+function eventHasCategory(event: EventRow, categoryId: string): boolean {
+  if (!categoryId) return true;
+  return (event.categories ?? []).some((row) => row.category.id === categoryId);
 }
 
 function formatAdminEventWhen(iso: string, allDay: boolean | undefined, locale: string): string {
@@ -138,6 +191,10 @@ function compareEvents(a: EventRow, b: EventRow, key: SortKey, dir: SortDir): nu
       left = formatVenue(a.venue);
       right = formatVenue(b.venue);
       break;
+    case 'category':
+      left = formatCategories(a.categories);
+      right = formatCategories(b.categories);
+      break;
     case 'status':
       left = a.status;
       right = b.status;
@@ -182,12 +239,28 @@ export default function EventsPage() {
   const [startAt, setStartAt] = useState('');
   const [endAt, setEndAt] = useState('');
   const [changeReason, setChangeReason] = useState('');
+  const [venueId, setVenueId] = useState<string | null>(null);
+  const [venueRegionId, setVenueRegionId] = useState<string | null>(null);
+  const [venueName, setVenueName] = useState('');
+  const [venueAddress, setVenueAddress] = useState('');
+  const [venueSuggestions, setVenueSuggestions] = useState<VenueSuggestion[]>([]);
+  const [venueLookupBusy, setVenueLookupBusy] = useState(false);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const { data: regionsData } = useAdminQuery<RegionRow[]>('/api/v1/admin/regions');
+  const { data: categoriesData } = useAdminQuery<CategoryRow[]>('/api/v1/admin/categories');
 
   const events = useMemo(() => {
-    const rows = [...(data ?? [])];
+    const categoryId = debouncedFilters.category;
+    const rows = (data ?? []).filter((event) => eventHasCategory(event, categoryId));
     rows.sort((a, b) => compareEvents(a, b, sortKey, sortDir));
     return rows;
-  }, [data, sortKey, sortDir]);
+  }, [data, debouncedFilters.category, sortKey, sortDir]);
+
+  const categoryOptions = useMemo(() => {
+    return [...(categoriesData ?? [])].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+    );
+  }, [categoriesData]);
 
   const eventIds = useMemo(() => events.map((event) => event.id), [events]);
   const hasFilters = filtersActive(debouncedFilters);
@@ -201,6 +274,56 @@ export default function EventsPage() {
       return next.size === prev.size ? prev : next;
     });
   }, [eventIds]);
+
+  useEffect(() => {
+    if (!token || !editingId) {
+      setVenueSuggestions([]);
+      return;
+    }
+    const q = venueName.trim();
+    if (q.length < 2) {
+      setVenueSuggestions([]);
+      return;
+    }
+    const handle = window.setTimeout(() => {
+      setVenueLookupBusy(true);
+      const qLower = q.toLowerCase();
+      const placeTypes = new Set(['suburb', 'municipality', 'city']);
+      const regionHits: VenueSuggestion[] = (regionsData ?? [])
+        .filter(
+          (region) => placeTypes.has(region.type) && region.name.toLowerCase().includes(qLower),
+        )
+        .slice(0, 12)
+        .map((region) => ({
+          id: region.id,
+          name: region.name,
+          city: null,
+          address: null,
+          regionId: region.id,
+          kind: 'region' as const,
+        }));
+
+      void adminFetch<Array<Omit<VenueSuggestion, 'kind'>>>(
+        `/api/v1/admin/venues?q=${encodeURIComponent(q)}&limit=20`,
+        token,
+      )
+        .then((rows) => {
+          const venueHits: VenueSuggestion[] = rows.map((row) => ({
+            ...row,
+            kind: 'venue' as const,
+          }));
+          const merged = [...regionHits, ...venueHits].filter(
+            (row, index, all) =>
+              all.findIndex((other) => other.name.toLowerCase() === row.name.toLowerCase()) ===
+              index,
+          );
+          setVenueSuggestions(merged.slice(0, 20));
+        })
+        .catch(() => setVenueSuggestions(regionHits))
+        .finally(() => setVenueLookupBusy(false));
+    }, 250);
+    return () => window.clearTimeout(handle);
+  }, [token, editingId, venueName, regionsData]);
 
   const allSelected = events.length > 0 && selected.size === events.length;
   const selectedCount = selected.size;
@@ -256,6 +379,13 @@ export default function EventsPage() {
     setAllDay(Boolean(event.allDay));
     setStartAt(toDatetimeLocal(event.startAt));
     setEndAt(toDatetimeLocal(event.endAt));
+    setVenueId(event.venue?.id ?? null);
+    setVenueRegionId(event.venue?.regionId ?? null);
+    // Ort = place name (legacy city falls back when name was empty)
+    setVenueName(event.venue?.name?.trim() || event.venue?.city?.trim() || '');
+    setVenueAddress(event.venue?.address ?? '');
+    setCategoryIds((event.categories ?? []).map((row) => row.category.id));
+    setVenueSuggestions([]);
     setChangeReason('');
     setMessage(null);
     setFormError(null);
@@ -264,6 +394,30 @@ export default function EventsPage() {
   function cancelEdit(): void {
     setEditingId(null);
     setFormError(null);
+    setVenueSuggestions([]);
+  }
+
+  function clearVenueFields(): void {
+    setVenueId(null);
+    setVenueRegionId(null);
+    setVenueName('');
+    setVenueAddress('');
+    setVenueSuggestions([]);
+  }
+
+  function pickVenueSuggestion(suggestion: VenueSuggestion): void {
+    if (suggestion.kind === 'region') {
+      setVenueId(null);
+      setVenueRegionId(suggestion.regionId ?? suggestion.id);
+      setVenueName(suggestion.name);
+      setVenueAddress(suggestion.address ?? '');
+    } else {
+      setVenueId(suggestion.id);
+      setVenueRegionId(suggestion.regionId ?? null);
+      setVenueName(suggestion.name);
+      setVenueAddress(suggestion.address ?? '');
+    }
+    setVenueSuggestions([]);
   }
 
   async function onSave(event: FormEvent): Promise<void> {
@@ -272,6 +426,17 @@ export default function EventsPage() {
     setSaving(true);
     setFormError(null);
     try {
+      const trimmedVenueName = venueName.trim();
+      const venuePayload = trimmedVenueName
+        ? {
+            ...(venueId ? { id: venueId } : {}),
+            name: trimmedVenueName,
+            city: null,
+            address: venueAddress.trim() || null,
+            regionId: venueRegionId,
+          }
+        : null;
+
       await adminFetch(`/api/v1/admin/events/${editingId}`, token, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -287,11 +452,14 @@ export default function EventsPage() {
               ? fromDatetimeLocalAllDay(endAt)
               : fromDatetimeLocal(endAt)
             : null,
+          venue: venuePayload,
+          categoryIds,
           changeReason: changeReason.trim() || null,
         }),
       });
       setMessage(t('events.updated'));
       setEditingId(null);
+      setVenueSuggestions([]);
       await reload();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : String(err));
@@ -481,6 +649,114 @@ export default function EventsPage() {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </label>
+            <div className="grid gap-3 md:col-span-2 md:grid-cols-2">
+              <label className="relative text-sm md:col-span-2">
+                {t('events.fieldVenuePlace')}
+                <input
+                  className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                  value={venueName}
+                  list="event-venue-suggestions"
+                  placeholder={t('events.venuePlacePlaceholder')}
+                  autoComplete="off"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setVenueName(value);
+                    const match = venueSuggestions.find(
+                      (suggestion) => suggestion.name.toLowerCase() === value.trim().toLowerCase(),
+                    );
+                    if (match) {
+                      pickVenueSuggestion(match);
+                      return;
+                    }
+                    setVenueId(null);
+                    setVenueRegionId(null);
+                  }}
+                />
+                <datalist id="event-venue-suggestions">
+                  {venueSuggestions.map((suggestion) => (
+                    <option
+                      key={`${suggestion.kind}-${suggestion.id}`}
+                      value={suggestion.name}
+                      label={
+                        suggestion.kind === 'region'
+                          ? t('events.venueSuggestionRegion')
+                          : suggestion.address || t('events.venueSuggestionVenue')
+                      }
+                    />
+                  ))}
+                </datalist>
+                {venueLookupBusy ? (
+                  <span className="mt-1 block text-xs text-[var(--muted)]">
+                    {t('common.loading')}
+                  </span>
+                ) : null}
+                {venueSuggestions.length > 0 ? (
+                  <ul className="mt-1 max-h-40 overflow-auto rounded-md border border-[var(--border)] bg-[var(--card)] text-sm shadow-sm">
+                    {venueSuggestions.map((suggestion) => (
+                      <li key={`${suggestion.kind}-${suggestion.id}`}>
+                        <button
+                          type="button"
+                          className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--background)]"
+                          onClick={() => pickVenueSuggestion(suggestion)}
+                        >
+                          <span className="font-medium">{suggestion.name}</span>
+                          <span className="text-xs text-[var(--muted)]">
+                            {suggestion.kind === 'region'
+                              ? t('events.venueSuggestionRegion')
+                              : suggestion.address || t('events.venueSuggestionVenue')}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </label>
+              <label className="text-sm md:col-span-2">
+                {t('events.fieldVenueAddress')}
+                <input
+                  className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                  value={venueAddress}
+                  placeholder={t('events.venueAddressPlaceholder')}
+                  onChange={(e) => setVenueAddress(e.target.value)}
+                />
+              </label>
+              {venueId || venueRegionId || venueName.trim() || venueAddress.trim() ? (
+                <div className="md:col-span-2">
+                  <button
+                    type="button"
+                    className="text-xs text-[var(--muted)] underline-offset-2 hover:underline"
+                    onClick={clearVenueFields}
+                  >
+                    {t('events.clearVenue')}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <label className="text-sm md:col-span-2">
+              {t('events.fieldCategories')}
+              <select
+                className="mt-1 min-h-28 w-full rounded-md border border-[var(--border)] px-3 py-2"
+                multiple
+                value={categoryIds}
+                aria-label={t('events.fieldCategories')}
+                onChange={(e) => {
+                  const selected = [...e.target.selectedOptions].map((option) => option.value);
+                  setCategoryIds(selected);
+                }}
+              >
+                {(categoriesData ?? [])
+                  .slice()
+                  .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+              <span className="mt-1 block text-xs text-[var(--muted)]">
+                {t('events.categoriesHint')}
+              </span>
+            </label>
             <label className="text-sm md:col-span-2">
               {t('events.fieldChangeReason')}
               <input
@@ -511,7 +787,7 @@ export default function EventsPage() {
       ) : null}
 
       <Panel className="overflow-x-auto !p-0">
-        <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
+        <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
           <thead className="bg-[var(--background)]">
             <tr className="border-b border-[var(--border)] text-xs text-[var(--muted)]">
               <th className="w-10 px-2 py-1.5">
@@ -552,6 +828,16 @@ export default function EventsPage() {
                 >
                   {t('events.colVenue')}
                   {sortIndicator('venue')}
+                </button>
+              </th>
+              <th className="px-2 py-1.5">
+                <button
+                  type="button"
+                  className="font-semibold hover:text-[var(--foreground)]"
+                  onClick={() => toggleSort('category')}
+                >
+                  {t('events.colCategory')}
+                  {sortIndicator('category')}
                 </button>
               </th>
               <th className="px-2 py-1.5">
@@ -619,6 +905,21 @@ export default function EventsPage() {
               <th className="px-2 py-1">
                 <select
                   className={inputClass}
+                  value={filters.category}
+                  aria-label={t('events.filterCategory')}
+                  onChange={(e) => patchFilter('category', e.target.value)}
+                >
+                  <option value="">{t('events.filterAnyCategory')}</option>
+                  {categoryOptions.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </th>
+              <th className="px-2 py-1">
+                <select
+                  className={inputClass}
                   value={filters.status}
                   aria-label={t('events.filterStatus')}
                   onChange={(e) => patchFilter('status', e.target.value as EventFilters['status'])}
@@ -660,6 +961,7 @@ export default function EventsPage() {
             {events.map((event) => {
               const checked = selected.has(event.id);
               const venueLabel = formatVenue(event.venue);
+              const names = categoryNames(event.categories);
               return (
                 <tr
                   key={event.id}
@@ -690,8 +992,30 @@ export default function EventsPage() {
                   <td className="max-w-[12rem] truncate px-2 py-1.5 text-xs" title={venueLabel}>
                     {venueLabel || '—'}
                   </td>
+                  <td className="max-w-[14rem] px-2 py-1.5" title={names.join(', ') || undefined}>
+                    {(event.categories ?? []).length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {[...(event.categories ?? [])]
+                          .sort((a, b) =>
+                            a.category.name.localeCompare(b.category.name, undefined, {
+                              sensitivity: 'base',
+                            }),
+                          )
+                          .map((row) => (
+                            <span
+                              key={row.category.id}
+                              className="inline-flex max-w-full truncate rounded border border-[var(--border)] bg-[var(--background)] px-1.5 py-0.5 text-[11px] text-[var(--muted)]"
+                            >
+                              {row.category.name}
+                            </span>
+                          ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[var(--muted)]">—</span>
+                    )}
+                  </td>
                   <td className="px-2 py-1.5">
-                    <StatusPill value={event.status} />
+                    <StatusPill value={eventStatusLabel(t, event.status)} />
                   </td>
                   <td className="px-2 py-1.5 text-xs text-[var(--muted)]">
                     {event.allDay ? t('events.allDayBadge') : '—'}

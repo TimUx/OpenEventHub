@@ -264,6 +264,8 @@ model Region {
   type      RegionType
   parentId  String?    @map("parent_id") @db.Uuid
   isoCode   String?    @map("iso_code")
+  latitude  Decimal?   @db.Decimal(10, 7)
+  longitude Decimal?   @db.Decimal(10, 7)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 

@@ -247,7 +247,7 @@ Never implement multiple large milestones in parallel.
 ## Post-M11 — Portal and ops follow-ups
 
 After roadmap packages M1–M11, these product/ops enhancements were added
-(see `CHANGELOG.md`, latest **v0.23.0**):
+(see `CHANGELOG.md`, latest **v0.24.0**):
 
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list
@@ -256,11 +256,12 @@ After roadmap packages M1–M11, these product/ops enhancements were added
 - Embedded map with search, filters, auto-zoom; deep link `?event=`
 - Public submission of events and sources (schedule presets)
 - Admin: source edit; categories/regions/events CRUD; error log; AI Settings provider CRUD
-- Optional Ollama: `OLLAMA_DEPLOY`, external network (`ownai-net`), NVIDIA GPU overlay; Swarm Ollama as separate overlay
+- Optional Ollama: `OLLAMA_DEPLOY`, host/LAN/remote URL or optional shared Docker network; NVIDIA GPU overlay; Swarm Ollama as separate overlay
 - AI ingest: create events from extraction; taxonomy find-or-create; one AI job per plugin event candidate
 - Crawl **future/ongoing** events only; scheduler deletes expired events hourly
 - All-day events (`allDay`): no invented clock times in UI/ICS
-- Admin Events: multi-select status/delete; table column filter/sort (status, date, venue, search, all-day); header hint for events awaiting review
+- Admin Events: multi-select status/delete; table column filter/sort (status, date, venue, search, all-day); header hint for events awaiting review; status labels i18n; venue in event edit form (select/enter)
+- Geocoding worker (Nominatim): venue/region coordinates after import; admin backfill; region lat/lng in schema
 - Cross-source event consolidation (title+day, venue-compatible) with field fill-in; place from title when venue is missing
 - Admin: collapsible nav groups; optional white-label (`NEXT_PUBLIC_ADMIN_TITLE` / `_LOGO_URL`)
 - Coverage scope: Admin selects regions (district includes children + extra municipalities); AI ingest drops out-of-area places

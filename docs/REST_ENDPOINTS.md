@@ -15,6 +15,8 @@ GET    /api/v1/regions
 GET    /api/v1/search?q=
 ```
 
+Öffentliche Event-Payloads enthalten `categories` und optional `media[]` (`type`, `url`, `altText`, `sortOrder`; MVP: Remote-URLs aus Crawl/JSON-LD/`og:image`).
+
 ## Auth / Admin (JWT)
 
 ```
@@ -24,8 +26,10 @@ GET    /api/v1/admin/dashboard                 (admin|moderator|viewer)
 GET    /api/v1/admin/events                    (Query: status, dateFrom, dateTo, q, venue, allDay, limit)
 GET    /api/v1/admin/events/counts             (Zähler je Status, z. B. pending_moderation)
 GET    /api/v1/admin/events/{id}
-PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventVersion)
+PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventVersion; optional `venue: { id?, name?, address?, regionId? } | null`, `categoryIds: string[]`)
 DELETE /api/v1/admin/events/{id}               (admin only)
+GET    /api/v1/admin/venues                    (Query: q, limit — Ortssuche für Event-Bearbeitung)
+POST   /api/v1/admin/geocoding/backfill        (Venues/Regionen ohne Koordinaten in Queue `geocoding`)
 GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; delete: admin)
 GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
 GET /api/v1/admin/regions/lookup?q=…             (Ortssuche DE via Nominatim)

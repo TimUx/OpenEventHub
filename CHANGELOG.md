@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2026-08-09
+
+### Added
+
+- **Geocoding worker** (BullMQ `geocoding`): Nominatim → venue/region latitude/longitude; enqueue after AI ingest and admin place assignment; Admin backfill `POST /api/v1/admin/geocoding/backfill`
+- Region **lat/lng** columns + migration; Admin venues endpoints; worker joins Compose/Stack `edge` network for outbound Nominatim
+- Event **media** from HTML `og:image` / JSON-LD → `Media` rows; public API media on event detail; frontend detail images + JSON-LD
+- Admin Events: **Ort/Adresse** (no Stadt field), `regionId`, category edit + table column; category inference falls back to **Sonstiges**
+- Admin **i18n** labels for dashboard, crawler, queues, sources, moderation, and roles via shared `labels`
+
+### Changed
+
+- Shared Nominatim client; docs (DE/EN): Geocoding, REST, Database, Queue/Workers, Roadmap, AI/Classification/Regions
+
 ## [0.23.0] - 2026-08-08
 
 ### Added

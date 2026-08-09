@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { normalizeCategoryKey, resolveDefaultCategorySlug } from './default-categories.js';
+import {
+  inferDefaultCategorySlugsFromText,
+  normalizeCategoryKey,
+  resolveCategorySlugsForEvent,
+  resolveDefaultCategorySlug,
+} from './default-categories.js';
 
 describe('default-categories', () => {
   it('normalizes umlauts and punctuation', () => {
@@ -20,5 +25,42 @@ describe('default-categories', () => {
 
   it('returns null for unknown labels', () => {
     assert.equal(resolveDefaultCategorySlug('quantum-leap-expo'), null);
+  });
+
+  it('infers a single category from title text', () => {
+    assert.deepEqual(inferDefaultCategorySlugsFromText('Kirmes Niedergrenzebach 2026'), ['kirmes']);
+    assert.deepEqual(inferDefaultCategorySlugsFromText('Weihnachtsmarkt Treysa'), [
+      'weihnachtsmarkt',
+    ]);
+  });
+
+  it('falls back to Sonstiges when inference is ambiguous or empty', () => {
+    assert.deepEqual(
+      resolveCategorySlugsForEvent({
+        labels: [],
+        title: 'Gemeindeversammlung und Kirmes',
+      }),
+      ['sonstiges'],
+    );
+    assert.deepEqual(
+      resolveCategorySlugsForEvent({
+        labels: [],
+        title: 'Nachbarschaftstreffen am Samstag',
+      }),
+      ['sonstiges'],
+    );
+    assert.deepEqual(
+      resolveCategorySlugsForEvent({
+        labels: ['Kirmes'],
+        title: 'Anything',
+      }),
+      ['kirmes'],
+    );
+  });
+
+  it('prefers specific alias over substring category (Weihnachtsmarkt vs Markt)', () => {
+    assert.deepEqual(inferDefaultCategorySlugsFromText('Weihnachtsmarkt Treysa'), [
+      'weihnachtsmarkt',
+    ]);
   });
 });
