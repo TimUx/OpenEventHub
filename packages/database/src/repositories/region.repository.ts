@@ -109,4 +109,41 @@ export class RegionRepository {
   countChildren(id: string): Promise<number> {
     return this.prisma.region.count({ where: { parentId: id } });
   }
+
+  findManyByIds(ids: readonly string[]): Promise<Region[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return this.prisma.region.findMany({ where: { id: { in: [...ids] } } });
+  }
+
+  async updateParentMany(
+    ids: readonly string[],
+    parentId: string | null,
+  ): Promise<{ updated: number; ids: string[] }> {
+    if (ids.length === 0) {
+      return { updated: 0, ids: [] };
+    }
+    const result = await this.prisma.region.updateMany({
+      where: { id: { in: [...ids] } },
+      data: { parentId },
+    });
+    return { updated: result.count, ids: [...ids] };
+  }
+
+  async deleteMany(ids: readonly string[]): Promise<{ deleted: number; ids: string[] }> {
+    if (ids.length === 0) {
+      return { deleted: 0, ids: [] };
+    }
+    const result = await this.prisma.region.deleteMany({
+      where: { id: { in: [...ids] } },
+    });
+    return { deleted: result.count, ids: [...ids] };
+  }
+
+  /** How many regions have a parent among `ids` (any child of the batch). */
+  countChildrenOfIds(ids: readonly string[]): Promise<number> {
+    if (ids.length === 0) return Promise.resolve(0);
+    return this.prisma.region.count({
+      where: { parentId: { in: [...ids] } },
+    });
+  }
 }

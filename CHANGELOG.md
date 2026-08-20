@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2026-08-20
+
+### Added
+
+- Admin Regions bulk parent/root assign and delete (`PATCH /api/v1/admin/regions/bulk-parent`, `POST /api/v1/admin/regions/bulk-delete`) with checkbox selection UI
+- Admin Regions **hierarchy tree** view (expand/collapse Land → … → Ort, path column, filter keeps ancestors)
+
+### Fixed
+
+- AI queue `fetch failed` against missing hostname `ollama`: clearer LLM fetch errors (include DNS/connect cause); AI worker concurrency 1; seed/default Ollama URL prefers `host.docker.internal` for external Ollama
+
+### Changed
+
+- AI ingest creates regions only via catalog match or Nominatim-verified settlement/admin hierarchy (no blind create from venue/POI LLM labels); classification prompt **1.0.6**
+- DEV region repair also removes pseudo-Ort names (Kirche, Parkplatz, Straße, …) and reattaches venues
+
 ## [0.24.1] - 2026-08-20
 
 ### Fixed

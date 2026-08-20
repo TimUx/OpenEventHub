@@ -8,6 +8,7 @@ import {
   linkEventTaxonomy,
   matchCategoryIdsFromCatalog,
   normalizeLabel,
+  resetNominatimPaceForTests,
   slugify,
   type TaxonomyDb,
 } from './taxonomy-link.js';
@@ -67,7 +68,12 @@ function createMemoryDb(): TaxonomyDb & {
             if (where.type && row.type !== where.type) return false;
             if (where.name && !nameEq(row.name, where.name.equals)) return false;
             if (where.slug && row.slug !== where.slug) return false;
-            return Boolean(where.name || where.slug || where.type);
+            if (Object.prototype.hasOwnProperty.call(where, 'parentId')) {
+              if (row.parentId !== where.parentId) return false;
+            }
+            return Boolean(
+              where.name || where.slug || where.type || Object.prototype.hasOwnProperty.call(where, 'parentId'),
+            );
           }) ?? null
         );
       },
@@ -79,7 +85,9 @@ function createMemoryDb(): TaxonomyDb & {
           slug: data.slug,
           type: data.type,
           parentId: data.parentId,
-          isoCode: null,
+          isoCode: data.isoCode ?? null,
+          latitude: null,
+          longitude: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         } satisfies Region;
@@ -178,13 +186,59 @@ function createMemoryDb(): TaxonomyDb & {
   };
 }
 
+const SCHWALMSTADT_NOMINATIM_HIT = {
+  osm_type: 'relation',
+  osm_id: 100,
+  name: 'Schwalmstadt',
+  class: 'boundary',
+  type: 'administrative',
+  addresstype: 'town',
+  display_name: 'Schwalmstadt, Schwalm-Eder-Kreis, Hessen, Deutschland',
+  address: {
+    town: 'Schwalmstadt',
+    county: 'Schwalm-Eder-Kreis',
+    state: 'Hessen',
+    country: 'Deutschland',
+    country_code: 'de',
+  },
+} as const;
+
+const TREYSA_NOMINATIM_HIT = {
+  osm_type: 'relation',
+  osm_id: 101,
+  name: 'Treysa',
+  class: 'place',
+  type: 'suburb',
+  addresstype: 'suburb',
+  display_name: 'Treysa, Schwalmstadt, Schwalm-Eder-Kreis, Hessen, Deutschland',
+  address: {
+    suburb: 'Treysa',
+    town: 'Schwalmstadt',
+    county: 'Schwalm-Eder-Kreis',
+    state: 'Hessen',
+    country: 'Deutschland',
+    country_code: 'de',
+  },
+} as const;
+
+const CHURCH_POI_HIT = {
+  osm_type: 'node',
+  osm_id: 102,
+  name: 'Stadtkirche Treysa',
+  class: 'amenity',
+  type: 'place_of_worship',
+  addresstype: 'amenity',
+  display_name: 'Stadtkirche Treysa, Treysa, Schwalmstadt, Hessen, Deutschland',
+} as const;
+
 describe('taxonomy-link', () => {
   it('normalizes and slugifies labels', () => {
     assert.equal(normalizeLabel('  Ziegenhain  '), 'Ziegenhain');
     assert.equal(slugify('Schwalm-Bräu'), 'schwalm-braeu');
   });
 
-  it('maps labels onto curated categories without inventing new ones', async () => {
+  it('maps labels onto curated categories and creates Nominatim region chain', async () => {
+    resetNominatimPaceForTests();
     const db = createMemoryDb();
     const eventId = randomUUID();
     db.categories.push(
@@ -206,51 +260,205 @@ describe('taxonomy-link', () => {
       },
     );
 
-    const result = await linkEventTaxonomy(db, {
-      eventId,
-      extraction: {
-        isEvent: true,
-        title: 'Kirmes',
-        summary: null,
-        description: null,
-        startAt: '2026-04-10T00:00:00.000Z',
-        endAt: null,
-        organizerName: null,
-        venueName: 'Festplatz Florshain',
-        venueAddress: null,
-        isRecurring: false,
-        extractionConfidence: 0.7,
+    const result = await linkEventTaxonomy(
+      db,
+      {
+        eventId,
+        extraction: {
+          isEvent: true,
+          title: 'Kirmes',
+          summary: null,
+          description: null,
+          startAt: '2026-04-10T00:00:00.000Z',
+          endAt: null,
+          organizerName: null,
+          venueName: 'Festplatz Florshain',
+          venueAddress: null,
+          isRecurring: false,
+          extractionConfidence: 0.7,
+        },
+        classification: {
+          categories: ['Culture'],
+          subcategories: ['Kirmes'],
+          tags: ['schwalm'],
+          region: 'Hessen',
+          municipality: 'Schwalmstadt',
+          place: null,
+          district: 'Schwalm-Eder-Kreis',
+          classificationConfidence: 0.8,
+        },
       },
-      classification: {
-        categories: ['Culture'],
-        subcategories: ['Kirmes'],
-        tags: ['schwalm'],
-        region: 'Hessen',
-        municipality: 'Schwalmstadt',
-        place: null,
-        district: 'Schwalm-Eder-Kreis',
-        classificationConfidence: 0.8,
+      {
+        searchGermany: async () => [SCHWALMSTADT_NOMINATIM_HIT],
       },
-    });
+    );
 
-    assert.equal(db.regions.length, 3);
-    assert.equal(db.regions[0]?.name, 'Hessen');
-    assert.equal(db.regions[0]?.type, 'state');
-    assert.equal(db.regions[1]?.name, 'Schwalm-Eder-Kreis');
-    assert.equal(db.regions[1]?.type, 'district');
-    assert.equal(db.regions[1]?.parentId, db.regions[0]?.id);
-    assert.equal(db.regions[2]?.name, 'Schwalmstadt');
-    assert.equal(db.regions[2]?.type, 'municipality');
-    assert.equal(db.regions[2]?.parentId, db.regions[1]?.id);
+    assert.equal(db.regions.length, 4);
+    assert.deepEqual(
+      db.regions.map((row) => `${row.type}:${row.name}`),
+      [
+        'country:Deutschland',
+        'state:Hessen',
+        'district:Schwalm-Eder-Kreis',
+        'municipality:Schwalmstadt',
+      ],
+    );
+    assert.equal(db.regions[3]?.parentId, db.regions[2]?.id);
 
     // Culture → theater alias; Kirmes → kirmes; no new category rows created
     assert.equal(db.categories.length, 2);
     assert.equal(db.eventCategories.length, 2);
     assert.equal(db.venues.length, 1);
-    assert.equal(db.venues[0]?.regionId, db.regions[2]?.id);
+    assert.equal(db.venues[0]?.regionId, db.regions[3]?.id);
     assert.equal(db.eventVenue.get(eventId), db.venues[0]?.id);
     assert.equal(db.eventTags.length, 1);
-    assert.equal(result.regionId, db.regions[2]?.id);
+    assert.equal(result.regionId, db.regions[3]?.id);
+  });
+
+  it('matches existing catalog regions without Nominatim', async () => {
+    const db = createMemoryDb();
+    const municipalityId = randomUUID();
+    db.regions.push({
+      id: municipalityId,
+      name: 'Schwalmstadt',
+      slug: 'schwalmstadt',
+      type: 'municipality',
+      parentId: null,
+      isoCode: null,
+      latitude: null,
+      longitude: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    let nominatimCalls = 0;
+    const result = await linkEventTaxonomy(
+      db,
+      {
+        eventId: randomUUID(),
+        extraction: {
+          isEvent: true,
+          title: 'X',
+          summary: null,
+          description: null,
+          startAt: '2026-01-01T00:00:00.000Z',
+          endAt: null,
+          organizerName: null,
+          venueName: null,
+          venueAddress: null,
+          isRecurring: false,
+          extractionConfidence: 0.5,
+        },
+        classification: {
+          categories: [],
+          subcategories: [],
+          tags: [],
+          region: 'Hessen',
+          municipality: 'schwalmstadt',
+          place: null,
+          district: null,
+          classificationConfidence: 0.5,
+        },
+      },
+      {
+        searchGermany: async () => {
+          nominatimCalls += 1;
+          return [SCHWALMSTADT_NOMINATIM_HIT];
+        },
+      },
+    );
+
+    assert.equal(nominatimCalls, 0);
+    assert.equal(db.regions.length, 1);
+    assert.equal(result.regionId, municipalityId);
+  });
+
+  it('does not create a region from POI-only Nominatim hits', async () => {
+    resetNominatimPaceForTests();
+    const db = createMemoryDb();
+    const result = await linkEventTaxonomy(
+      db,
+      {
+        eventId: randomUUID(),
+        extraction: {
+          isEvent: true,
+          title: 'Konzert',
+          summary: null,
+          description: null,
+          startAt: '2026-01-01T00:00:00.000Z',
+          endAt: null,
+          organizerName: null,
+          venueName: 'Stadtkirche Treysa',
+          venueAddress: null,
+          isRecurring: false,
+          extractionConfidence: 0.8,
+        },
+        classification: {
+          categories: [],
+          subcategories: [],
+          tags: [],
+          region: null,
+          municipality: null,
+          place: 'Stadtkirche Treysa',
+          district: null,
+          classificationConfidence: 0.6,
+        },
+      },
+      {
+        searchGermany: async () => [CHURCH_POI_HIT],
+      },
+    );
+
+    assert.equal(db.regions.length, 0);
+    assert.equal(result.regionId, null);
+    assert.equal(db.venues.length, 1);
+    assert.equal(db.venues[0]?.name, 'Stadtkirche Treysa');
+  });
+
+  it('creates Treysa suburb chain when Nominatim returns a settlement hit for a church label', async () => {
+    resetNominatimPaceForTests();
+    const db = createMemoryDb();
+    const result = await linkEventTaxonomy(
+      db,
+      {
+        eventId: randomUUID(),
+        extraction: {
+          isEvent: true,
+          title: 'Konzert',
+          summary: null,
+          description: null,
+          startAt: '2026-01-01T00:00:00.000Z',
+          endAt: null,
+          organizerName: null,
+          venueName: 'Stadtkirche Treysa',
+          venueAddress: null,
+          isRecurring: false,
+          extractionConfidence: 0.8,
+        },
+        classification: {
+          categories: [],
+          subcategories: [],
+          tags: [],
+          region: null,
+          municipality: null,
+          place: 'Stadtkirche Treysa',
+          district: null,
+          classificationConfidence: 0.6,
+        },
+      },
+      {
+        searchGermany: async (query) => {
+          assert.equal(query, 'Treysa');
+          return [CHURCH_POI_HIT, TREYSA_NOMINATIM_HIT];
+        },
+      },
+    );
+
+    assert.ok(result.regionId);
+    const leaf = db.regions.find((row) => row.id === result.regionId);
+    assert.equal(leaf?.name, 'Treysa');
+    assert.equal(leaf?.type, 'suburb');
+    assert.equal(db.venues[0]?.regionId, leaf?.id);
   });
 
   it('prefers EMS sourceCategories over LLM festival guesses', async () => {
@@ -275,6 +483,18 @@ describe('taxonomy-link', () => {
         updatedAt: new Date(),
       },
     );
+    db.regions.push({
+      id: randomUUID(),
+      name: 'Borken (Hessen)',
+      slug: 'borken-hessen',
+      type: 'municipality',
+      parentId: null,
+      isoCode: null,
+      latitude: null,
+      longitude: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     const eventId = randomUUID();
     const result = await linkEventTaxonomy(db, {
@@ -310,20 +530,23 @@ describe('taxonomy-link', () => {
     assert.equal(db.venues[0]?.address, 'Bahnhofstraße 32, 34582 Borken (Hessen)');
   });
 
-  it('reuses existing region names case-insensitively', async () => {
+  it('reuses existing region names case-insensitively from catalog', async () => {
     const db = createMemoryDb();
+    const ziegenhainId = randomUUID();
     db.regions.push({
-      id: randomUUID(),
-      name: 'Hessen',
-      slug: 'hessen',
-      type: 'state',
+      id: ziegenhainId,
+      name: 'Ziegenhain',
+      slug: 'ziegenhain',
+      type: 'suburb',
       parentId: null,
       isoCode: null,
+      latitude: null,
+      longitude: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    await linkEventTaxonomy(db, {
+    const result = await linkEventTaxonomy(db, {
       eventId: randomUUID(),
       extraction: {
         isEvent: true,
@@ -343,15 +566,15 @@ describe('taxonomy-link', () => {
         subcategories: [],
         tags: [],
         region: 'hessen',
-        municipality: 'Ziegenhain',
+        municipality: 'ziegenhain',
         place: null,
         district: null,
         classificationConfidence: 0.5,
       },
     });
 
-    assert.equal(db.regions.length, 2);
-    assert.equal(db.regions[1]?.parentId, db.regions[0]?.id);
+    assert.equal(db.regions.length, 1);
+    assert.equal(result.regionId, ziegenhainId);
   });
 
   it('matchCategoryIdsFromCatalog maps aliases without inventing rows', () => {

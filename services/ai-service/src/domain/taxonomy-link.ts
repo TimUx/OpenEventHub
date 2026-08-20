@@ -1,9 +1,15 @@
 import {
+  looksLikeVenueOrAddressLabel,
+  NominatimClient,
   normalizeCategoryKey,
+  pickBestSettlementCandidate,
   resolveCategorySlugsForEvent,
   resolveDefaultCategorySlug,
+  settlementQueryFromLabel,
   type ClassificationFields,
   type ExtractedEventFields,
+  type NominatimSearchHit,
+  type RegionHierarchyNode,
 } from '@openeventhub/shared';
 import type { Category, Region, RegionType, Tag, Venue } from '@prisma/client';
 
@@ -24,6 +30,7 @@ export type TaxonomyDb = {
         name?: { equals: string; mode: 'insensitive' };
         slug?: string;
         type?: RegionType;
+        parentId?: string | null;
       };
     }): Promise<Region | null>;
     findUnique(args: { where: { slug: string } }): Promise<Region | null>;
@@ -33,6 +40,7 @@ export type TaxonomyDb = {
         slug: string;
         type: RegionType;
         parentId: string | null;
+        isoCode?: string | null;
       };
     }): Promise<Region>;
   };
@@ -95,9 +103,32 @@ export type TaxonomyLinkResult = {
   readonly venueId: string | null;
 };
 
+/** Optional Nominatim wiring for tests / DI. */
+export type TaxonomyLinkDeps = {
+  readonly nominatim?: NominatimClient;
+  readonly searchGermany?: (query: string) => Promise<NominatimSearchHit[]>;
+};
+
+const NOMINATIM_MIN_INTERVAL_MS = 1100;
+let lastNominatimAt = 0;
+
+async function paceNominatim(): Promise<void> {
+  const now = Date.now();
+  const wait = lastNominatimAt + NOMINATIM_MIN_INTERVAL_MS - now;
+  if (wait > 0) {
+    await new Promise((resolve) => setTimeout(resolve, wait));
+  }
+  lastNominatimAt = Date.now();
+}
+
+/** Reset Nominatim pacing (unit tests only). */
+export function resetNominatimPaceForTests(): void {
+  lastNominatimAt = 0;
+}
+
 /**
- * Resolve classification/extraction into catalog rows (find-or-create) and link the event.
- * Places are created on demand — no full gazetteer required.
+ * Resolve classification/extraction into catalog rows and link the event.
+ * Regions: catalog match or Nominatim-verified settlement chain only — never blind LLM create.
  */
 export async function linkEventTaxonomy(
   db: TaxonomyDb,
@@ -106,10 +137,11 @@ export async function linkEventTaxonomy(
     readonly extraction: ExtractedEventFields;
     readonly classification: ClassificationFields;
   },
+  deps: TaxonomyLinkDeps = {},
 ): Promise<TaxonomyLinkResult> {
   const categoryIds = await resolveCategories(db, args.classification, args.extraction);
   const tagIds = await resolveTags(db, args.classification.tags);
-  const regionId = await resolvePlaceRegion(db, args.classification);
+  const regionId = await resolvePlaceRegion(db, args.classification, deps);
   const venueId = await resolveVenue(db, args.extraction, args.classification, regionId);
 
   for (const categoryId of categoryIds) {
@@ -293,48 +325,147 @@ async function resolveTags(db: TaxonomyDb, tags: readonly string[]): Promise<str
   return [...new Set(ids)];
 }
 
+type PlaceQuery = {
+  readonly label: string;
+  readonly preferredTypes: readonly RegionType[];
+};
+
+function primaryPlaceQuery(classification: ClassificationFields): PlaceQuery | null {
+  const candidates: Array<{ raw: string | null | undefined; preferredTypes: RegionType[] }> = [
+    { raw: classification.place, preferredTypes: ['suburb', 'municipality'] },
+    { raw: classification.municipality, preferredTypes: ['municipality', 'suburb'] },
+    { raw: classification.district, preferredTypes: ['district'] },
+    { raw: classification.region, preferredTypes: ['state'] },
+  ];
+  for (const candidate of candidates) {
+    const label = normalizeLabel(candidate.raw);
+    if (label) {
+      return { label, preferredTypes: candidate.preferredTypes };
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve a settlement region: catalog match first, else Nominatim-verified hierarchy.
+ * Never creates regions from unverified LLM venue/POI labels.
+ */
 async function resolvePlaceRegion(
   db: TaxonomyDb,
   classification: ClassificationFields,
+  deps: TaxonomyLinkDeps,
 ): Promise<string | null> {
-  let parentId: string | null = null;
-  let leafId: string | null = null;
+  const primary = primaryPlaceQuery(classification);
+  if (!primary) {
+    return null;
+  }
 
-  // Bundesland / state (optionally under Land if a country root exists)
-  const regionName = normalizeLabel(classification.region);
-  if (regionName) {
-    const country = await db.region.findFirst({
-      where: { type: 'country', name: { equals: 'Deutschland', mode: 'insensitive' } },
+  const settlementQuery = settlementQueryFromLabel(primary.label);
+  const catalogNames = uniqueNonEmpty([
+    // Prefer settlement fragment for venue-like labels (e.g. Stadtkirche Treysa → Treysa)
+    looksLikeVenueOrAddressLabel(primary.label) ? settlementQuery : primary.label,
+    settlementQuery,
+    primary.label,
+  ]);
+
+  for (const name of catalogNames) {
+    const existing = await findCatalogRegion(db, name, primary.preferredTypes);
+    if (existing) {
+      return existing.id;
+    }
+  }
+
+  const nominatimQuery =
+    settlementQuery ?? (looksLikeVenueOrAddressLabel(primary.label) ? null : primary.label);
+  if (!nominatimQuery) {
+    return null;
+  }
+
+  try {
+    await paceNominatim();
+    const hits = deps.searchGermany
+      ? await deps.searchGermany(nominatimQuery)
+      : await (deps.nominatim ?? new NominatimClient()).searchGermany(nominatimQuery);
+    const candidate = pickBestSettlementCandidate(hits, primary.label);
+    if (!candidate || candidate.chain.length === 0) {
+      return null;
+    }
+    const leaf = await createRegionChain(db, candidate.chain);
+    return leaf.id;
+  } catch {
+    // Timeout / rate limit / network: catalog-only, never blind-create from LLM labels
+    return null;
+  }
+}
+
+async function findCatalogRegion(
+  db: TaxonomyDb,
+  name: string,
+  preferredTypes: readonly RegionType[],
+): Promise<Region | null> {
+  for (const type of preferredTypes) {
+    const row = await db.region.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' }, type },
     });
-    const region = await findOrCreateRegion(db, regionName, 'state', country?.id ?? null);
-    parentId = region.id;
-    leafId = region.id;
+    if (row) {
+      return row;
+    }
+  }
+  return db.region.findFirst({
+    where: { name: { equals: name, mode: 'insensitive' } },
+  });
+}
+
+async function findByNameTypeParent(
+  db: TaxonomyDb,
+  name: string,
+  type: RegionType,
+  parentId: string | null,
+): Promise<Region | null> {
+  return db.region.findFirst({
+    where: {
+      name: { equals: name, mode: 'insensitive' },
+      type,
+      parentId,
+    },
+  });
+}
+
+/** Find-or-create every node Land → … → leaf (same semantics as API RegionLookupService). */
+async function createRegionChain(
+  db: TaxonomyDb,
+  chain: readonly RegionHierarchyNode[],
+): Promise<Region> {
+  if (chain.length === 0) {
+    throw new Error('Empty hierarchy chain');
   }
 
-  // Landkreis / district under state
-  const districtName = normalizeLabel(classification.district);
-  if (districtName) {
-    const district = await findOrCreateRegion(db, districtName, 'district', parentId);
-    parentId = district.id;
-    leafId = district.id;
+  let parentId: string | null = null;
+  let leaf: Region | null = null;
+
+  for (const node of chain) {
+    const type = node.type as RegionType;
+    const existing = await findByNameTypeParent(db, node.name, type, parentId);
+    if (existing) {
+      leaf = existing;
+      parentId = existing.id;
+      continue;
+    }
+
+    const slug = await allocateUniqueSlug(db, 'region', node.name);
+    leaf = await db.region.create({
+      data: {
+        name: node.name,
+        slug,
+        type,
+        parentId,
+        isoCode: node.isoCode,
+      },
+    });
+    parentId = leaf.id;
   }
 
-  // Kommune (Gemeinde/Stadt) under Landkreis
-  const municipalityName = normalizeLabel(classification.municipality);
-  if (municipalityName) {
-    const municipality = await findOrCreateRegion(db, municipalityName, 'municipality', parentId);
-    parentId = municipality.id;
-    leafId = municipality.id;
-  }
-
-  // Ort / Dorf / Ortsteil under Kommune (or under Landkreis if Kommune unknown)
-  const placeName = normalizeLabel(classification.place);
-  if (placeName) {
-    const place = await findOrCreateRegion(db, placeName, 'suburb', parentId);
-    leafId = place.id;
-  }
-
-  return leafId;
+  return leaf!;
 }
 
 async function resolveVenue(
@@ -387,25 +518,6 @@ async function resolveVenue(
   return created.id;
 }
 
-async function findOrCreateRegion(
-  db: TaxonomyDb,
-  name: string,
-  type: RegionType,
-  parentId: string | null,
-): Promise<Region> {
-  const existing = await db.region.findFirst({
-    where: { name: { equals: name, mode: 'insensitive' } },
-  });
-  if (existing) {
-    return existing;
-  }
-
-  const slug = await allocateUniqueSlug(db, 'region', name);
-  return db.region.create({
-    data: { name, slug, type, parentId },
-  });
-}
-
 async function findOrCreateTag(db: TaxonomyDb, name: string): Promise<Tag> {
   const existing = await db.tag.findFirst({
     where: { name: { equals: name, mode: 'insensitive' } },
@@ -450,6 +562,19 @@ async function slugExists(
     return Boolean(await db.tag.findUnique({ where: { slug } }));
   }
   return Boolean(await db.venue.findUnique({ where: { slug } }));
+}
+
+function uniqueNonEmpty(values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values) {
+    if (!value) continue;
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(value);
+  }
+  return out;
 }
 
 export function normalizeLabel(value: string | null | undefined): string | null {

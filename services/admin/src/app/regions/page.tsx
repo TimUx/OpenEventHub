@@ -6,6 +6,15 @@ import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, StatusPill, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
+import {
+  buildRegionForest,
+  collectExpandableIds,
+  defaultExpandedIds,
+  flattenVisible,
+  formatRegionPath,
+  isFilterActive,
+  type FlatTreeRow,
+} from '../../lib/region-tree';
 
 const REGION_TYPES = ['country', 'state', 'district', 'municipality', 'suburb', 'city'] as const;
 
@@ -24,12 +33,9 @@ type RegionFilters = {
   name: string;
   slug: string;
   type: '' | RegionType;
-  parent: string;
+  path: string;
   iso: string;
 };
-
-type SortKey = 'name' | 'slug' | 'type' | 'parent' | 'iso';
-type SortDir = 'asc' | 'desc';
 
 type HierarchyNode = {
   type: RegionType;
@@ -51,7 +57,7 @@ const EMPTY_FILTERS: RegionFilters = {
   name: '',
   slug: '',
   type: '',
-  parent: '',
+  path: '',
   iso: '',
 };
 
@@ -59,13 +65,13 @@ const inputClass =
   'h-7 w-full min-w-0 rounded border border-[var(--border)] bg-[var(--background)] px-1.5 text-xs';
 
 function filtersActive(filters: RegionFilters): boolean {
-  return Boolean(
-    filters.name.trim() ||
-    filters.slug.trim() ||
-    filters.type ||
-    filters.parent.trim() ||
-    filters.iso.trim(),
-  );
+  return isFilterActive({
+    name: filters.name,
+    slug: filters.slug,
+    type: filters.type,
+    path: filters.path,
+    iso: filters.iso,
+  });
 }
 
 function regionTypeLabelKey(type: string): `regions.type.${RegionType}` {
@@ -86,8 +92,8 @@ export default function RegionsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState<RegionFilters>(EMPTY_FILTERS);
-  const [sortKey, setSortKey] = useState<SortKey>('name');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [expandedInitialized, setExpandedInitialized] = useState(false);
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -100,63 +106,54 @@ export default function RegionsPage() {
   const [lookupLoading, setLookupLoading] = useState(false);
   const [candidates, setCandidates] = useState<LookupCandidate[]>([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkParentId, setBulkParentId] = useState('');
 
-  const byId = useMemo(() => new Map((data ?? []).map((item) => [item.id, item])), [data]);
   const selectedCandidate = useMemo(
     () => candidates.find((item) => item.id === selectedCandidateId) ?? null,
     [candidates, selectedCandidateId],
   );
 
-  function parentLabel(id: string | null): string {
-    if (!id) return t('regions.noParent');
-    return byId.get(id)?.name ?? id;
-  }
+  const forest = useMemo(() => buildRegionForest(data ?? []), [data]);
 
-  const rows = useMemo(() => {
-    const nameQ = filters.name.trim().toLowerCase();
-    const slugQ = filters.slug.trim().toLowerCase();
-    const parentQ = filters.parent.trim().toLowerCase();
-    const isoQ = filters.iso.trim().toLowerCase();
-    const filtered = (data ?? []).filter((item) => {
-      if (nameQ && !item.name.toLowerCase().includes(nameQ)) return false;
-      if (slugQ && !item.slug.toLowerCase().includes(slugQ)) return false;
-      if (filters.type && item.type !== filters.type) return false;
-      if (parentQ) {
-        const label = parentLabel(item.parentId).toLowerCase();
-        if (!label.includes(parentQ)) return false;
+  useEffect(() => {
+    if (!data || expandedInitialized) return;
+    setExpandedIds(defaultExpandedIds(data));
+    setExpandedInitialized(true);
+  }, [data, expandedInitialized]);
+
+  const treeFilter = useMemo(
+    () => ({
+      name: filters.name,
+      slug: filters.slug,
+      type: filters.type,
+      path: filters.path,
+      iso: filters.iso,
+    }),
+    [filters],
+  );
+
+  const rows: FlatTreeRow<Region>[] = useMemo(
+    () => flattenVisible(forest, expandedIds, treeFilter),
+    [forest, expandedIds, treeFilter],
+  );
+
+  const rowIds = useMemo(() => rows.map((row) => row.region.id), [rows]);
+  const expandableIds = useMemo(() => collectExpandableIds(forest), [forest]);
+
+  useEffect(() => {
+    setSelected((prev) => {
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (rowIds.includes(id)) next.add(id);
       }
-      if (isoQ && !(item.isoCode ?? '').toLowerCase().includes(isoQ)) return false;
-      return true;
+      return next.size === prev.size && [...prev].every((id) => next.has(id)) ? prev : next;
     });
-    const mul = sortDir === 'asc' ? 1 : -1;
-    filtered.sort((a, b) => {
-      let left = '';
-      let right = '';
-      switch (sortKey) {
-        case 'slug':
-          left = a.slug;
-          right = b.slug;
-          break;
-        case 'type':
-          left = a.type;
-          right = b.type;
-          break;
-        case 'parent':
-          left = parentLabel(a.parentId);
-          right = parentLabel(b.parentId);
-          break;
-        case 'iso':
-          left = a.isoCode ?? '';
-          right = b.isoCode ?? '';
-          break;
-        default:
-          left = a.name;
-          right = b.name;
-      }
-      return left.localeCompare(right, undefined, { sensitivity: 'base', numeric: true }) * mul;
-    });
-    return filtered;
-  }, [data, filters, sortKey, sortDir, byId, t]);
+  }, [rowIds]);
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const selectedCount = selected.size;
 
   useEffect(() => {
     if (!token || editingId || manualMode || !formOpen) {
@@ -206,20 +203,37 @@ export default function RegionsPage() {
 
   function clearFilters(): void {
     setFilters(EMPTY_FILTERS);
+    setSelected(new Set());
   }
 
-  function toggleSort(key: SortKey): void {
-    if (sortKey === key) {
-      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-      return;
-    }
-    setSortKey(key);
-    setSortDir('asc');
+  function toggleExpand(id: string): void {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
-  function sortIndicator(key: SortKey): string {
-    if (sortKey !== key) return '';
-    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  function expandAll(): void {
+    setExpandedIds(new Set(expandableIds));
+  }
+
+  function collapseAll(): void {
+    setExpandedIds(new Set());
+  }
+
+  function toggleSelect(id: string): void {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll(): void {
+    setSelected(allSelected ? new Set() : new Set(rowIds));
   }
 
   function resetForm(): void {
@@ -368,13 +382,73 @@ export default function RegionsPage() {
       if (editingId === item.id) {
         resetForm();
       }
+      setSelected((prev) => {
+        if (!prev.has(item.id)) return prev;
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
       await reload();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : String(err));
     }
   }
 
+  async function applyBulkParent(): Promise<void> {
+    if (!token || selectedCount === 0) return;
+    setBulkBusy(true);
+    setFormError(null);
+    try {
+      const ids = [...selected];
+      const parentId = bulkParentId.trim() ? bulkParentId.trim() : null;
+      const result = await adminFetch<{ updated: number }>(
+        '/api/v1/admin/regions/bulk-parent',
+        token,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ ids, parentId }),
+        },
+      );
+      setMessage(t('regions.bulkParentUpdated', { count: result.updated }));
+      setSelected(new Set());
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
+  async function applyBulkDelete(): Promise<void> {
+    if (!token || selectedCount === 0) return;
+    if (!window.confirm(t('regions.confirmBulkDelete', { count: selectedCount }))) return;
+    setBulkBusy(true);
+    setFormError(null);
+    try {
+      const ids = [...selected];
+      const result = await adminFetch<{ deleted: number }>(
+        '/api/v1/admin/regions/bulk-delete',
+        token,
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids }),
+        },
+      );
+      setMessage(t('regions.bulkDeleted', { count: result.deleted }));
+      if (editingId && ids.includes(editingId)) {
+        resetForm();
+      }
+      setSelected(new Set());
+      await reload();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
   const parentOptions = (data ?? []).filter((item) => item.id !== editingId);
+  const bulkParentOptions = (data ?? []).filter((item) => !selected.has(item.id));
   const hasFilters = filtersActive(filters);
   const createViaLookup = !editingId && !manualMode;
 
@@ -397,6 +471,71 @@ export default function RegionsPage() {
       {loading ? <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
+
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--card)] px-2 py-1.5 text-xs">
+          <span className="text-[var(--muted)]">
+            {t('regions.selectedCount', { count: selectedCount })}
+          </span>
+          <select
+            className="h-7 max-w-[14rem] rounded border border-[var(--border)] bg-[var(--background)] px-1.5"
+            value={bulkParentId}
+            disabled={bulkBusy}
+            aria-label={t('regions.bulkParent')}
+            onChange={(e) => setBulkParentId(e.target.value)}
+          >
+            <option value="">{t('regions.noParent')}</option>
+            {bulkParentOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name} ({t(regionTypeLabelKey(item.type))})
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="h-7 rounded bg-primary px-2 font-semibold text-white disabled:opacity-60"
+            disabled={bulkBusy}
+            onClick={() => void applyBulkParent()}
+          >
+            {t('regions.applyParent')}
+          </button>
+          <button
+            type="button"
+            className="h-7 rounded border border-red-200 px-2 font-semibold text-red-700 disabled:opacity-60"
+            disabled={bulkBusy}
+            onClick={() => void applyBulkDelete()}
+          >
+            {t('regions.deleteSelected')}
+          </button>
+          <button
+            type="button"
+            className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+            disabled={bulkBusy}
+            onClick={() => setSelected(new Set())}
+          >
+            {t('regions.clearSelection')}
+          </button>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <button
+          type="button"
+          className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+          disabled={expandableIds.length === 0 || bulkBusy}
+          onClick={expandAll}
+        >
+          {t('regions.expandAll')}
+        </button>
+        <button
+          type="button"
+          className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+          disabled={expandedIds.size === 0 || bulkBusy}
+          onClick={collapseAll}
+        >
+          {t('regions.collapseAll')}
+        </button>
+      </div>
 
       {formOpen ? (
         <Panel>
@@ -563,59 +702,25 @@ export default function RegionsPage() {
         <table className="w-full min-w-[48rem] border-collapse text-left text-sm">
           <thead className="bg-[var(--background)]">
             <tr className="border-b border-[var(--border)] text-xs text-[var(--muted)]">
-              <th className="px-2 py-1.5">
-                <button
-                  type="button"
-                  className="font-semibold hover:text-[var(--foreground)]"
-                  onClick={() => toggleSort('name')}
-                >
-                  {t('regions.colName')}
-                  {sortIndicator('name')}
-                </button>
+              <th className="w-10 px-2 py-1.5">
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 rounded border-[var(--border)]"
+                  checked={allSelected}
+                  disabled={rows.length === 0 || bulkBusy}
+                  onChange={toggleSelectAll}
+                  aria-label={allSelected ? t('regions.clearSelection') : t('regions.selectAll')}
+                />
               </th>
-              <th className="px-2 py-1.5">
-                <button
-                  type="button"
-                  className="font-semibold hover:text-[var(--foreground)]"
-                  onClick={() => toggleSort('slug')}
-                >
-                  {t('regions.colSlug')}
-                  {sortIndicator('slug')}
-                </button>
-              </th>
-              <th className="px-2 py-1.5">
-                <button
-                  type="button"
-                  className="font-semibold hover:text-[var(--foreground)]"
-                  onClick={() => toggleSort('type')}
-                >
-                  {t('regions.colType')}
-                  {sortIndicator('type')}
-                </button>
-              </th>
-              <th className="px-2 py-1.5">
-                <button
-                  type="button"
-                  className="font-semibold hover:text-[var(--foreground)]"
-                  onClick={() => toggleSort('parent')}
-                >
-                  {t('regions.colParent')}
-                  {sortIndicator('parent')}
-                </button>
-              </th>
-              <th className="px-2 py-1.5">
-                <button
-                  type="button"
-                  className="font-semibold hover:text-[var(--foreground)]"
-                  onClick={() => toggleSort('iso')}
-                >
-                  {t('regions.colIso')}
-                  {sortIndicator('iso')}
-                </button>
-              </th>
+              <th className="px-2 py-1.5 font-semibold">{t('regions.colName')}</th>
+              <th className="px-2 py-1.5 font-semibold">{t('regions.colSlug')}</th>
+              <th className="px-2 py-1.5 font-semibold">{t('regions.colType')}</th>
+              <th className="px-2 py-1.5 font-semibold">{t('regions.colPath')}</th>
+              <th className="px-2 py-1.5 font-semibold">{t('regions.colIso')}</th>
               <th className="w-28 px-2 py-1.5 font-semibold">{t('regions.colActions')}</th>
             </tr>
             <tr className="border-b border-[var(--border)]">
+              <th className="px-2 py-1" />
               <th className="px-2 py-1">
                 <input
                   type="search"
@@ -655,10 +760,10 @@ export default function RegionsPage() {
                 <input
                   type="search"
                   className={inputClass}
-                  value={filters.parent}
-                  placeholder={t('regions.filterParentPlaceholder')}
-                  aria-label={t('regions.colParent')}
-                  onChange={(e) => patchFilter('parent', e.target.value)}
+                  value={filters.path}
+                  placeholder={t('regions.filterPathPlaceholder')}
+                  aria-label={t('regions.colPath')}
+                  onChange={(e) => patchFilter('path', e.target.value)}
                 />
               </th>
               <th className="px-2 py-1">
@@ -685,40 +790,81 @@ export default function RegionsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => (
-              <tr
-                key={item.id}
-                className={`border-b border-[var(--border)]/60 hover:bg-[var(--background)]/80 ${
-                  editingId === item.id ? 'bg-primary-soft/60' : ''
-                }`}
-              >
-                <td className="px-2 py-1.5 font-medium">{item.name}</td>
-                <td className="px-2 py-1.5 font-mono text-xs text-[var(--muted)]">{item.slug}</td>
-                <td className="px-2 py-1.5">
-                  <StatusPill value={t(regionTypeLabelKey(item.type))} />
-                </td>
-                <td className="px-2 py-1.5 text-xs">{parentLabel(item.parentId)}</td>
-                <td className="px-2 py-1.5 font-mono text-xs">{item.isoCode ?? '—'}</td>
-                <td className="px-2 py-1.5">
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      type="button"
-                      className="rounded border border-[var(--border)] px-1.5 py-0.5 text-xs"
-                      onClick={() => startEdit(item)}
+            {rows.map((row) => {
+              const item = row.region;
+              const isExpanded = expandedIds.has(item.id);
+              const pathLabel = formatRegionPath(row.pathNames);
+              return (
+                <tr
+                  key={item.id}
+                  className={`border-b border-[var(--border)]/60 hover:bg-[var(--background)]/80 ${
+                    editingId === item.id ? 'bg-primary-soft/60' : ''
+                  } ${row.matched ? 'bg-primary-soft/30' : ''}`}
+                >
+                  <td className="px-2 py-1.5">
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5 rounded border-[var(--border)]"
+                      checked={selected.has(item.id)}
+                      disabled={bulkBusy}
+                      onChange={() => toggleSelect(item.id)}
+                      aria-label={item.name}
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <div
+                      className="flex min-w-0 items-center gap-1"
+                      style={{ paddingLeft: `${row.depth * 1.25}rem` }}
                     >
-                      {t('common.edit')}
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded border border-red-200 px-1.5 py-0.5 text-xs text-red-700"
-                      onClick={() => void remove(item)}
-                    >
-                      {t('common.delete')}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {row.hasChildren ? (
+                        <button
+                          type="button"
+                          className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[var(--muted)] hover:bg-[var(--background)] hover:text-[var(--foreground)]"
+                          aria-expanded={isExpanded}
+                          aria-label={
+                            isExpanded ? t('regions.collapseNode') : t('regions.expandNode')
+                          }
+                          onClick={() => toggleExpand(item.id)}
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                      ) : (
+                        <span className="inline-block w-5 shrink-0" aria-hidden />
+                      )}
+                      <span className={`truncate font-medium ${row.matched ? 'font-semibold' : ''}`}>
+                        {item.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-2 py-1.5 font-mono text-xs text-[var(--muted)]">{item.slug}</td>
+                  <td className="px-2 py-1.5">
+                    <StatusPill value={t(regionTypeLabelKey(item.type))} />
+                  </td>
+                  <td className="px-2 py-1.5 text-xs text-[var(--muted)]">
+                    {pathLabel || t('regions.noParent')}
+                  </td>
+                  <td className="px-2 py-1.5 font-mono text-xs">{item.isoCode ?? '—'}</td>
+                  <td className="px-2 py-1.5">
+                    <div className="flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        className="rounded border border-[var(--border)] px-1.5 py-0.5 text-xs"
+                        onClick={() => startEdit(item)}
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded border border-red-200 px-1.5 py-0.5 text-xs text-red-700"
+                        onClick={() => void remove(item)}
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {!loading && rows.length === 0 ? (

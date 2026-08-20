@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Repair DEV regions to Land → Bundesland → Landkreis → Kommune → Ort.
+# Also removes pseudo-Ort rows (Kirche, Parkplatz, Straße, Saal, …) and reattaches venues.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

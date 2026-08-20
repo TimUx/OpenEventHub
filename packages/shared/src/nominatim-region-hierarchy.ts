@@ -71,6 +71,34 @@ const REJECT_TYPES = new Set([
   'parking',
 ]);
 
+/** Nominatim classes/types that may become Region nodes on AI ingest. */
+const SETTLEMENT_CLASSES = new Set(['place', 'boundary']);
+const SETTLEMENT_TYPES = new Set([
+  'administrative',
+  'city',
+  'town',
+  'village',
+  'hamlet',
+  'municipality',
+  'suburb',
+  'neighbourhood',
+  'neighborhood',
+  'quarter',
+  'locality',
+  'city_district',
+  'borough',
+  'county',
+  'state',
+  'state_district',
+  'country',
+]);
+
+const VENUE_OR_POI_TOKEN =
+  /\b(kirche|stadtkirche|parkplatz|wanderparkplatz|burgruine|museum|bahnhof|saal|halle|gasthof|gasthaus|hotel|schule|kindergarten|friedhof|sportplatz|festplatz|marktplatz|rathaus|schloss|kloster|kapelle|arena|stadion|theater|kino|bibliothek|buergerhaus|bürgerhaus)\b/i;
+
+const STREET_ADDRESS =
+  /\b(\d{1,4}[a-z]?)\b.*\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b|\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b.+\b\d{1,4}[a-z]?\b/i;
+
 function cleanName(value: string | undefined | null): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
@@ -88,6 +116,79 @@ function sameName(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
+function normalizePlaceKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+/**
+ * Labels that must not become Region nodes (venues, halls, street addresses).
+ * Used before Nominatim on AI ingest.
+ */
+export function looksLikeVenueOrAddressLabel(label: string): boolean {
+  const trimmed = label.trim();
+  if (!trimmed) return false;
+  if (VENUE_OR_POI_TOKEN.test(trimmed)) return true;
+  if (STREET_ADDRESS.test(trimmed)) return true;
+  // "Zella Blauer Saal" / comma-separated address lines
+  if (/,/.test(trimmed) && /\d/.test(trimmed)) return true;
+  return false;
+}
+
+/**
+ * Prefer the settlement fragment of a polluted label for catalog/Nominatim lookup.
+ * Returns null when nothing settlement-like remains.
+ */
+export function settlementQueryFromLabel(label: string): string | null {
+  const trimmed = label.trim().replace(/\s+/g, ' ');
+  if (!trimmed) return null;
+
+  // "Waßmuthshäuser Straße 15, Homberg (Efze)" → last comma segment
+  if (trimmed.includes(',')) {
+    const parts = trimmed
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    for (let i = parts.length - 1; i >= 0; i -= 1) {
+      const part = parts[i]!;
+      if (looksLikeVenueOrAddressLabel(part) && STREET_ADDRESS.test(part)) continue;
+      if (!STREET_ADDRESS.test(part) && !VENUE_OR_POI_TOKEN.test(part)) {
+        // Strip leading ZIP
+        const withoutZip = part.replace(/^\d{5}\s+/, '').trim();
+        if (withoutZip.length >= 2) return withoutZip;
+      }
+    }
+  }
+
+  if (!looksLikeVenueOrAddressLabel(trimmed)) {
+    return trimmed;
+  }
+
+  // "Zella Blauer Saal" → drop adjective before venue noun, then venue tokens
+  // "Stadtkirche Treysa" → drop venue token, keep settlement words
+  const withoutVenue = trimmed
+    .replace(
+      /\b\S+\s+(?=(?:kirche|stadtkirche|parkplatz|wanderparkplatz|burgruine|museum|bahnhof|saal|halle|gasthof|gasthaus|hotel|schule|kindergarten|friedhof|sportplatz|festplatz|marktplatz|rathaus|schloss|kloster|kapelle|arena|stadion|theater|kino|bibliothek|buergerhaus|bürgerhaus)\b)/gi,
+      ' ',
+    )
+    .replace(VENUE_OR_POI_TOKEN, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (withoutVenue.length >= 2 && !looksLikeVenueOrAddressLabel(withoutVenue)) {
+    return withoutVenue;
+  }
+  return null;
+}
+
 /** Whether a Nominatim hit is a usable admin/settlement place (not peak/nature noise). */
 export function isUsableNominatimPlaceHit(hit: NominatimSearchHit): boolean {
   const kind = (hit.type ?? hit.addresstype ?? '').toLowerCase();
@@ -97,6 +198,20 @@ export function isUsableNominatimPlaceHit(hit: NominatimSearchHit): boolean {
     if (hit.class !== 'boundary') return false;
   }
   if (!hit.address && !hit.name) return false;
+  return true;
+}
+
+/**
+ * Stricter gate for AI ingest: only settlement / administrative place hits.
+ * Rejects amenity/building/tourism/parking/highway POIs (church, parking, ruins, …).
+ */
+export function isSettlementOrAdminNominatimHit(hit: NominatimSearchHit): boolean {
+  if (!isUsableNominatimPlaceHit(hit)) return false;
+  const klass = (hit.class ?? '').toLowerCase();
+  if (klass && !SETTLEMENT_CLASSES.has(klass)) return false;
+  const kind = (hit.type ?? hit.addresstype ?? '').toLowerCase();
+  if (kind && !SETTLEMENT_TYPES.has(kind) && klass !== 'boundary') return false;
+  if (hit.name && looksLikeVenueOrAddressLabel(hit.name)) return false;
   return true;
 }
 
@@ -206,6 +321,62 @@ export function toRegionLookupCandidate(hit: NominatimSearchHit): RegionLookupCa
     lat: Number.isFinite(lat) ? lat : null,
     lon: Number.isFinite(lon) ? lon : null,
   };
+}
+
+/** Like toRegionLookupCandidate but only for settlement/admin hits (AI ingest). */
+export function toSettlementRegionLookupCandidate(
+  hit: NominatimSearchHit,
+): RegionLookupCandidate | null {
+  if (!isSettlementOrAdminNominatimHit(hit)) return null;
+  return toRegionLookupCandidate(hit);
+}
+
+function leafMatchesQuery(candidate: RegionLookupCandidate, queryKey: string): boolean {
+  if (!queryKey) return false;
+  const leafKey = normalizePlaceKey(candidate.name);
+  if (leafKey === queryKey || leafKey.includes(queryKey) || queryKey.includes(leafKey)) {
+    return true;
+  }
+  return candidate.chain.some((node) => {
+    const key = normalizePlaceKey(node.name);
+    return key === queryKey || key.includes(queryKey) || queryKey.includes(key);
+  });
+}
+
+/**
+ * Pick the best settlement candidate for AI ingest.
+ * Prefers leaf/chain names matching the query; for street-like queries prefers municipality leaves.
+ */
+export function pickBestSettlementCandidate(
+  hits: readonly NominatimSearchHit[],
+  query: string,
+): RegionLookupCandidate | null {
+  const settlementQuery = settlementQueryFromLabel(query) ?? query.trim();
+  if (settlementQuery.length < 2) return null;
+  const queryKey = normalizePlaceKey(settlementQuery);
+  const preferMunicipality = looksLikeVenueOrAddressLabel(query) || STREET_ADDRESS.test(query);
+
+  const candidates = uniqueRegionLookupCandidates(
+    hits
+      .map((hit) => toSettlementRegionLookupCandidate(hit))
+      .filter((row): row is RegionLookupCandidate => row != null),
+  ).filter((candidate) => leafMatchesQuery(candidate, queryKey));
+
+  if (candidates.length === 0) return null;
+
+  const scored = candidates.map((candidate) => {
+    const leafKey = normalizePlaceKey(candidate.name);
+    let score = 0;
+    if (leafKey === queryKey) score += 100;
+    else if (leafKey.includes(queryKey) || queryKey.includes(leafKey)) score += 40;
+    if (preferMunicipality && candidate.leafType === 'municipality') score += 30;
+    if (candidate.leafType === 'suburb' && !preferMunicipality) score += 20;
+    if (candidate.leafType === 'district') score += 5;
+    score += Math.min(candidate.chain.length, 5);
+    return { candidate, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.candidate ?? null;
 }
 
 /** Deduplicate candidates that resolve to the same hierarchy path. */

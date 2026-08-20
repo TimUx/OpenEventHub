@@ -53,3 +53,11 @@ werden die Kandidaten-Koordinaten auf dem Blatt-Region-Knoten gespeichert.
 | `NOMINATIM_USER_AGENT` | `OpenEventHub/… (geocoding; …)` |
 
 Nutzungsregeln von Nominatim beachten (User-Agent, Rate-Limit).
+
+## AI-Ingest Regionen-Resolve
+
+Beim Taxonomy-Link nach der Klassifikation kann `ai-service` fehlende Siedlungen
+über denselben Nominatim-Endpunkt verifizieren (Compose: Netz `edge`, Rate-Limit
+≈1,1 s im Worker-Prozess). Nur Treffer der Klassen `place`/`boundary` mit
+Siedlungs-/Admin-Typen werden akzeptiert; Amenities (Kirche, Parkplatz, …) legen
+keine Region an. Admin-Lookup bleibt bewusst breiter.

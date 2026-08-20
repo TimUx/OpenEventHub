@@ -48,7 +48,7 @@ the `ai` queue. The EIE then:
 4. stores `AIAnalysis` (confidence accounts for source count),
 5. resolves classification labels and links categories
    (catalog match / aliases only — no auto-creation of new categories),
-   tags and places (find-or-create),
+   tags (find-or-create) and places (catalog match or Nominatim-verified settlement chain),
    regions, and optionally a venue.
 
 Multi-event listing pages:

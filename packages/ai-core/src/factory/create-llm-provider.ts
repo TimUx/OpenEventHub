@@ -51,7 +51,7 @@ export function defaultBaseUrlForType(type: AiProviderProfileConfig['type']): st
     case 'openrouter':
       return 'https://openrouter.ai/api/v1';
     case 'ollama':
-      return 'http://ollama:11434/v1';
+      return 'http://host.docker.internal:11434/v1';
     case 'azure_openai':
     case 'custom_openai':
       return null;

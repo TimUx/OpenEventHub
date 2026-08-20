@@ -39,4 +39,4 @@ Beim Zusammenführen gilt **nur auffüllen / anreichern**, nicht verarmen:
 - `endAt` wird gesetzt, wenn bisher fehlend
 - `confidenceScore` nimmt das Maximum; bei mehreren Quellen greift der Multi-Source-Bonus im Confidence-Score
 
-Taxonomie: Kategorien nur Katalog-Match; Regionen/Venue weiterhin Find-or-create (fehlende Orte möglich).
+Taxonomie: Kategorien nur Katalog-Match; Regionen nur Katalog-Match oder Nominatim-verifizierte Siedlungskette; Venues weiterhin Find-or-create.

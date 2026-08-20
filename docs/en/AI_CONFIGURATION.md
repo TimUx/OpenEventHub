@@ -31,11 +31,20 @@ normal URL in Admin → AI Settings (or via seed `OLLAMA_BASE_URL`).
 | Host port `0.0.0.0:11434` (recommended locally) | `http://host.docker.internal:11434/v1` | App services include `extra_hosts: host.docker.internal:host-gateway` |
 | LAN / server IP or hostname | `http://192.168.1.50:11434/v1` | Any reachable host |
 | Remote / reverse proxy | `https://llm.example.com/v1` | Same pattern as other OpenAI-compatible gateways |
+| Bundled Compose `oeh-ollama` (`OLLAMA_DEPLOY=1`) | `http://ollama:11434/v1` | Hostname `ollama` only on the OEH Compose network |
+
+**Important — hostname `ollama`:** Resolves only when the Compose `ollama` service is running
+(`OLLAMA_DEPLOY=1`) or you attach Ollama via `OLLAMA_EXTERNAL_NETWORK`.
+With an external Ollama (e.g. `ownai-ollama` published only on host port 11434),
+`http://ollama:11434/v1` causes AI queue failures (`fetch failed` / `ENOTFOUND ollama`).
+Use **`http://host.docker.internal:11434/v1`** and the model actually loaded
+(Admin → AI Settings → provider test).
 
 **Important:** Binding only to `127.0.0.1:11434` is **not** reachable from other containers.
 Either publish on `0.0.0.0` (or a LAN address) — or optionally (below) join a shared Docker network.
 
-Seed and the Admin **Local Ollama** profile use `OLLAMA_BASE_URL` / `OLLAMA_MODEL`.
+Seed and the Admin **Local Ollama** profile use `OLLAMA_BASE_URL` / `OLLAMA_MODEL`
+(default URL without env: `http://host.docker.internal:11434/v1`).
 After switching, check Admin → AI Settings or re-run `db:seed`.
 
 Seed creates/updates the profile (`timeoutMs` at least 180 000) and sets it active when

@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/admin",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "private": true,
   "description": "OpenEventHub admin center",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start -p 3101",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts"
+    "test": "node --import tsx --test src/probes.test.ts src/lib/api.test.ts src/lib/region-tree.test.ts"
   },
   "dependencies": {
     "@openeventhub/shared": "0.2.0",

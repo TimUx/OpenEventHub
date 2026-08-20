@@ -52,3 +52,10 @@ Admin place search uses **OpenStreetMap Nominatim** synchronously
 | `NOMINATIM_USER_AGENT` | `OpenEventHub/… (geocoding; …)` |
 
 Follow Nominatim usage policy (User-Agent, rate limit).
+
+## AI ingest region resolve
+
+During taxonomy link after classification, `ai-service` may verify missing settlements
+via the same Nominatim endpoint (Compose: `edge` network, ~1.1s spacing per worker
+process). Only `place`/`boundary` hits with settlement/admin types are accepted;
+amenities (church, parking, …) do not create regions. Admin lookup stays intentionally broader.
