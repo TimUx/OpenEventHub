@@ -412,7 +412,7 @@ describe('taxonomy-link', () => {
     assert.equal(db.regions.length, 0);
     assert.equal(result.regionId, null);
     assert.equal(db.venues.length, 1);
-    assert.equal(db.venues[0]?.name, 'Stadtkirche Treysa');
+    assert.equal(db.venues[0]?.name, 'Stadtkirche');
   });
 
   it('creates Treysa suburb chain when Nominatim returns a settlement hit for a church label', async () => {

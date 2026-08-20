@@ -46,9 +46,22 @@ export function streetLineFromAddress(address: string | null | undefined): strin
   return street.length >= 2 ? street : null;
 }
 
+function stripTrailingSettlement(label: string, settlement: string): string {
+  const esc = escapeRegExp(settlement);
+  let out = label
+    .replace(new RegExp(`\\s*\\(${esc}\\)\\s*$`, 'i'), '')
+    .replace(new RegExp(`\\s*[-–]\\s*${esc}\\s*$`, 'i'), '')
+    .replace(new RegExp(`\\s+${esc}\\s*$`, 'i'), '')
+    .trim();
+  out = out.replace(/\s*\((?:hessen|deutschland|germany)\)\s*$/i, '').trim();
+  return out.length >= 2 ? out : label;
+}
+
 /**
  * Prefer building/site name without trailing settlement (Ort belongs on Region).
- * `Schlosskirche Ziegenhain` → `Schlosskirche` when settlement is known or extractable.
+ * - With region/classification hint: strip that settlement when it trails the label.
+ * - Without hint: only compound `*kirche` labels (e.g. Schlosskirche Ziegenhain → Schlosskirche).
+ *   Never strip arbitrary venue nouns (Museum der Schwalm, Gasthaus Simmen, Schloss Hirschgarten).
  */
 export function buildingLocalityFromLabel(
   label: string | null | undefined,
@@ -57,28 +70,21 @@ export function buildingLocalityFromLabel(
   const trimmed = label?.trim().replace(/\s+/g, ' ') ?? '';
   if (!trimmed) return null;
 
-  const settlement =
-    settlementHint?.trim() ||
-    (looksLikeVenueOrAddressLabel(trimmed) ? settlementQueryFromLabel(trimmed) : null);
-
-  if (!settlement || settlement.length < 2) {
-    return trimmed;
+  const hint = settlementHint?.trim() || null;
+  if (hint && hint.length >= 2) {
+    const out = stripTrailingSettlement(trimmed, hint);
+    if (out.toLowerCase() !== trimmed.toLowerCase()) return out;
   }
 
-  const esc = escapeRegExp(settlement);
-  let out = trimmed
-    .replace(new RegExp(`\\s*\\(${esc}\\)\\s*$`, 'i'), '')
-    .replace(new RegExp(`\\s*[-–]\\s*${esc}\\s*$`, 'i'), '')
-    .replace(new RegExp(`\\s+${esc}\\s*$`, 'i'), '')
-    .trim();
-
-  // Drop trailing parenthetical municipality leftovers: "Glashaus Borken (Hessen)" → after
-  // stripping "Borken (Hessen)" if that was the hint; or strip "(Hessen)" alone when left.
-  out = out.replace(/\s*\((?:hessen|deutschland|germany)\)\s*$/i, '').trim();
-
-  if (out.length >= 2 && out.toLowerCase() !== trimmed.toLowerCase()) {
-    return out;
+  const firstToken = trimmed.split(/\s+/)[0] ?? '';
+  if (/\w*kirche$/i.test(firstToken) && looksLikeVenueOrAddressLabel(trimmed)) {
+    const settlement = settlementQueryFromLabel(trimmed);
+    if (settlement && settlement.length >= 2 && !/^(der|die|das|den|dem|des)\b/i.test(settlement)) {
+      const out = stripTrailingSettlement(trimmed, settlement);
+      if (out.toLowerCase() !== trimmed.toLowerCase()) return out;
+    }
   }
+
   return trimmed;
 }
 

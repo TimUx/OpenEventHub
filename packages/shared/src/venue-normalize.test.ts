@@ -29,6 +29,10 @@ describe('venue-normalize', () => {
       buildingLocalityFromLabel('Glashaus Borken (Hessen)', 'Borken (Hessen)'),
       'Glashaus',
     );
+    assert.equal(buildingLocalityFromLabel('Museum der Schwalm'), 'Museum der Schwalm');
+    assert.equal(buildingLocalityFromLabel('Gasthaus Simmen'), 'Gasthaus Simmen');
+    assert.equal(buildingLocalityFromLabel('Schloss Hirschgarten'), 'Schloss Hirschgarten');
+    assert.equal(buildingLocalityFromLabel('Festplatz Treysa', 'Treysa'), 'Festplatz');
     assert.equal(buildingLocalityFromLabel('Treysa'), 'Treysa');
     assert.equal(buildingLocalityFromLabel('Festplatz'), 'Festplatz');
   });
