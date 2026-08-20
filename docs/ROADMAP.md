@@ -247,8 +247,9 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 ## Post-M11 — Portal- und Ops-Nachzüge
 
 Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
-(siehe `CHANGELOG.md`, zuletzt **v0.26.0**):
+(siehe `CHANGELOG.md`, zuletzt **v0.26.1**):
 
+- **v0.26.1:** Venue-Lokalitäts-Normalisierung nur mit Regions-Hint oder Compound-*kirche* (kein Strip von Museum/Gasthaus/…)
 - **v0.26.0:** Admin Lokalität vs Ort (Region); Venue-Adresse/Name-Normalisierung; Compound-*kirche*-Heuristik
 - **v0.25.0:** KI-Orte nur Katalog/Nominatim-Siedlungskette; Admin-Regionen Hierarchie-Baum + Bulk Parent/Löschen; AI-Ollama `host.docker.internal` / klarere fetch-Fehler
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)

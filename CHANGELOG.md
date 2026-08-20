@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.1] - 2026-08-20
+
+### Fixed
+
+- Venue locality normalize no longer strips brand/site names (`Museum der Schwalm`, `Gasthaus Simmen`, …); without a region hint only compound `*kirche` labels drop the settlement suffix
+
 ## [0.26.0] - 2026-08-20
 
 ### Changed
