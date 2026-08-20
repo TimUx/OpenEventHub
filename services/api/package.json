@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/api",
-  "version": "0.26.1",
+  "version": "0.27.0",
   "private": true,
   "description": "OpenEventHub REST/GraphQL API",
   "type": "module",

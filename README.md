@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.26.1 — Safer venue locality normalize** (post-M11)
+**v0.27.0 — Import coverage region tree** (post-M11)
 
-Vorher: v0.26.0 — Lokalität vs Ort, Venue-Normalisierung
+Vorher: v0.26.1 — Safer venue locality normalize
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

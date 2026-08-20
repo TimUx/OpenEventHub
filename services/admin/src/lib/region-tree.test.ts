@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import {
   buildRegionForest,
   collectExpandableIds,
+  collectSubtreeIds,
   defaultExpandedIds,
   flattenVisible,
   formatRegionPath,
@@ -124,5 +125,12 @@ describe('region-tree', () => {
     const forest = buildRegionForest(sample);
     assert.ok(collectExpandableIds(forest).includes('wil'));
     assert.equal(formatRegionPath(['Hessen', 'SEK']), 'Hessen › SEK');
+  });
+
+  it('collectSubtreeIds returns node and all descendants', () => {
+    const forest = buildRegionForest(sample);
+    assert.deepEqual(collectSubtreeIds(forest, 'wil').sort(), ['mer', 'was', 'wil'].sort());
+    assert.deepEqual(collectSubtreeIds(forest, 'orphan'), ['orphan']);
+    assert.deepEqual(collectSubtreeIds(forest, 'missing'), ['missing']);
   });
 });

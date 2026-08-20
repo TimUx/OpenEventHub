@@ -7,17 +7,19 @@ import { useAuth } from '../../components/auth-provider';
 import { PageHeader, Panel, useAdminQuery } from '../../components/ui';
 import { useI18n } from '../../i18n/i18n-provider';
 import { adminFetch } from '../../lib/api';
+import {
+  buildRegionForest,
+  collectExpandableIds,
+  collectSubtreeIds,
+  defaultExpandedIds,
+  flattenVisible,
+  type RegionTreeInput,
+} from '../../lib/region-tree';
 
 const REGION_TYPES = ['country', 'state', 'district', 'municipality', 'suburb', 'city'] as const;
 type RegionType = (typeof REGION_TYPES)[number];
 
-type Region = {
-  id: string;
-  name: string;
-  slug: string;
-  type: string;
-  parentId: string | null;
-};
+type Region = RegionTreeInput;
 
 type Category = {
   id: string;
@@ -64,45 +66,58 @@ export default function ImportSettingsPage() {
   const [coverageSelected, setCoverageSelected] = useState<Set<string>>(new Set());
   const [categoriesSaving, setCategoriesSaving] = useState(false);
   const [categoriesSelected, setCategoriesSelected] = useState<Set<string>>(new Set());
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [expandedInitialized, setExpandedInitialized] = useState(false);
 
-  const regionById = useMemo(
-    () => new Map((regions ?? []).map((item) => [item.id, item])),
-    [regions],
-  );
   const categoryById = useMemo(
     () => new Map((categories ?? []).map((item) => [item.id, item])),
     [categories],
   );
 
+  const forest = useMemo(() => buildRegionForest(regions ?? []), [regions]);
+  const expandableIds = useMemo(() => collectExpandableIds(forest), [forest]);
+  const coverageRows = useMemo(
+    () => flattenVisible(forest, expandedIds),
+    [forest, expandedIds],
+  );
+  const descendantsById = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const region of regions ?? []) {
+      map.set(region.id, collectSubtreeIds(forest, region.id));
+    }
+    return map;
+  }, [regions, forest]);
+
   useEffect(() => {
-    setCoverageSelected(new Set(coverage?.regionIds ?? []));
-  }, [coverage]);
+    if (!regions || expandedInitialized) return;
+    setExpandedIds(defaultExpandedIds(regions));
+    setExpandedInitialized(true);
+  }, [regions, expandedInitialized]);
+
+  useEffect(() => {
+    const roots = coverage?.regionIds ?? [];
+    if (!regions || regions.length === 0) {
+      setCoverageSelected(new Set(roots));
+      return;
+    }
+    // Expand stored roots so parent selection shows all child checkboxes as checked.
+    const expanded = new Set<string>();
+    for (const rootId of roots) {
+      for (const id of collectSubtreeIds(forest, rootId)) {
+        expanded.add(id);
+      }
+    }
+    setCoverageSelected(expanded);
+  }, [coverage, regions, forest]);
 
   useEffect(() => {
     setCategoriesSelected(new Set(categoryAllowlist?.categoryIds ?? []));
   }, [categoryAllowlist]);
 
-  function regionParentLabel(id: string | null): string {
-    if (!id) return t('regions.noParent');
-    return regionById.get(id)?.name ?? id;
-  }
-
   function categoryParentLabel(id: string | null): string {
     if (!id) return t('categories.noParent');
     return categoryById.get(id)?.name ?? id;
   }
-
-  const coverageOptions = useMemo(() => {
-    const list = [...(regions ?? [])];
-    const typeOrder = new Map(REGION_TYPES.map((value, index) => [value, index]));
-    list.sort((a, b) => {
-      const typeCmp =
-        (typeOrder.get(a.type as RegionType) ?? 99) - (typeOrder.get(b.type as RegionType) ?? 99);
-      if (typeCmp !== 0) return typeCmp;
-      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-    });
-    return list;
-  }, [regions]);
 
   const categoryOptions = useMemo(() => {
     const list = [...(categories ?? [])];
@@ -110,11 +125,45 @@ export default function ImportSettingsPage() {
     return list;
   }, [categories]);
 
-  function toggleCoverage(id: string): void {
-    setCoverageSelected((prev) => {
+  function toggleExpand(id: string): void {
+    setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      return next;
+    });
+  }
+
+  function expandAll(): void {
+    setExpandedIds(new Set(expandableIds));
+  }
+
+  function collapseAll(): void {
+    setExpandedIds(new Set());
+  }
+
+  function subtreeSelected(id: string): boolean {
+    const subtree = descendantsById.get(id) ?? [id];
+    return subtree.every((childId) => coverageSelected.has(childId));
+  }
+
+  function subtreePartial(id: string): boolean {
+    const subtree = descendantsById.get(id) ?? [id];
+    if (subtree.length <= 1) return false;
+    const selectedCount = subtree.filter((childId) => coverageSelected.has(childId)).length;
+    return selectedCount > 0 && selectedCount < subtree.length;
+  }
+
+  function toggleCoverage(id: string): void {
+    const subtree = descendantsById.get(id) ?? [id];
+    setCoverageSelected((prev) => {
+      const next = new Set(prev);
+      const selecting = !subtree.every((childId) => next.has(childId));
+      if (selecting) {
+        for (const childId of subtree) next.add(childId);
+      } else {
+        for (const childId of subtree) next.delete(childId);
+      }
       return next;
     });
   }
@@ -190,39 +239,87 @@ export default function ImportSettingsPage() {
         </p>
         {regionsLoading ? (
           <p className="text-sm text-[var(--muted)]">{t('common.loading')}</p>
+        ) : (regions ?? []).length === 0 ? (
+          <p className="mb-3 text-sm text-[var(--muted)]">
+            {t('importSettings.noRegions')}{' '}
+            <Link href="/regions" className="font-semibold text-primary hover:underline">
+              {t('importSettings.manageRegions')}
+            </Link>
+          </p>
         ) : (
-          <div className="mb-3 max-h-72 space-y-1 overflow-y-auto rounded-md border border-[var(--border)] p-2">
-            {coverageOptions.length === 0 ? (
-              <p className="text-sm text-[var(--muted)]">
-                {t('importSettings.noRegions')}{' '}
-                <Link href="/regions" className="font-semibold text-primary hover:underline">
-                  {t('importSettings.manageRegions')}
-                </Link>
-              </p>
-            ) : (
-              coverageOptions.map((item) => (
-                <label
-                  key={item.id}
-                  className="flex cursor-pointer items-start gap-2 rounded px-1 py-1 text-sm hover:bg-[var(--background)]"
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-3.5 w-3.5 rounded border-[var(--border)]"
-                    checked={coverageSelected.has(item.id)}
-                    onChange={() => toggleCoverage(item.id)}
-                  />
-                  <span>
-                    <span className="font-medium">{item.name}</span>
-                    <span className="text-[var(--muted)]">
-                      {' '}
-                      · {t(regionTypeLabelKey(item.type))}
-                      {item.parentId ? ` · ${regionParentLabel(item.parentId)}` : ''}
-                    </span>
-                  </span>
-                </label>
-              ))
-            )}
-          </div>
+          <>
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+              <button
+                type="button"
+                className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+                disabled={expandableIds.length === 0}
+                onClick={expandAll}
+              >
+                {t('regions.expandAll')}
+              </button>
+              <button
+                type="button"
+                className="h-7 rounded border border-[var(--border)] px-2 disabled:opacity-60"
+                disabled={expandedIds.size === 0}
+                onClick={collapseAll}
+              >
+                {t('regions.collapseAll')}
+              </button>
+              <Link href="/regions" className="font-semibold text-primary hover:underline">
+                {t('importSettings.manageRegions')}
+              </Link>
+            </div>
+            <div className="mb-3 max-h-96 space-y-0.5 overflow-y-auto rounded-md border border-[var(--border)] p-2">
+              {coverageRows.map((row) => {
+                const item = row.region;
+                const isExpanded = expandedIds.has(item.id);
+                const checked = subtreeSelected(item.id);
+                const partial = !checked && subtreePartial(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-2 rounded px-1 py-1 text-sm hover:bg-[var(--background)]"
+                    style={{ paddingLeft: `${0.25 + row.depth * 1.25}rem` }}
+                  >
+                    {row.hasChildren ? (
+                      <button
+                        type="button"
+                        className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"
+                        aria-expanded={isExpanded}
+                        aria-label={
+                          isExpanded ? t('regions.collapseNode') : t('regions.expandNode')
+                        }
+                        onClick={() => toggleExpand(item.id)}
+                      >
+                        {isExpanded ? '▼' : '▶'}
+                      </button>
+                    ) : (
+                      <span className="mt-0.5 inline-block w-5 shrink-0" aria-hidden />
+                    )}
+                    <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-3.5 w-3.5 rounded border-[var(--border)]"
+                        checked={checked}
+                        ref={(el) => {
+                          if (el) el.indeterminate = partial;
+                        }}
+                        onChange={() => toggleCoverage(item.id)}
+                        aria-label={item.name}
+                      />
+                      <span className="min-w-0">
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-[var(--muted)]">
+                          {' '}
+                          · {t(regionTypeLabelKey(item.type))}
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
         <button
           type="button"
