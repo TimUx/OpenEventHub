@@ -35,6 +35,8 @@ Bei Auto-Anlage aus Crawls/KI (nur nach Katalog-Match oder Nominatim-Verifikatio
 
 Hinweis: DB-Enum behält `city` / `suburb` aus Kompatibilität; `city` wird wie Kommune behandelt, `suburb` ist Ort. Venue-/Gebäude-/Parkplatz-Namen werden **nicht** als `place` angelegt.
 
+**Lokalität vs. Ort vs. Adresse:** `Venue.name` = Lokalität/Gebäude (z. B. Schlosskirche — ohne Siedlungsnamen); `Venue.regionId` → Region-Ort (z. B. Ziegenhain unter Schwalmstadt); `Venue.address` = reine Straßenzeile (z. B. Paradeplatz). Ingest/Admin/Repair normalisieren auf diese Form; kein separates Prisma-Feld für „Gebäude“.
+
 ### AI-Ingest Regionen-Resolve
 
 Der AI-Service löst `place` → sonst `municipality` → sonst `district` → sonst `region`:

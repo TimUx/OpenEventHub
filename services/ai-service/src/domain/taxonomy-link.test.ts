@@ -526,8 +526,8 @@ describe('taxonomy-link', () => {
     });
 
     assert.deepEqual(result.categoryIds, [tanzkursId]);
-    assert.equal(db.venues[0]?.name, 'Glashaus Borken (Hessen)');
-    assert.equal(db.venues[0]?.address, 'Bahnhofstraße 32, 34582 Borken (Hessen)');
+    assert.equal(db.venues[0]?.name, 'Glashaus');
+    assert.equal(db.venues[0]?.address, 'Bahnhofstraße 32');
   });
 
   it('reuses existing region names case-insensitively from catalog', async () => {

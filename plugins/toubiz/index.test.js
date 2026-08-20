@@ -60,7 +60,7 @@ describe('toubiz plugin', () => {
     assert.equal(occurrences[0]?.startAt, '2026-09-01T18:00:00.000Z');
     assert.equal(occurrences[0]?.endAt, '2026-09-01T21:00:00.000Z');
     assert.equal(occurrences[0]?.venueName, 'Marktplatz');
-    assert.match(occurrences[0]?.venueAddress ?? '', /Homberg/);
+    assert.equal(occurrences[0]?.venueAddress, 'Hauptstr. 1');
     assert.equal(occurrences[0]?.summary, 'Hallo Welt');
     assert.equal(occurrences[0]?.sourceCategories?.[0], 'Tanzkurs');
   });
@@ -107,7 +107,7 @@ describe('toubiz plugin', () => {
       '2026-08-06',
     );
     assert.equal(occurrence?.venueName, 'Glashaus Borken (Hessen)');
-    assert.equal(occurrence?.venueAddress, 'Bahnhofstraße 32, 34582 Borken (Hessen)');
+    assert.equal(occurrence?.venueAddress, 'Bahnhofstraße 32');
     assert.match(occurrence?.description ?? '', /Paartanzkurs/);
     assert.deepEqual(occurrence?.sourceCategories, ['Tanzkurs']);
   });
