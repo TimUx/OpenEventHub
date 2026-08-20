@@ -128,3 +128,9 @@ export {
   type RegionHierarchyType,
   type RegionLookupCandidate,
 } from './nominatim-region-hierarchy.js';
+
+export {
+  buildingLocalityFromLabel,
+  normalizeVenueFields,
+  streetLineFromAddress,
+} from './venue-normalize.js';

@@ -35,6 +35,8 @@ On crawl/AI create (only after catalog match or Nominatim verification):
 
 Note: DB enum keeps `city` / `suburb` for compatibility; `city` is treated as Kommune, `suburb` as Ort. Venue/building/parking names are **not** created as `place`.
 
+**Venue vs. place vs. address:** `Venue.name` = venue/building (e.g. Schlosskirche — without settlement); `Venue.regionId` → hierarchy place (e.g. Ziegenhain under Schwalmstadt); `Venue.address` = street line only (e.g. Paradeplatz). Ingest/admin/repair normalize to this shape; no separate Prisma “building” column.
+
 ### AI ingest region resolve
 
 The AI service resolves `place` → else `municipality` → else `district` → else `region`:

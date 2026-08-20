@@ -116,14 +116,37 @@ function filtersActive(filters: EventFilters): boolean {
   );
 }
 
-function formatVenue(venue: EventRow['venue']): string {
-  if (!venue) return '';
-  const place = venue.name?.trim() || venue.city?.trim() || '';
-  const address = venue.address?.trim() || '';
-  if (place && address && address.toLowerCase() !== place.toLowerCase()) {
-    return `${place}, ${address}`;
+function regionTypeLabel(
+  type: string,
+  t: (key: string) => string,
+): string {
+  if (type === 'suburb' || type === 'city' || type === 'town' || type === 'village') {
+    return t('events.regionTypeSuburb');
   }
-  return place || address;
+  if (type === 'municipality' || type === 'county' || type === 'state' || type === 'country') {
+    return type === 'municipality'
+      ? t('events.regionTypeMunicipality')
+      : t('events.regionTypeOther');
+  }
+  return t('events.regionTypeOther');
+}
+
+function formatVenue(
+  venue: EventRow['venue'],
+  regionById: ReadonlyMap<string, RegionRow>,
+): { primary: string; secondary: string; title: string } {
+  if (!venue) return { primary: '', secondary: '', title: '' };
+  const locality = venue.name?.trim() || venue.city?.trim() || '';
+  const address = venue.address?.trim() || '';
+  const region = venue.regionId ? regionById.get(venue.regionId) : undefined;
+  const ort = region?.name?.trim() || '';
+  const primary =
+    locality && ort && locality.toLowerCase() !== ort.toLowerCase()
+      ? `${locality} · ${ort}`
+      : locality || ort;
+  const secondary = address && address.toLowerCase() !== locality.toLowerCase() ? address : '';
+  const title = [primary, secondary].filter(Boolean).join('\n');
+  return { primary, secondary, title };
 }
 
 function categoryNames(categories: EventRow['categories']): string[] {
@@ -174,7 +197,13 @@ function fromDatetimeLocalAllDay(value: string): string {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString();
 }
 
-function compareEvents(a: EventRow, b: EventRow, key: SortKey, dir: SortDir): number {
+function compareEvents(
+  a: EventRow,
+  b: EventRow,
+  key: SortKey,
+  dir: SortDir,
+  regionById: ReadonlyMap<string, RegionRow>,
+): number {
   const mul = dir === 'asc' ? 1 : -1;
   let left = '';
   let right = '';
@@ -188,8 +217,8 @@ function compareEvents(a: EventRow, b: EventRow, key: SortKey, dir: SortDir): nu
       right = b.startAt;
       break;
     case 'venue':
-      left = formatVenue(a.venue);
-      right = formatVenue(b.venue);
+      left = formatVenue(a.venue, regionById).primary;
+      right = formatVenue(b.venue, regionById).primary;
       break;
     case 'category':
       left = formatCategories(a.categories);
@@ -249,12 +278,30 @@ export default function EventsPage() {
   const { data: regionsData } = useAdminQuery<RegionRow[]>('/api/v1/admin/regions');
   const { data: categoriesData } = useAdminQuery<CategoryRow[]>('/api/v1/admin/categories');
 
+  const regionById = useMemo(() => {
+    const map = new Map<string, RegionRow>();
+    for (const region of regionsData ?? []) {
+      map.set(region.id, region);
+    }
+    return map;
+  }, [regionsData]);
+
+  const placeRegionOptions = useMemo(() => {
+    const placeTypes = new Set(['suburb', 'municipality', 'city', 'town', 'village']);
+    const rows = [...(regionsData ?? [])].filter((region) => placeTypes.has(region.type));
+    if (venueRegionId && !rows.some((region) => region.id === venueRegionId)) {
+      const linked = regionById.get(venueRegionId);
+      if (linked) rows.push(linked);
+    }
+    return rows.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  }, [regionsData, regionById, venueRegionId]);
+
   const events = useMemo(() => {
     const categoryId = debouncedFilters.category;
     const rows = (data ?? []).filter((event) => eventHasCategory(event, categoryId));
-    rows.sort((a, b) => compareEvents(a, b, sortKey, sortDir));
+    rows.sort((a, b) => compareEvents(a, b, sortKey, sortDir, regionById));
     return rows;
-  }, [data, debouncedFilters.category, sortKey, sortDir]);
+  }, [data, debouncedFilters.category, sortKey, sortDir, regionById]);
 
   const categoryOptions = useMemo(() => {
     return [...(categoriesData ?? [])].sort((a, b) =>
@@ -287,43 +334,23 @@ export default function EventsPage() {
     }
     const handle = window.setTimeout(() => {
       setVenueLookupBusy(true);
-      const qLower = q.toLowerCase();
-      const placeTypes = new Set(['suburb', 'municipality', 'city']);
-      const regionHits: VenueSuggestion[] = (regionsData ?? [])
-        .filter(
-          (region) => placeTypes.has(region.type) && region.name.toLowerCase().includes(qLower),
-        )
-        .slice(0, 12)
-        .map((region) => ({
-          id: region.id,
-          name: region.name,
-          city: null,
-          address: null,
-          regionId: region.id,
-          kind: 'region' as const,
-        }));
-
       void adminFetch<Array<Omit<VenueSuggestion, 'kind'>>>(
         `/api/v1/admin/venues?q=${encodeURIComponent(q)}&limit=20`,
         token,
       )
         .then((rows) => {
-          const venueHits: VenueSuggestion[] = rows.map((row) => ({
-            ...row,
-            kind: 'venue' as const,
-          }));
-          const merged = [...regionHits, ...venueHits].filter(
-            (row, index, all) =>
-              all.findIndex((other) => other.name.toLowerCase() === row.name.toLowerCase()) ===
-              index,
+          setVenueSuggestions(
+            rows.map((row) => ({
+              ...row,
+              kind: 'venue' as const,
+            })),
           );
-          setVenueSuggestions(merged.slice(0, 20));
         })
-        .catch(() => setVenueSuggestions(regionHits))
+        .catch(() => setVenueSuggestions([]))
         .finally(() => setVenueLookupBusy(false));
     }, 250);
     return () => window.clearTimeout(handle);
-  }, [token, editingId, venueName, regionsData]);
+  }, [token, editingId, venueName]);
 
   const allSelected = events.length > 0 && selected.size === events.length;
   const selectedCount = selected.size;
@@ -406,17 +433,10 @@ export default function EventsPage() {
   }
 
   function pickVenueSuggestion(suggestion: VenueSuggestion): void {
-    if (suggestion.kind === 'region') {
-      setVenueId(null);
-      setVenueRegionId(suggestion.regionId ?? suggestion.id);
-      setVenueName(suggestion.name);
-      setVenueAddress(suggestion.address ?? '');
-    } else {
-      setVenueId(suggestion.id);
-      setVenueRegionId(suggestion.regionId ?? null);
-      setVenueName(suggestion.name);
-      setVenueAddress(suggestion.address ?? '');
-    }
+    setVenueId(suggestion.id);
+    setVenueRegionId(suggestion.regionId ?? null);
+    setVenueName(suggestion.name);
+    setVenueAddress(suggestion.address ?? '');
     setVenueSuggestions([]);
   }
 
@@ -658,7 +678,7 @@ export default function EventsPage() {
             </label>
             <div className="grid gap-3 md:col-span-2 md:grid-cols-2">
               <label className="relative text-sm md:col-span-2">
-                {t('events.fieldVenuePlace')}
+                {t('events.fieldVenueLocality')}
                 <input
                   className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
                   value={venueName}
@@ -676,7 +696,6 @@ export default function EventsPage() {
                       return;
                     }
                     setVenueId(null);
-                    setVenueRegionId(null);
                   }}
                 />
                 <datalist id="event-venue-suggestions">
@@ -684,11 +703,7 @@ export default function EventsPage() {
                     <option
                       key={`${suggestion.kind}-${suggestion.id}`}
                       value={suggestion.name}
-                      label={
-                        suggestion.kind === 'region'
-                          ? t('events.venueSuggestionRegion')
-                          : suggestion.address || t('events.venueSuggestionVenue')
-                      }
+                      label={suggestion.address || t('events.venueSuggestionVenue')}
                     />
                   ))}
                 </datalist>
@@ -708,15 +723,28 @@ export default function EventsPage() {
                         >
                           <span className="font-medium">{suggestion.name}</span>
                           <span className="text-xs text-[var(--muted)]">
-                            {suggestion.kind === 'region'
-                              ? t('events.venueSuggestionRegion')
-                              : suggestion.address || t('events.venueSuggestionVenue')}
+                            {suggestion.address || t('events.venueSuggestionVenue')}
                           </span>
                         </button>
                       </li>
                     ))}
                   </ul>
                 ) : null}
+              </label>
+              <label className="text-sm md:col-span-2">
+                {t('events.fieldVenueRegion')}
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-[var(--border)] px-3"
+                  value={venueRegionId ?? ''}
+                  onChange={(e) => setVenueRegionId(e.target.value || null)}
+                >
+                  <option value="">{t('events.venueRegionNone')}</option>
+                  {placeRegionOptions.map((region) => (
+                    <option key={region.id} value={region.id}>
+                      {region.name} · {regionTypeLabel(region.type, t)}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="text-sm md:col-span-2">
                 {t('events.fieldVenueAddress')}
@@ -967,7 +995,7 @@ export default function EventsPage() {
           <tbody>
             {events.map((event) => {
               const checked = selected.has(event.id);
-              const venueLabel = formatVenue(event.venue);
+              const venueLabel = formatVenue(event.venue, regionById);
               const names = categoryNames(event.categories);
               return (
                 <tr
@@ -996,8 +1024,22 @@ export default function EventsPage() {
                   <td className="whitespace-nowrap px-2 py-1.5 text-xs">
                     {formatAdminEventWhen(event.startAt, event.allDay, locale)}
                   </td>
-                  <td className="max-w-[12rem] truncate px-2 py-1.5 text-xs" title={venueLabel}>
-                    {venueLabel || '—'}
+                  <td
+                    className="max-w-[14rem] px-2 py-1.5 text-xs"
+                    title={venueLabel.title || undefined}
+                  >
+                    {venueLabel.primary ? (
+                      <>
+                        <p className="truncate">{venueLabel.primary}</p>
+                        {venueLabel.secondary ? (
+                          <p className="truncate text-[11px] text-[var(--muted)]">
+                            {venueLabel.secondary}
+                          </p>
+                        ) : null}
+                      </>
+                    ) : (
+                      '—'
+                    )}
                   </td>
                   <td className="max-w-[14rem] px-2 py-1.5" title={names.join(', ') || undefined}>
                     {(event.categories ?? []).length > 0 ? (

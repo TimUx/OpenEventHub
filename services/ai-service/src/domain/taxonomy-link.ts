@@ -1,4 +1,5 @@
 import {
+  buildingLocalityFromLabel,
   looksLikeVenueOrAddressLabel,
   NominatimClient,
   normalizeCategoryKey,
@@ -6,6 +7,7 @@ import {
   resolveCategorySlugsForEvent,
   resolveDefaultCategorySlug,
   settlementQueryFromLabel,
+  streetLineFromAddress,
   type ClassificationFields,
   type ExtractedEventFields,
   type NominatimSearchHit,
@@ -71,6 +73,7 @@ export type TaxonomyDb = {
     update(args: {
       where: { id: string };
       data: {
+        name?: string;
         regionId?: string | null;
         address?: string | null;
         city?: string | null;
@@ -474,29 +477,45 @@ async function resolveVenue(
   classification: ClassificationFields,
   regionId: string | null,
 ): Promise<string | null> {
-  const name = normalizeLabel(extraction.venueName);
-  if (!name) {
+  const rawName = normalizeLabel(extraction.venueName);
+  if (!rawName) {
     return null;
   }
 
+  const settlementHint =
+    normalizeLabel(classification.place) ||
+    normalizeLabel(classification.municipality) ||
+    settlementQueryFromLabel(rawName);
+  const name = buildingLocalityFromLabel(rawName, settlementHint) || rawName;
+  const address = streetLineFromAddress(extraction.venueAddress);
+
   const existing = await db.venue.findFirst({
     where: {
-      OR: [{ slug: slugify(name) }, { name: { equals: name, mode: 'insensitive' } }],
+      OR: [
+        { slug: slugify(name) },
+        { name: { equals: name, mode: 'insensitive' } },
+        ...(name !== rawName
+          ? [{ slug: slugify(rawName) }, { name: { equals: rawName, mode: 'insensitive' as const } }]
+          : []),
+      ],
     },
   });
 
   const city = normalizeLabel(classification.municipality);
   if (existing) {
-    const nextAddress = extraction.venueAddress?.trim() || null;
     const shouldSetRegion = Boolean(regionId && !existing.regionId);
-    const shouldSetAddress = Boolean(nextAddress && !existing.address);
+    const shouldSetAddress = Boolean(
+      address && (!existing.address || existing.address !== address),
+    );
     const shouldSetCity = Boolean(city && !existing.city);
-    if (shouldSetRegion || shouldSetAddress || shouldSetCity) {
+    const shouldSetName = Boolean(name && name !== existing.name);
+    if (shouldSetRegion || shouldSetAddress || shouldSetCity || shouldSetName) {
       const updated = await db.venue.update({
         where: { id: existing.id },
         data: {
+          ...(shouldSetName ? { name } : {}),
           ...(shouldSetRegion && regionId ? { regionId } : {}),
-          ...(shouldSetAddress ? { address: nextAddress } : {}),
+          ...(shouldSetAddress ? { address } : {}),
           ...(shouldSetCity ? { city } : {}),
         },
       });
@@ -510,7 +529,7 @@ async function resolveVenue(
     data: {
       name,
       slug,
-      address: extraction.venueAddress,
+      address,
       city,
       regionId,
     },

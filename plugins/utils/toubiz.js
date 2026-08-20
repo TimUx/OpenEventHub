@@ -68,14 +68,9 @@ export function extractToubizWidgetConfig(html) {
 
 function addressLine(addr) {
   if (!addr || typeof addr !== 'object') return null;
-  const country = String(addr.country ?? '').trim();
-  const skipCountry = /^(de|deu|deutschland|germany)$/i.test(country);
-  const parts = [
-    [addr.street, addr.streetNumber].filter(Boolean).join(' '),
-    [addr.zip, addr.city].filter(Boolean).join(' '),
-    skipCountry ? '' : country,
-  ].filter(Boolean);
-  return parts.length ? parts.join(', ') : null;
+  // Street (+ house number) only — Ort/PLZ belong on Region after ingest normalize.
+  const street = [addr.street, addr.streetNumber].filter(Boolean).join(' ').trim();
+  return street || null;
 }
 
 function sourceCategories(event) {

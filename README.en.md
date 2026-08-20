@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.25.0 — Verified regions, Admin region tree & AI Ollama fix** (post-M11)
+**v0.26.0 — Venue vs place, address normalization** (post-M11)
 
-Previous: v0.24.1 — Admin bulk events & Toubiz ingest
+Previous: v0.25.0 — Verified regions, Admin region tree & AI Ollama fix
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

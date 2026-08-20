@@ -93,8 +93,16 @@ const SETTLEMENT_TYPES = new Set([
   'country',
 ]);
 
-const VENUE_OR_POI_TOKEN =
-  /\b(kirche|stadtkirche|parkplatz|wanderparkplatz|burgruine|museum|bahnhof|saal|halle|gasthof|gasthaus|hotel|schule|kindergarten|friedhof|sportplatz|festplatz|marktplatz|rathaus|schloss|kloster|kapelle|arena|stadion|theater|kino|bibliothek|buergerhaus|bürgerhaus)\b/i;
+/** Compound POIs (`Schlosskirche`) + common venue nouns — must not become Region leaves. */
+const VENUE_OR_POI_TOKEN_CORE =
+  '\\w*kirche|parkplatz|wanderparkplatz|burgruine|museum|bahnhof|saal|halle|gasthof|gasthaus|hotel|schule|kindergarten|friedhof|sportplatz|festplatz|marktplatz|rathaus|schloss|kloster|kapelle|arena|stadion|theater|kino|bibliothek|buergerhaus|bürgerhaus';
+
+const VENUE_OR_POI_TOKEN = new RegExp(`\\b(?:${VENUE_OR_POI_TOKEN_CORE})\\b`, 'i');
+
+const LEADING_BEFORE_VENUE = new RegExp(
+  `\\b\\S+\\s+(?=(?:${VENUE_OR_POI_TOKEN_CORE})\\b)`,
+  'gi',
+);
 
 const STREET_ADDRESS =
   /\b(\d{1,4}[a-z]?)\b.*\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b|\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b.+\b\d{1,4}[a-z]?\b/i;
@@ -174,12 +182,9 @@ export function settlementQueryFromLabel(label: string): string | null {
   }
 
   // "Zella Blauer Saal" → drop adjective before venue noun, then venue tokens
-  // "Stadtkirche Treysa" → drop venue token, keep settlement words
+  // "Stadtkirche Treysa" / "Schlosskirche Ziegenhain" → drop compound *kirche, keep settlement
   const withoutVenue = trimmed
-    .replace(
-      /\b\S+\s+(?=(?:kirche|stadtkirche|parkplatz|wanderparkplatz|burgruine|museum|bahnhof|saal|halle|gasthof|gasthaus|hotel|schule|kindergarten|friedhof|sportplatz|festplatz|marktplatz|rathaus|schloss|kloster|kapelle|arena|stadion|theater|kino|bibliothek|buergerhaus|bürgerhaus)\b)/gi,
-      ' ',
-    )
+    .replace(LEADING_BEFORE_VENUE, ' ')
     .replace(VENUE_OR_POI_TOKEN, ' ')
     .replace(/\s+/g, ' ')
     .trim();

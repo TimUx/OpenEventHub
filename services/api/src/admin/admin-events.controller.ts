@@ -18,8 +18,10 @@ import {
   CategoryRepository,
   EventRepository,
   EventStatus,
+  RegionRepository,
   VenueRepository,
 } from '@openeventhub/database';
+import { buildingLocalityFromLabel, streetLineFromAddress } from '@openeventhub/shared';
 import { Prisma } from '@prisma/client';
 
 import { AuditService } from '../audit/audit.service.js';
@@ -62,6 +64,7 @@ export class AdminEventsController {
   constructor(
     private readonly events: EventRepository,
     private readonly venues: VenueRepository,
+    private readonly regions: RegionRepository,
     private readonly categories: CategoryRepository,
     private readonly geocoding: GeocodingEnqueueService,
     private readonly audit: AuditService,
@@ -270,10 +273,10 @@ export class AdminEventsController {
       return null;
     }
 
-    const name = typeof venue.name === 'string' ? venue.name.trim().replace(/\s+/g, ' ') : '';
+    const rawName = typeof venue.name === 'string' ? venue.name.trim().replace(/\s+/g, ' ') : '';
     const city =
       venue.city === undefined ? undefined : venue.city === null ? null : venue.city.trim() || null;
-    const address =
+    const rawAddress =
       venue.address === undefined
         ? undefined
         : venue.address === null
@@ -285,6 +288,22 @@ export class AdminEventsController {
         : venue.regionId === null
           ? null
           : venue.regionId.trim() || null;
+
+    let settlementHint: string | null = null;
+    if (regionId) {
+      const region = await this.regions.findById(regionId);
+      settlementHint = region?.name ?? null;
+    }
+
+    const name = rawName
+      ? buildingLocalityFromLabel(rawName, settlementHint) || rawName
+      : '';
+    const address =
+      rawAddress === undefined
+        ? undefined
+        : rawAddress === null
+          ? null
+          : streetLineFromAddress(rawAddress);
 
     if (venue.id) {
       const existing = await this.venues.findById(venue.id);

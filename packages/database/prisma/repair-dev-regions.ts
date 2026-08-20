@@ -7,6 +7,7 @@
  */
 import {
   looksLikeVenueOrAddressLabel,
+  normalizeVenueFields,
   settlementQueryFromLabel,
 } from '@openeventhub/shared';
 import { PrismaClient, RegionType } from '@prisma/client';
@@ -222,6 +223,34 @@ async function cleanupPseudoPlaceRegions(kommuneIds: Map<string, string>): Promi
   return removed;
 }
 
+async function normalizeVenueLocalityAndAddress(): Promise<number> {
+  const venues = await prisma.venue.findMany({
+    include: { region: { select: { name: true } } },
+  });
+  let updated = 0;
+  for (const venue of venues) {
+    const next = normalizeVenueFields({
+      name: venue.name,
+      address: venue.address,
+      settlementHint: venue.region?.name ?? null,
+    });
+    const name = next.name || venue.name;
+    const address = next.address;
+    if (name === venue.name && address === venue.address) continue;
+    await prisma.venue.update({
+      where: { id: venue.id },
+      data: { name, address },
+    });
+    updated += 1;
+    console.warn(
+      `Venue normalize: ${venue.name}${venue.address ? ` / ${venue.address}` : ''} → ${name}${
+        address ? ` / ${address}` : ''
+      }`,
+    );
+  }
+  return updated;
+}
+
 async function main(): Promise<void> {
   // Drop known junk rows (no children expected).
   for (const name of DELETE_NAMES) {
@@ -356,6 +385,9 @@ async function main(): Promise<void> {
 
   const pseudoRemoved = await cleanupPseudoPlaceRegions(kommuneIds);
   console.warn(`Pseudo place regions removed: ${pseudoRemoved}`);
+
+  const venuesNormalized = await normalizeVenueLocalityAndAddress();
+  console.warn(`Venues locality/address normalized: ${venuesNormalized}`);
 
   const summary = await prisma.region.groupBy({ by: ['type'], _count: true });
   console.warn('Region types after repair:', summary);
