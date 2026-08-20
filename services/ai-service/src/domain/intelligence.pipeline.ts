@@ -1,13 +1,14 @@
 import type { AiJobPayload, AiJobResult } from '@openeventhub/shared';
 
 import { calculateConfidenceScore } from '../domain/confidence.score.js';
+import { coalesceExtractedEventFields } from '../domain/coalesce-extraction.js';
 import { parseClassificationJson, parseExtractionJson } from '../domain/json-parsers.js';
 import { prepareContentForLlm } from '../domain/prepare-content.js';
 import type { LlmProvider } from '../ports/llm.provider.js';
 import { type PromptRepository, renderTemplate } from '../ports/prompt.repository.js';
 
 const EXTRACTION_PROMPT = { id: 'event-extraction', version: '1.0.2' } as const;
-const CLASSIFICATION_PROMPT = { id: 'event-classification', version: '1.0.4' } as const;
+const CLASSIFICATION_PROMPT = { id: 'event-classification', version: '1.0.5' } as const;
 
 export interface IntelligencePipelineOptions {
   readonly sourceCount?: number;
@@ -43,7 +44,8 @@ export class EventIntelligencePipeline {
         },
       ],
     });
-    const extraction = parseExtractionJson(extractionCompletion.content);
+    const llmExtraction = parseExtractionJson(extractionCompletion.content);
+    const extraction = coalesceExtractedEventFields(payload.pluginEvent, llmExtraction);
 
     const classificationPrompt = await this.prompts.getPrompt(
       CLASSIFICATION_PROMPT.id,

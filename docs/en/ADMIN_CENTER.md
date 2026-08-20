@@ -18,7 +18,8 @@
 - Sources (create / edit / enable / disable / delete; plugin types
   `html` / `rss` / `ics` / `toubiz`; update interval via dropdown; optional custom cron)
 - Events (spreadsheet table: filter/sort via column headers; checkbox selection with a
-  compact bulk bar for status/delete; edit per row; header shows `pending_moderation` count)
+  compact bulk bar for status/delete via batch endpoints; edit per row; header shows
+  `pending_moderation` count)
 - Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
   seed provides the rural starter catalog; AI does **not** create new categories)
 - Regions (spreadsheet table with column filter/sort; place lookup creates hierarchy;

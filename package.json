@@ -1,6 +1,6 @@
 {
   "name": "openeventhub",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "private": true,
   "description": "AI-powered open-source Event Intelligence Platform",
   "license": "Apache-2.0",

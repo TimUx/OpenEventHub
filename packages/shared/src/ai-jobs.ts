@@ -3,16 +3,6 @@
  * See docs/EVENT_INTELLIGENCE_ENGINE.md and docs/QUEUE_AND_WORKERS.md.
  */
 
-export interface AiJobPayload {
-  readonly content: string;
-  readonly sourceUrl?: string;
-  readonly crawlResultId?: string;
-  readonly eventId?: string;
-  readonly jobId?: string;
-  /** Source that produced the crawl; required to create EventSource links on ingest. */
-  readonly sourceId?: string;
-}
-
 export interface ExtractedEventFields {
   readonly isEvent: boolean;
   readonly title: string | null;
@@ -29,6 +19,20 @@ export interface ExtractedEventFields {
   readonly extractionConfidence: number;
   /** Absolute or relative image URLs from the source (og:image, JSON-LD, etc.). */
   readonly images?: readonly string[];
+  /** Source taxonomy labels (e.g. Toubiz `category.name`); never invented by the LLM. */
+  readonly sourceCategories?: readonly string[];
+}
+
+export interface AiJobPayload {
+  readonly content: string;
+  readonly sourceUrl?: string;
+  readonly crawlResultId?: string;
+  readonly eventId?: string;
+  readonly jobId?: string;
+  /** Source that produced the crawl; required to create EventSource links on ingest. */
+  readonly sourceId?: string;
+  /** Structured plugin candidate; wins over LLM gaps for title/description/venue. */
+  readonly pluginEvent?: ExtractedEventFields;
 }
 
 export interface ClassificationFields {

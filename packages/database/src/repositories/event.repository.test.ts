@@ -135,4 +135,94 @@ describe('EventRepository', () => {
       `delete:${sampleEvent.id}`,
     ]);
   });
+
+  it('updates status for many events and appends versions', async () => {
+    const firstId = '11111111-1111-4111-8111-111111111111';
+    const secondId = '22222222-2222-4222-8222-222222222222';
+    const calls: string[] = [];
+    const prisma = {
+      $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma),
+      event: {
+        findMany: (args: { where: { id: { in: string[] } } }) => {
+          calls.push(`findMany:${args.where.id.in.join(',')}`);
+          return Promise.resolve([
+            {
+              id: firstId,
+              title: 'One',
+              startAt: new Date('2026-08-01T18:00:00.000Z'),
+              endAt: null,
+              allDay: false,
+              venueId: null,
+              organizerId: null,
+              confidenceScore: 0.5,
+            },
+            {
+              id: secondId,
+              title: 'Two',
+              startAt: new Date('2026-08-02T18:00:00.000Z'),
+              endAt: null,
+              allDay: false,
+              venueId: null,
+              organizerId: null,
+              confidenceScore: 0.5,
+            },
+          ]);
+        },
+        updateMany: (args: { where: { id: { in: string[] } }; data: { status: EventStatus } }) => {
+          calls.push(`updateMany:${args.where.id.in.length}:${args.data.status}`);
+          return Promise.resolve({ count: args.where.id.in.length });
+        },
+      },
+      eventVersion: {
+        groupBy: () => {
+          calls.push('version:groupBy');
+          return Promise.resolve([{ eventId: firstId, _max: { versionNumber: 3 } }]);
+        },
+        createMany: (args: { data: Array<{ eventId: string; versionNumber: number }> }) => {
+          calls.push(
+            `version:createMany:${args.data.map((row) => `${row.eventId}:${row.versionNumber}`).join(',')}`,
+          );
+          return Promise.resolve({ count: args.data.length });
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const repository = new EventRepository(prisma);
+    const result = await repository.updateStatusMany(
+      [firstId, secondId, firstId],
+      EventStatus.published,
+      'admin.bulk_status',
+    );
+    assert.equal(result.updated, 2);
+    assert.deepEqual(result.ids, [firstId, secondId]);
+    assert.deepEqual(calls, [
+      `findMany:${firstId},${secondId}`,
+      'updateMany:2:published',
+      'version:groupBy',
+      `version:createMany:${firstId}:4,${secondId}:1`,
+    ]);
+  });
+
+  it('deletes many events by id', async () => {
+    const firstId = '11111111-1111-4111-8111-111111111111';
+    const calls: string[] = [];
+    const prisma = {
+      event: {
+        findMany: () => {
+          calls.push('findMany');
+          return Promise.resolve([{ id: firstId }]);
+        },
+        deleteMany: (args: { where: { id: { in: string[] } } }) => {
+          calls.push(`deleteMany:${args.where.id.in.join(',')}`);
+          return Promise.resolve({ count: args.where.id.in.length });
+        },
+      },
+    } as unknown as PrismaClient;
+
+    const repository = new EventRepository(prisma);
+    const result = await repository.deleteMany([firstId, 'missing']);
+    assert.equal(result.deleted, 1);
+    assert.deepEqual(result.ids, [firstId]);
+    assert.deepEqual(calls, ['findMany', `deleteMany:${firstId}`]);
+  });
 });

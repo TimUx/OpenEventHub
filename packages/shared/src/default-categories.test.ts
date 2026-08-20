@@ -19,7 +19,8 @@ describe('default-categories', () => {
     assert.equal(resolveDefaultCategorySlug('traditionskirmes'), 'kirmes');
     assert.equal(resolveDefaultCategorySlug('Concerts'), 'konzert');
     assert.equal(resolveDefaultCategorySlug('Running'), 'sportveranstaltung');
-    assert.equal(resolveDefaultCategorySlug('fire brigade'), 'feuerwehrfest');
+    assert.equal(resolveDefaultCategorySlug('Tanzkurs'), 'tanzkurs');
+    assert.equal(resolveDefaultCategorySlug('exhibition'), 'ausstellung');
     assert.equal(resolveDefaultCategorySlug('Sonstiges'), 'sonstiges');
   });
 
@@ -32,6 +33,7 @@ describe('default-categories', () => {
     assert.deepEqual(inferDefaultCategorySlugsFromText('Weihnachtsmarkt Treysa'), [
       'weihnachtsmarkt',
     ]);
+    assert.deepEqual(inferDefaultCategorySlugsFromText('Paartanzkurs im Glashaus'), ['tanzkurs']);
   });
 
   it('falls back to Sonstiges when inference is ambiguous or empty', () => {

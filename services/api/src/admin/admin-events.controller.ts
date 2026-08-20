@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -27,6 +28,7 @@ import { CurrentAdmin } from '../auth/current-admin.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { GeocodingEnqueueService } from '../geocoding/geocoding-enqueue.service.js';
+import { parseBulkEventIds } from './admin-events.bulk.js';
 
 const EVENT_STATUSES = new Set<string>(Object.values(EventStatus));
 
@@ -111,6 +113,42 @@ export class AdminEventsController {
   @Roles(AdminRole.admin, AdminRole.moderator, AdminRole.viewer)
   counts() {
     return this.events.countByStatus();
+  }
+
+  @Patch('bulk-status')
+  async bulkStatus(
+    @Body() body: { ids?: unknown; status?: EventStatus; changeReason?: string | null },
+    @CurrentAdmin() admin: AdminJwtPayload,
+  ) {
+    if (body.status === undefined || !EVENT_STATUSES.has(body.status)) {
+      throw new BadRequestException(`Invalid status: ${String(body.status)}`);
+    }
+    const ids = parseBulkEventIds(body.ids);
+    const changeReason = body.changeReason?.trim() || 'admin.bulk_status';
+    const result = await this.events.updateStatusMany(ids, body.status, changeReason);
+    this.audit.record({
+      action: 'event.bulk_status',
+      actorId: admin.sub,
+      actorRole: admin.role,
+      resourceType: 'event',
+      metadata: { status: body.status, changeReason, count: result.updated, ids: result.ids },
+    });
+    return result;
+  }
+
+  @Post('bulk-delete')
+  @Roles(AdminRole.admin)
+  async bulkDelete(@Body() body: { ids?: unknown }, @CurrentAdmin() admin: AdminJwtPayload) {
+    const ids = parseBulkEventIds(body.ids);
+    const result = await this.events.deleteMany(ids);
+    this.audit.record({
+      action: 'event.bulk_delete',
+      actorId: admin.sub,
+      actorRole: admin.role,
+      resourceType: 'event',
+      metadata: { count: result.deleted, ids: result.ids },
+    });
+    return result;
   }
 
   @Get(':id')

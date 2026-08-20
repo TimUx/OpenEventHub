@@ -9,7 +9,7 @@
 - OpenAPI 3.1 document at `/api/docs-json` (Swagger UI: `/api/docs`)
 - GraphQL endpoint at `POST /graphql`
 - JWT authentication for admin routes
-- Rate limiting (`API_RATE_LIMIT` / `API_RATE_LIMIT_TTL_MS`)
+- Rate limiting (`API_RATE_LIMIT` / `API_RATE_LIMIT_TTL_MS`) for public routes and login; JWT admin routes (`/api/v1/admin/*`) are excluded
 
 ## Core Resources
 

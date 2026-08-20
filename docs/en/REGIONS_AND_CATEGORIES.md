@@ -84,6 +84,9 @@ starter catalog (source: `packages/shared` → `DEFAULT_EVENT_CATEGORIES`):
 - Markt
 - Feuerwehrfest
 - Theater
+- Tanzkurs
+- Vortrag
+- Ausstellung
 - Weihnachtsmarkt
 - Sonstiges
 

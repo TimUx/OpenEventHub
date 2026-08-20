@@ -91,7 +91,22 @@ export const DEFAULT_EVENT_CATEGORIES: readonly DefaultEventCategory[] = [
   {
     slug: 'theater',
     name: 'Theater',
-    aliases: ['theatre', 'kultur', 'culture', 'ausstellung', 'exhibition', 'exhibitions'],
+    aliases: ['theatre', 'kultur', 'culture'],
+  },
+  {
+    slug: 'tanzkurs',
+    name: 'Tanzkurs',
+    aliases: ['paartanz', 'tanzstunde', 'tanzworkshop', 'dance class', 'dance course'],
+  },
+  {
+    slug: 'vortrag',
+    name: 'Vortrag',
+    aliases: ['lesung', 'vorlesung', 'lecture', 'talk', 'reading'],
+  },
+  {
+    slug: 'ausstellung',
+    name: 'Ausstellung',
+    aliases: ['exhibition', 'exhibitions', 'vernissage'],
   },
   {
     slug: 'weihnachtsmarkt',

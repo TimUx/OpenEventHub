@@ -18,7 +18,7 @@
 - Quellen (anlegen / bearbeiten / aktivieren / deaktivieren / löschen; Plugin-Typen
   `html` / `rss` / `ics` / `toubiz`; Aktualisierungsintervall per Dropdown; optional eigener Cron)
 - Veranstaltungen (Tabellenansicht: Filter/Sortierung in Spaltenköpfen; Checkbox-Auswahl
-  mit kompakter Bulk-Leiste für Status/Löschen; Bearbeiten je Zeile;
+  mit kompakter Bulk-Leiste für Status/Löschen über Sammel-Endpunkte; Bearbeiten je Zeile;
   Header zeigt Anzahl `pending_moderation`)
 - Kategorien (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
   Seed liefert den ländlichen Starterkatalog; KI legt **keine** neuen Kategorien an)

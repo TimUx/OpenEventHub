@@ -61,6 +61,7 @@ Defined in `@openeventhub/shared`:
 | `venueAddress` | `string \| null` |
 | `isRecurring` | `boolean` |
 | `extractionConfidence` | `number` (0..1) |
+| `sourceCategories` | `string[]` optional (EMS labels, e.g. Toubiz `category.name`) |
 
 ## Loading
 

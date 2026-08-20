@@ -24,7 +24,7 @@ prompts/
 | Prompt ID              | Version | Task                     |
 | ---------------------- | ------- | ------------------------ |
 | `event-extraction`     | `1.0.2` | LLM extraction           |
-| `event-classification` | `1.0.2` | Category / region / tags |
+| `event-classification` | `1.0.5` | Category / region / tags |
 
 Older versions under each prompt id remain available for audit. Active versions are selected in the AI service pipeline.
 

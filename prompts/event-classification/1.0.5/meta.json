@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.5",
+  "task": "classification",
+  "description": "Assign taxonomy; prefer sourceCategories from EMS; curated rural catalog including Tanzkurs/Vortrag/Ausstellung; place-from-title into place (Ort).",
+  "responseFormat": "json"
+}

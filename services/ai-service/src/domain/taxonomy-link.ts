@@ -1,4 +1,5 @@
 import {
+  normalizeCategoryKey,
   resolveCategorySlugsForEvent,
   resolveDefaultCategorySlug,
   type ClassificationFields,
@@ -159,10 +160,15 @@ export function matchCategoryIdsFromCatalog(
     readonly title?: string | null;
     readonly summary?: string | null;
     readonly description?: string | null;
+    readonly sourceCategories?: readonly string[];
   },
 ): string[] {
   const bySlug = new Map(catalog.map((row) => [row.slug, row]));
-  const byName = new Map(catalog.map((row) => [row.name.toLowerCase(), row]));
+  const sourceIds = matchLabelsToCatalogIds(content?.sourceCategories ?? [], catalog);
+  if (sourceIds.length > 0) {
+    return sourceIds;
+  }
+
   const ids: string[] = [];
 
   const slugs = resolveCategorySlugsForEvent({
@@ -183,15 +189,36 @@ export function matchCategoryIdsFromCatalog(
   // Preserve legacy name-only catalog hits when curated slug resolution is empty
   // but operators added custom category names (still no create).
   if (ids.length === 0) {
-    for (const raw of labels) {
-      const name = normalizeLabel(raw);
-      if (!name) continue;
-      const curatedSlug = resolveDefaultCategorySlug(name);
-      if (curatedSlug) continue;
-      const category = byName.get(name.toLowerCase()) ?? null;
+    ids.push(...matchLabelsToCatalogIds(labels, catalog));
+  }
+
+  return [...new Set(ids)];
+}
+
+function matchLabelsToCatalogIds(
+  labels: readonly string[],
+  catalog: readonly CategoryMatchRow[],
+): string[] {
+  const bySlug = new Map(catalog.map((row) => [row.slug, row]));
+  const byName = new Map(catalog.map((row) => [row.name.toLowerCase(), row]));
+  const byNorm = new Map(catalog.map((row) => [normalizeCategoryKey(row.name), row]));
+  const ids: string[] = [];
+
+  for (const raw of labels) {
+    const slug = resolveDefaultCategorySlug(raw);
+    if (slug) {
+      const category = bySlug.get(slug);
       if (category) {
         ids.push(category.id);
+        continue;
       }
+    }
+    const name = raw.trim();
+    if (!name) continue;
+    const category =
+      byName.get(name.toLowerCase()) ?? byNorm.get(normalizeCategoryKey(name)) ?? null;
+    if (category) {
+      ids.push(category.id);
     }
   }
 
@@ -203,6 +230,11 @@ async function resolveCategories(
   classification: ClassificationFields,
   extraction: ExtractedEventFields,
 ): Promise<string[]> {
+  const sourceIds = await matchLabelsOnDb(db, extraction.sourceCategories ?? []);
+  if (sourceIds.length > 0) {
+    return sourceIds;
+  }
+
   const labels = [...classification.categories, ...classification.subcategories];
   const slugs = resolveCategorySlugsForEvent({
     labels,
@@ -221,19 +253,32 @@ async function resolveCategories(
   }
 
   if (ids.length === 0) {
-    for (const raw of labels) {
-      const name = normalizeLabel(raw);
-      if (!name) continue;
-      if (resolveDefaultCategorySlug(name)) continue;
-      const category = await db.category.findFirst({
-        where: { name: { equals: name, mode: 'insensitive' } },
-      });
-      if (category) {
-        ids.push(category.id);
-      }
-    }
+    ids.push(...(await matchLabelsOnDb(db, labels)));
   }
 
+  return [...new Set(ids)];
+}
+
+async function matchLabelsOnDb(db: TaxonomyDb, labels: readonly string[]): Promise<string[]> {
+  const ids: string[] = [];
+  for (const raw of labels) {
+    const name = normalizeLabel(raw);
+    if (!name) continue;
+    const slug = resolveDefaultCategorySlug(name);
+    if (slug) {
+      const category = await db.category.findUnique({ where: { slug } });
+      if (category) {
+        ids.push(category.id);
+        continue;
+      }
+    }
+    const category = await db.category.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' } },
+    });
+    if (category) {
+      ids.push(category.id);
+    }
+  }
   return [...new Set(ids)];
 }
 
@@ -311,13 +356,17 @@ async function resolveVenue(
 
   const city = normalizeLabel(classification.municipality);
   if (existing) {
-    if (regionId && !existing.regionId) {
+    const nextAddress = extraction.venueAddress?.trim() || null;
+    const shouldSetRegion = Boolean(regionId && !existing.regionId);
+    const shouldSetAddress = Boolean(nextAddress && !existing.address);
+    const shouldSetCity = Boolean(city && !existing.city);
+    if (shouldSetRegion || shouldSetAddress || shouldSetCity) {
       const updated = await db.venue.update({
         where: { id: existing.id },
         data: {
-          regionId,
-          ...(extraction.venueAddress ? { address: extraction.venueAddress } : {}),
-          ...(city ? { city } : {}),
+          ...(shouldSetRegion && regionId ? { regionId } : {}),
+          ...(shouldSetAddress ? { address: nextAddress } : {}),
+          ...(shouldSetCity ? { city } : {}),
         },
       });
       return updated.id;

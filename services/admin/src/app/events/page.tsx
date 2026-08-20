@@ -474,13 +474,15 @@ export default function EventsPage() {
     setFormError(null);
     try {
       const ids = [...selected];
-      for (const id of ids) {
-        await adminFetch(`/api/v1/admin/events/${id}`, token, {
+      const result = await adminFetch<{ updated: number }>(
+        '/api/v1/admin/events/bulk-status',
+        token,
+        {
           method: 'PATCH',
-          body: JSON.stringify({ status: bulkStatus, changeReason: 'admin.bulk_status' }),
-        });
-      }
-      setMessage(t('events.bulkStatusUpdated', { count: ids.length }));
+          body: JSON.stringify({ ids, status: bulkStatus, changeReason: 'admin.bulk_status' }),
+        },
+      );
+      setMessage(t('events.bulkStatusUpdated', { count: result.updated }));
       setSelected(new Set());
       if (editingId && ids.includes(editingId)) {
         setStatus(bulkStatus);
@@ -500,10 +502,15 @@ export default function EventsPage() {
     setFormError(null);
     try {
       const ids = [...selected];
-      for (const id of ids) {
-        await adminFetch(`/api/v1/admin/events/${id}`, token, { method: 'DELETE' });
-      }
-      setMessage(t('events.bulkDeleted', { count: ids.length }));
+      const result = await adminFetch<{ deleted: number }>(
+        '/api/v1/admin/events/bulk-delete',
+        token,
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids }),
+        },
+      );
+      setMessage(t('events.bulkDeleted', { count: result.deleted }));
       if (editingId && ids.includes(editingId)) {
         setEditingId(null);
       }

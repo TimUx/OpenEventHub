@@ -247,7 +247,7 @@ Niemals mehrere große Meilensteine parallel umsetzen.
 ## Post-M11 — Portal- und Ops-Nachzüge
 
 Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiterungen nachgezogen
-(siehe `CHANGELOG.md`, zuletzt **v0.24.0**):
+(siehe `CHANGELOG.md`, zuletzt **v0.24.1**):
 
 - Flaches Frontend-/Admin-UI (FestSchmiede-inspiriert), wählbare Akzentfarben (WCAG AA), Brand-Mark (Kalender + Hub)
 - Event-Aktionen: Karte/Kalender als Icon-Buttons; Filter und Kalender-Export als aufklappbare Panels auf der Veranstaltungsliste
@@ -266,7 +266,8 @@ Nach Abschluss der Roadmap-Pakete M1–M11 wurden folgende Produkt-/Ops-Erweiter
 - Admin: collapsible Nav-Gruppen; optionales White-Label (`NEXT_PUBLIC_ADMIN_TITLE` / `_LOGO_URL`)
 - Abdeckungsgebiet (Coverage Scope) und Kategorie-Allowlist unter Admin → Import-Einstellungen; AI-Ingest verwirft Orte/Kategorien außerhalb
 - HTML-Plugin multi-format (`1.3.0`): Tabellen/Listen/Div/JSON-LD/`<time>`/Klartext; Embedded EMS **Toubiz** (alle zukünftigen Termine)
-- Dediziertes Plugin `toubiz` (`mein.toubiz.de` / `<toubiz-widget>`)
+- Dediziertes Plugin `toubiz` **1.1.0** (`mein.toubiz.de` / `<toubiz-widget>`): `eventDates` + Event-Detail für Adresse/Beschreibung; EMS-Kategorie (`sourceCategories`) vor LLM
+- Admin Events: Bulk-Status/Löschen über Sammel-Endpunkte (kein 429 Rate-Limit)
 - Scheduler: ein Tick pro Distinct-Cron; serielle Crawls
 - Strikte Docker-Netztrennung (`edge` / `internal`) mit minimalen Host-Ports
 - UI-i18n (`de`/`en`) und erweiterte Anzeigemodi (Events/Kalender)
