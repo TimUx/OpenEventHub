@@ -461,7 +461,7 @@ export const en = {
       'Controls which events are kept on ingest — separate from the region and category catalogs.',
     coverageTitle: 'Coverage area',
     coverageDescription:
-      'Select one or more regions for which events are ingested. A district includes all child municipalities — add extra places (e.g. Alsfeld) separately. Empty = no geo filter.',
+      'Expand the hierarchy and tick regions. Selecting a parent also selects all child regions. Empty = no geo filter.',
     coverageSave: 'Save coverage',
     coverageSaved: 'Coverage area updated',
     coverageEmpty: 'No region selected (filter off).',

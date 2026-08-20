@@ -189,3 +189,34 @@ export function flattenVisible<T extends RegionTreeInput>(
 export function formatRegionPath(pathNames: readonly string[], separator = ' › '): string {
   return pathNames.join(separator);
 }
+
+/**
+ * Collect a node and all descendants from a forest (for coverage/bulk selection).
+ * Returns `[rootId]` when the id is not found.
+ */
+export function collectSubtreeIds<T extends RegionTreeInput>(
+  forest: readonly RegionTreeNode<T>[],
+  rootId: string,
+): string[] {
+  function find(nodes: readonly RegionTreeNode<T>[]): RegionTreeNode<T> | null {
+    for (const node of nodes) {
+      if (node.region.id === rootId) return node;
+      const nested = find(node.children);
+      if (nested) return nested;
+    }
+    return null;
+  }
+
+  const root = find(forest);
+  if (!root) return [rootId];
+
+  const ids: string[] = [];
+  function walk(node: RegionTreeNode<T>): void {
+    ids.push(node.region.id);
+    for (const child of node.children) {
+      walk(child);
+    }
+  }
+  walk(root);
+  return ids;
+}

@@ -459,7 +459,7 @@ export const de = {
       'Steuert, welche Events beim Import übernommen werden — getrennt vom Regionen- und Kategoriekatalog.',
     coverageTitle: 'Abdeckungsgebiet',
     coverageDescription:
-      'Wähle eine oder mehrere Regionen, für die Events übernommen werden. Ein Landkreis schließt alle untergeordneten Kommunen und Orte ein — Extra-Orte (z. B. Alsfeld) separat anhaken. Leer = kein Geo-Filter.',
+      'Hierarchie aufklappen und Regionen anhaken. Ein übergeordneter Klick wählt alle Unterregionen mit. Leer = kein Geo-Filter.',
     coverageSave: 'Abdeckung speichern',
     coverageSaved: 'Abdeckungsgebiet aktualisiert',
     coverageEmpty: 'Keine Region gewählt (Filter aus).',
