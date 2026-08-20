@@ -16,7 +16,7 @@ export {
   requireEncryptionKey,
 } from './crypto/secret-box.js';
 
-export { OpenAiCompatibleProvider } from './adapters/openai-compatible.provider.js';
+export { OpenAiCompatibleProvider, formatFetchFailure } from './adapters/openai-compatible.provider.js';
 export { AnthropicProvider } from './adapters/anthropic.provider.js';
 export { GeminiProvider } from './adapters/gemini.provider.js';
 export {

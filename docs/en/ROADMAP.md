@@ -247,8 +247,9 @@ Never implement multiple large milestones in parallel.
 ## Post-M11 — Portal and ops follow-ups
 
 After roadmap packages M1–M11, these product/ops enhancements were added
-(see `CHANGELOG.md`, latest **v0.24.1**):
+(see `CHANGELOG.md`, latest **v0.25.0**):
 
+- **v0.25.0:** AI places only via catalog/Nominatim settlement chain; Admin Regions hierarchy tree + bulk parent/delete; AI Ollama `host.docker.internal` / clearer fetch errors
 - Flat frontend/admin UI (FestSchmiede-inspired), selectable accents (WCAG AA), brand mark (calendar + hub)
 - Event actions: map/calendar as icon buttons; filters and calendar export as collapsible panels on the event list
 - Calendar subscription (`/calendar.ics`) and bulk `.ics` export of filtered events

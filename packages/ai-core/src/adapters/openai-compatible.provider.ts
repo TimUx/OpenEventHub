@@ -100,7 +100,28 @@ export async function postJson<T>(
       throw new Error(`LLM HTTP ${response.status}: ${errorBody}`);
     }
     return (await response.json()) as T;
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`LLM request timed out after ${timeoutMs}ms`);
+    }
+    if (err instanceof Error && /LLM HTTP/.test(err.message)) {
+      throw err;
+    }
+    throw new Error(formatFetchFailure(url, err));
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/** Surface undici/Node `fetch failed` with DNS/connect cause for admin error logs. */
+export function formatFetchFailure(url: string, err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const cause =
+    err instanceof Error && err.cause instanceof Error
+      ? err.cause.message
+      : err instanceof Error && err.cause != null
+        ? String(err.cause)
+        : null;
+  const detail = cause && !message.includes(cause) ? `${message}: ${cause}` : message;
+  return `LLM fetch failed (${url}): ${detail}`;
 }

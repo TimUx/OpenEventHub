@@ -31,11 +31,20 @@ und in Admin → KI-Einstellungen (bzw. Seed über `OLLAMA_BASE_URL`) eine norma
 | Host-Port `0.0.0.0:11434` (empfohlen lokal) | `http://host.docker.internal:11434/v1` | App-Services haben `extra_hosts: host.docker.internal:host-gateway` |
 | LAN-/Server-IP oder Hostname | `http://192.168.1.50:11434/v1` | Beliebiger erreichbarer Host |
 | Remote / Reverse-Proxy | `https://llm.example.com/v1` | Wie ChatGPT-kompatible Gateways |
+| Bundled Compose `oeh-ollama` (`OLLAMA_DEPLOY=1`) | `http://ollama:11434/v1` | Hostname `ollama` nur im OEH-Compose-Netz |
+
+**Wichtig — Hostname `ollama`:** Löst nur auf, wenn der Compose-Dienst `ollama` läuft
+(`OLLAMA_DEPLOY=1`) oder ihr Ollama absichtlich über `OLLAMA_EXTERNAL_NETWORK` anbindet.
+Bei externem Ollama (z. B. `ownai-ollama` nur auf Host-Port 11434) führt
+`http://ollama:11434/v1` zu AI-Queue-Fehlern (`fetch failed` / `ENOTFOUND ollama`).
+Dann **`http://host.docker.internal:11434/v1`** und das tatsächlich geladene Modell
+(Admin → KI-Einstellungen → Provider-Test) setzen.
 
 **Wichtig:** Bind nur auf `127.0.0.1:11434` ist aus anderen Containern **nicht** erreichbar.
 Dann entweder auf `0.0.0.0` (oder eine LAN-Adresse) publishen — oder optional (unten) ein gemeinsames Docker-Netz.
 
-Seed und Admin-Profil **Local Ollama** verwenden `OLLAMA_BASE_URL` / `OLLAMA_MODEL`.
+Seed und Admin-Profil **Local Ollama** verwenden `OLLAMA_BASE_URL` / `OLLAMA_MODEL`
+(Default-URL ohne Env: `http://host.docker.internal:11434/v1`).
 Nach Umstellung ggf. Admin → KI-Einstellungen prüfen oder `db:seed` erneut ausführen.
 
 Beim Seed wird das Profil angelegt bzw. aktualisiert (`timeoutMs` mindestens 180 000) und als

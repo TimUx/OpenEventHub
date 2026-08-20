@@ -23,6 +23,7 @@ import { CurrentAdmin } from '../auth/current-admin.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { RegionLookupService } from '../geocoding/region-lookup.service.js';
+import { parseBulkRegionIds } from './admin-regions.bulk.js';
 import { slugifyLabel } from './slugify.js';
 
 const REGION_TYPES = new Set<string>(Object.values(RegionType));
@@ -159,6 +160,74 @@ export class AdminRegionsController {
       }
       throw err;
     }
+  }
+
+  @Patch('bulk-parent')
+  async bulkParent(
+    @Body() body: { ids?: unknown; parentId?: string | null },
+    @CurrentAdmin() admin: AdminJwtPayload,
+  ) {
+    const ids = parseBulkRegionIds(body.ids);
+    if (body.parentId === undefined) {
+      throw new BadRequestException('parentId is required (use null for root)');
+    }
+    const parentId = body.parentId === null ? null : String(body.parentId).trim() || null;
+
+    const existing = await this.regions.findManyByIds(ids);
+    if (existing.length !== ids.length) {
+      const found = new Set(existing.map((row) => row.id));
+      const missing = ids.filter((id) => !found.has(id));
+      throw new NotFoundException(`Regions not found: ${missing.slice(0, 5).join(', ')}`);
+    }
+
+    if (parentId !== null) {
+      const parent = await this.regions.findById(parentId);
+      if (!parent) {
+        throw new BadRequestException('parentId not found');
+      }
+      for (const id of ids) {
+        await this.assertValidParent(id, parentId);
+      }
+    }
+
+    const result = await this.regions.updateParentMany(ids, parentId);
+    this.audit.record({
+      action: 'region.bulk_parent',
+      actorId: admin.sub,
+      actorRole: admin.role,
+      resourceType: 'region',
+      metadata: { parentId, count: result.updated, ids: result.ids },
+    });
+    return result;
+  }
+
+  @Post('bulk-delete')
+  @Roles(AdminRole.admin)
+  async bulkDelete(@Body() body: { ids?: unknown }, @CurrentAdmin() admin: AdminJwtPayload) {
+    const ids = parseBulkRegionIds(body.ids);
+    const existing = await this.regions.findManyByIds(ids);
+    if (existing.length !== ids.length) {
+      const found = new Set(existing.map((row) => row.id));
+      const missing = ids.filter((id) => !found.has(id));
+      throw new NotFoundException(`Regions not found: ${missing.slice(0, 5).join(', ')}`);
+    }
+
+    const childCount = await this.regions.countChildrenOfIds(ids);
+    if (childCount > 0) {
+      throw new ConflictException(
+        'One or more regions have child regions; reassign or delete children first',
+      );
+    }
+
+    const result = await this.regions.deleteMany(ids);
+    this.audit.record({
+      action: 'region.bulk_delete',
+      actorId: admin.sub,
+      actorRole: admin.role,
+      resourceType: 'region',
+      metadata: { count: result.deleted, ids: result.ids },
+    });
+    return result;
   }
 
   @Patch(':id')

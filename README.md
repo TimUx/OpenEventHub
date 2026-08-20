@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.24.1 — Admin bulk events & Toubiz ingest** (post-M11)
+**v0.25.0 — Verified regions, Admin region tree & AI Ollama fix** (post-M11)
 
-Vorher: v0.24.0 — Geocoding worker, event media & Admin events/i18n
+Vorher: v0.24.1 — Admin bulk events & Toubiz ingest
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates

@@ -22,9 +22,10 @@
   Header zeigt Anzahl `pending_moderation`)
 - Kategorien (Tabelle mit Spaltenfilter/-sortierung; manuell anlegen / bearbeiten / löschen;
   Seed liefert den ländlichen Starterkatalog; KI legt **keine** neuen Kategorien an)
-- Regionen (Tabelle mit Spaltenfilter/-sortierung; Ortssuche legt Hierarchie an;
-  Mehrdeutigkeit mit Auswahl; manuell bearbeiten / löschen;
-  KI kann Orte/Hierarchie per Find-or-create ergänzen)
+- Regionen (Hierarchie-Baum Land→…→Ort, aufklappbar; Ortssuche legt Hierarchie an;
+  Mehrdeutigkeit mit Auswahl; manuell bearbeiten / löschen; Checkbox-Auswahl mit
+  Bulk-Leiste für Parent/Wurzel setzen und Löschen; KI ergänzt Orte/Hierarchie nur
+  nach Katalog-Match oder Nominatim-verifizierter Siedlungskette)
 - **Import-Einstellungen** (Abdeckungsgebiet und Kategorie-Allowlist für den Ingest;
   getrennt vom Regionen-/Kategoriekatalog)
 - Moderation

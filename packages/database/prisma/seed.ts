@@ -128,7 +128,7 @@ async function main(): Promise<void> {
     update: {},
   });
 
-  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://ollama:11434/v1';
+  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://host.docker.internal:11434/v1';
   const ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.2';
 
   const existingOllama = await prisma.aiProviderProfile.findFirst({

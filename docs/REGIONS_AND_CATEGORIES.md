@@ -7,9 +7,9 @@
 | Aspekt | Verhalten |
 |--------|-----------|
 | Startwerte | Seed (`db:seed`) legt Regionen (z. B. Deutschland → Bayern → München) und einen **kuratierten flachen Kategoriekatalog** für den ländlichen Raum an (Kirmes, Schützenfest, Dorffest, Konzert, …) |
-| Crawls / KI | **Orte/Tags:** Find-or-create. **Kategorien:** nur Zuordnung auf bestehende Katalog-Einträge (Alias-Mapping DE/EN); keine Auto-Anlage neuer Kategorien |
-| Orte | Kein vollständiger Ortskatalog nötig — Kommunen/Orte entstehen aus der Klassifikation (`municipality` / `place` / `region` / `district`) und optional über Venues |
-| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen; **Regionen-Anlage** per Ortssuche (OpenStreetMap/Nominatim) legt fehlende Eltern mit an; bei Mehrdeutigkeit Auswahl; DEV-Bereinigung Kategorien: `bash scripts/reset-categories.sh`; Regionen: `bash scripts/repair-dev-regions.sh` |
+| Crawls / KI | **Tags:** Find-or-create. **Kategorien:** nur Zuordnung auf bestehende Katalog-Einträge (Alias-Mapping DE/EN); keine Auto-Anlage neuer Kategorien. **Orte/Regionen:** nur Katalog-Match **oder** Nominatim-verifizierte Siedlungs-/Verwaltungskette — keine Blind-Anlage aus LLM-Venue-/POI-Labels |
+| Orte | Ort = Dorf/Stadtteil unter Kommune. Venue-Namen (`venueName`/`venueAddress`) bleiben Venues. Fehlende Siedlungen entstehen nur nach Nominatim-Treffer als volle Hierarchie (Land → … → Blatt) |
+| Betrieb | Admin Center unter **Kategorien** und **Regionen** zum Nachpflegen, Umbenennen, Hierarchie und Löschen; **Regionen-Anlage** per Ortssuche (OpenStreetMap/Nominatim) legt fehlende Eltern mit an; bei Mehrdeutigkeit Auswahl; DEV-Bereinigung Kategorien: `bash scripts/reset-categories.sh`; Regionen (inkl. Pseudo-POI-Orte): `bash scripts/repair-dev-regions.sh` |
 
 Filter bleiben moderierbar: neu angelegte Einträge erscheinen in Admin und können bereinigt oder zusammengeführt werden.
 
@@ -23,7 +23,7 @@ Land
 
 Beispiel: `Deutschland › Hessen › Schwalm-Eder-Kreis › Willingshausen › Merzhausen`
 
-Bei Auto-Anlage aus Crawls:
+Bei Auto-Anlage aus Crawls/KI (nur nach Katalog-Match oder Nominatim-Verifikation):
 
 | Klassifikationsfeld | RegionType (DB) | UI-Bezeichnung | Parent |
 |---------------------|-----------------|----------------|--------|
@@ -33,7 +33,17 @@ Bei Auto-Anlage aus Crawls:
 | `municipality` | `municipality` | Kommune | Landkreis |
 | `place` | `suburb` | Ort | Kommune (sonst Landkreis) |
 
-Hinweis: DB-Enum behält `city` / `suburb` aus Kompatibilität; `city` wird wie Kommune behandelt, `suburb` ist Ort.
+Hinweis: DB-Enum behält `city` / `suburb` aus Kompatibilität; `city` wird wie Kommune behandelt, `suburb` ist Ort. Venue-/Gebäude-/Parkplatz-Namen werden **nicht** als `place` angelegt.
+
+### AI-Ingest Regionen-Resolve
+
+Der AI-Service löst `place` → sonst `municipality` → sonst `district` → sonst `region`:
+
+1. Bestehenden Katalog treffen (Name case-insensitive, passender Typ)
+2. Sonst Nominatim (DE), strenger Siedlungs-/Admin-Filter; Kette Land→…→Blatt per Find-or-create
+3. Kein Treffer → `regionId = null` (Venue bleibt); kein Blind-Create aus LLM-Labels
+
+Admin-Lookup bleibt breiter (Operator-Auswahl).
 
 ### Ortssuche im Admin (Hierarchie-Anlage)
 

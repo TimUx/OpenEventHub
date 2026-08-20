@@ -114,8 +114,13 @@ export {
 export {
   buildRegionHierarchyFromNominatim,
   candidateIdFromNominatim,
+  isSettlementOrAdminNominatimHit,
   isUsableNominatimPlaceHit,
+  looksLikeVenueOrAddressLabel,
+  pickBestSettlementCandidate,
+  settlementQueryFromLabel,
   toRegionLookupCandidate,
+  toSettlementRegionLookupCandidate,
   uniqueRegionLookupCandidates,
   type NominatimAddress,
   type NominatimSearchHit,

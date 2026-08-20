@@ -1,8 +1,14 @@
 /**
  * Repair DEV region hierarchy to Land → Bundesland → Landkreis → Kommune → Ort.
+ * Also removes pseudo-Ort rows (Kirche, Parkplatz, Straße, …) and reattaches venues.
  *
  *   DATABASE_URL=... npx tsx packages/database/prisma/repair-dev-regions.ts
+ *   # or: bash scripts/repair-dev-regions.sh
  */
+import {
+  looksLikeVenueOrAddressLabel,
+  settlementQueryFromLabel,
+} from '@openeventhub/shared';
 import { PrismaClient, RegionType } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -127,6 +133,93 @@ async function upsertNamed(
   return prisma.region.create({
     data: { name, type, parentId, slug },
   });
+}
+
+async function resolveSettlementTargetId(
+  rawName: string,
+  kommuneIds: Map<string, string>,
+): Promise<string | null> {
+  const settlement = settlementQueryFromLabel(rawName);
+  if (!settlement) return null;
+
+  const key = norm(settlement);
+  const kommuneName = ORT_TO_KOMMUNE[key];
+  if (kommuneName) {
+    const kommuneId = kommuneIds.get(norm(kommuneName));
+    if (!kommuneId) return null;
+    const existingOrt = await prisma.region.findFirst({
+      where: {
+        name: { equals: settlement, mode: 'insensitive' },
+        type: RegionType.suburb,
+        parentId: kommuneId,
+      },
+    });
+    if (existingOrt) return existingOrt.id;
+    const slug = key.replace(/\s+/g, '-');
+    const created = await upsertNamed(settlement, RegionType.suburb, kommuneId, slug);
+    return created.id;
+  }
+
+  if (kommuneIds.has(key)) {
+    return kommuneIds.get(key) ?? null;
+  }
+
+  const existing = await prisma.region.findFirst({
+    where: {
+      name: { equals: settlement, mode: 'insensitive' },
+      type: { in: [RegionType.suburb, RegionType.municipality] },
+      NOT: { name: { equals: rawName, mode: 'insensitive' } },
+    },
+  });
+  return existing?.id ?? null;
+}
+
+/**
+ * Drop suburb/municipality rows that are clearly venues or street addresses.
+ * Venues keep their events; regionId is moved to a real settlement when possible.
+ */
+async function cleanupPseudoPlaceRegions(kommuneIds: Map<string, string>): Promise<number> {
+  const candidates = await prisma.region.findMany({
+    where: {
+      type: { in: [RegionType.suburb, RegionType.municipality, RegionType.city] },
+    },
+  });
+
+  let removed = 0;
+  for (const row of candidates) {
+    if (kommuneIds.has(norm(row.name))) continue;
+    if (ORT_TO_KOMMUNE[norm(row.name)]) continue;
+    if (!looksLikeVenueOrAddressLabel(row.name)) continue;
+
+    const targetId = await resolveSettlementTargetId(row.name, kommuneIds);
+
+    await prisma.venue.updateMany({
+      where: { regionId: row.id },
+      data: { regionId: targetId },
+    });
+    await prisma.region.updateMany({
+      where: { parentId: row.id },
+      data: { parentId: targetId },
+    });
+    await prisma.coverageScopeRegion.deleteMany({ where: { regionId: row.id } }).catch(() => undefined);
+
+    const childCount = await prisma.region.count({ where: { parentId: row.id } });
+    const venueCount = await prisma.venue.count({ where: { regionId: row.id } });
+    if (childCount === 0 && venueCount === 0) {
+      await prisma.region.delete({ where: { id: row.id } }).catch(() => undefined);
+      removed += 1;
+      console.warn(`Removed pseudo region: ${row.name}`);
+    } else {
+      await prisma.region
+        .update({
+          where: { id: row.id },
+          data: { name: `${row.name} (junk)` },
+        })
+        .catch(() => undefined);
+      console.warn(`Marked junk region (still referenced): ${row.name}`);
+    }
+  }
+  return removed;
 }
 
 async function main(): Promise<void> {
@@ -260,6 +353,9 @@ async function main(): Promise<void> {
       });
     }
   }
+
+  const pseudoRemoved = await cleanupPseudoPlaceRegions(kommuneIds);
+  console.warn(`Pseudo place regions removed: ${pseudoRemoved}`);
 
   const summary = await prisma.region.groupBy({ by: ['type'], _count: true });
   console.warn('Region types after repair:', summary);

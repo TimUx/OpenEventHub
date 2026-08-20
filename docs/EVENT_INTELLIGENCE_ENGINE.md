@@ -48,7 +48,7 @@ in die `ai`-Queue. Die EIE:
 4. speichert `AIAnalysis` (Confidence berücksichtigt Source-Anzahl),
 5. löst Klassifikations-Labels auf und verknüpft Kategorien
    (nur Katalog-Match / Aliases — keine Auto-Anlage neuer Kategorien),
-   Tags und Orte (Find-or-create),
+   Tags (Find-or-create) und Orte (Katalog-Match oder Nominatim-verifizierte Siedlungskette),
    Tags, Regionen und optional Venue.
 
 Listen mit mehreren Terminen:

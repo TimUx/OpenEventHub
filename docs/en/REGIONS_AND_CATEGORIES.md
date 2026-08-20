@@ -7,9 +7,9 @@
 | Aspect | Behaviour |
 |--------|-----------|
 | Starters | Seed (`db:seed`) creates regions (e.g. Deutschland → Bayern → München) and a **curated flat rural category catalog** (Kirmes, Schützenfest, Dorffest, Konzert, …) |
-| Crawls / AI | **Places/tags:** find-or-create. **Categories:** map onto existing catalog entries only (DE/EN aliases); no auto-creation of new categories |
-| Places | No full gazetteer required — Kommunen/Orte appear from classification (`municipality` / `place` / `region` / `district`) and optionally venues |
-| Ops | Admin Center under **Categories** and **Regions**; **region create** via place lookup (OpenStreetMap/Nominatim) also creates missing parents; ambiguous names require a choice; DEV category reset: `bash scripts/reset-categories.sh`; region repair: `bash scripts/repair-dev-regions.sh` |
+| Crawls / AI | **Tags:** find-or-create. **Categories:** map onto existing catalog entries only (DE/EN aliases); no auto-creation of new categories. **Places/regions:** catalog match **or** Nominatim-verified settlement/admin chain only — never blind-create from LLM venue/POI labels |
+| Places | Ort = village/locality under Kommune. Venue names stay on venues. Missing settlements are created only after a Nominatim hit as a full hierarchy (country → … → leaf) |
+| Ops | Admin Center under **Categories** and **Regions**; **region create** via place lookup (OpenStreetMap/Nominatim) also creates missing parents; ambiguous names require a choice; DEV category reset: `bash scripts/reset-categories.sh`; region repair (incl. pseudo-POI places): `bash scripts/repair-dev-regions.sh` |
 
 Filters stay moderatable: newly created entries show up in Admin and can be cleaned up or merged.
 
@@ -23,7 +23,7 @@ Country (Land)
 
 Example: `Deutschland › Hessen › Schwalm-Eder-Kreis › Willingshausen › Merzhausen`
 
-On crawl auto-create:
+On crawl/AI create (only after catalog match or Nominatim verification):
 
 | Classification field | RegionType (DB) | UI label | Parent |
 |----------------------|-----------------|----------|--------|
@@ -33,7 +33,17 @@ On crawl auto-create:
 | `municipality` | `municipality` | Kommune | District |
 | `place` | `suburb` | Ort | Kommune (else district) |
 
-Note: DB enum keeps `city` / `suburb` for compatibility; `city` is treated as Kommune, `suburb` as Ort.
+Note: DB enum keeps `city` / `suburb` for compatibility; `city` is treated as Kommune, `suburb` as Ort. Venue/building/parking names are **not** created as `place`.
+
+### AI ingest region resolve
+
+The AI service resolves `place` → else `municipality` → else `district` → else `region`:
+
+1. Match existing catalog (case-insensitive name, suitable type)
+2. Else Nominatim (DE) with a strict settlement/admin filter; find-or-create country→…→leaf chain
+3. No hit → `regionId = null` (venue kept); never blind-create from LLM labels
+
+Admin lookup stays broader (operator choice).
 
 ### Place lookup in Admin (hierarchy create)
 

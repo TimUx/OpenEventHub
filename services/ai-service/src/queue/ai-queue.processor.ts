@@ -5,7 +5,7 @@ import type { Job } from 'bullmq';
 
 import { AiProcessingService } from '../ai-processing.service.js';
 
-@Processor(QUEUE_NAMES.ai)
+@Processor(QUEUE_NAMES.ai, { concurrency: 1 })
 export class AiQueueProcessor extends WorkerHost {
   private readonly logger = new Logger(AiQueueProcessor.name);
 

@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/api",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "private": true,
   "description": "OpenEventHub REST/GraphQL API",
   "type": "module",
@@ -9,7 +9,7 @@
     "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --import reflect-metadata --test src/probes.test.ts src/api.contract.test.ts src/admin.contract.test.ts src/throttle-skip.test.ts src/admin/admin-events.bulk.test.ts"
+    "test": "node --import tsx --import reflect-metadata --test src/probes.test.ts src/api.contract.test.ts src/admin.contract.test.ts src/throttle-skip.test.ts src/admin/admin-events.bulk.test.ts src/admin/admin-regions.bulk.test.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.2",

@@ -1,0 +1,7 @@
+{
+  "id": "event-classification",
+  "version": "1.0.6",
+  "task": "classification",
+  "description": "Assign taxonomy; place/municipality = settlements only (never venue/POI); prefer sourceCategories; curated rural catalog.",
+  "responseFormat": "json"
+}

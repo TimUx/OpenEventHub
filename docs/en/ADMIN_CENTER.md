@@ -22,9 +22,10 @@
   `pending_moderation` count)
 - Categories (spreadsheet table with column filter/sort; manual create / edit / delete;
   seed provides the rural starter catalog; AI does **not** create new categories)
-- Regions (spreadsheet table with column filter/sort; place lookup creates hierarchy;
-  ambiguous names need a choice; manual edit / delete;
-  AI may add places/hierarchy via find-or-create)
+- Regions (expandable hierarchy tree Country→…→Place; place lookup creates hierarchy;
+  ambiguous names need a choice; manual edit / delete; checkbox selection with bulk bar
+  for parent/root assign and delete; AI adds places/hierarchy only after catalog match
+  or Nominatim-verified settlement chain)
 - **Import settings** (coverage area and category allowlist for ingest;
   separate from the region/category catalogs)
 - Moderation

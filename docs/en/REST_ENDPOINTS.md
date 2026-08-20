@@ -36,6 +36,8 @@ GET|POST|PATCH|DELETE /api/v1/admin/categories*  (mutations: admin|moderator; de
 GET|POST|PATCH|DELETE /api/v1/admin/regions*     (mutations: admin|moderator; delete: admin)
 GET /api/v1/admin/regions/lookup?q=…             (DE place lookup via Nominatim)
 POST /api/v1/admin/regions/from-lookup           (hierarchy find-or-create; body `{ chain }`)
+PATCH /api/v1/admin/regions/bulk-parent          (admin|moderator; body `{ ids, parentId }` with `parentId: string|null`, max 200; all-or-nothing incl. cycle check)
+POST  /api/v1/admin/regions/bulk-delete          (admin only; body `{ ids }`, max 200; fails if any id still has child regions)
 GET|PUT /api/v1/admin/coverage-scope             (coverage area; PUT body `{ regionIds: string[] }`)
 GET|PUT /api/v1/admin/category-import-allowlist  (category allowlist; PUT body `{ categoryIds: string[] }`)
 
