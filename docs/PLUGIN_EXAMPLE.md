@@ -43,7 +43,7 @@ Alle Treffer werden gemerged und dedupliziert (Titel + Start + Ende):
 | Event-Blöcke | `article` / `li` / `div.event*` / `itemtype=…Event` |
 | `<time datetime>` | Mit nahem Überschriftentitel |
 | Klartext-Listen | Markup wird zu Zeilen flatten; DE/EN/ISO-Datumszeilen unter Monats-/Jahreskontext |
-| Embedded EMS (Toubiz) | `<toubiz-widget api-token …>` → API `mein.toubiz.de`, **alle zukünftigen** Termine (paginiert, inkl. `dateIntervals`) |
+| Embedded EMS (Toubiz) | `<toubiz-widget api-token …>` → API `mein.toubiz.de`, **alle zukünftigen** Termine (`eventDates` + Event-Detail für Beschreibung/Kategorie/Adresse) |
 
 Datumsbeispiele: `01.08.2026`, `01.08. + 02.08.`, `07.08. – 09.08.`, `15 + 16.08.2026`,
 `2026-08-01`, `1. August 2026`, Monatsüberschriften wie `August 2026` / `Termine 2026`.

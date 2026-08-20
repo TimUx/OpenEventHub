@@ -253,6 +253,63 @@ describe('taxonomy-link', () => {
     assert.equal(result.regionId, db.regions[2]?.id);
   });
 
+  it('prefers EMS sourceCategories over LLM festival guesses', async () => {
+    const db = createMemoryDb();
+    const tanzkursId = randomUUID();
+    const kirmesId = randomUUID();
+    db.categories.push(
+      {
+        id: kirmesId,
+        name: 'Kirmes',
+        slug: 'kirmes',
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: tanzkursId,
+        name: 'Tanzkurs',
+        slug: 'tanzkurs',
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    );
+
+    const eventId = randomUUID();
+    const result = await linkEventTaxonomy(db, {
+      eventId,
+      extraction: {
+        isEvent: true,
+        title: 'Euer gemeinsamer Takt',
+        summary: null,
+        description: 'Paartanzkurs',
+        startAt: '2026-08-21T18:00:00.000Z',
+        endAt: null,
+        organizerName: null,
+        venueName: 'Glashaus Borken (Hessen)',
+        venueAddress: 'Bahnhofstraße 32, 34582 Borken (Hessen)',
+        isRecurring: true,
+        extractionConfidence: 0.95,
+        sourceCategories: ['Tanzkurs'],
+      },
+      classification: {
+        categories: ['Kirmes'],
+        subcategories: [],
+        tags: [],
+        region: 'Hessen',
+        municipality: 'Borken (Hessen)',
+        place: null,
+        district: null,
+        classificationConfidence: 0.4,
+      },
+    });
+
+    assert.deepEqual(result.categoryIds, [tanzkursId]);
+    assert.equal(db.venues[0]?.name, 'Glashaus Borken (Hessen)');
+    assert.equal(db.venues[0]?.address, 'Bahnhofstraße 32, 34582 Borken (Hessen)');
+  });
+
   it('reuses existing region names case-insensitively', async () => {
     const db = createMemoryDb();
     db.regions.push({
@@ -308,6 +365,20 @@ describe('taxonomy-link', () => {
       catalog,
     );
     assert.deepEqual(ids, ['1', '2']);
+  });
+
+  it('matchCategoryIdsFromCatalog prefers sourceCategories over LLM labels', () => {
+    const catalog = [
+      { id: '1', name: 'Kirmes', slug: 'kirmes' },
+      { id: '4', name: 'Tanzkurs', slug: 'tanzkurs' },
+    ];
+    assert.deepEqual(
+      matchCategoryIdsFromCatalog(['Kirmes'], catalog, {
+        title: 'Euer gemeinsamer Takt',
+        sourceCategories: ['Tanzkurs'],
+      }),
+      ['4'],
+    );
   });
 
   it('matchCategoryIdsFromCatalog infers from title or falls back to Sonstiges', () => {

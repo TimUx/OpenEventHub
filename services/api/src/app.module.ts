@@ -58,6 +58,7 @@ import { RegionsController } from './regions/regions.controller.js';
 import { SearchController } from './search/search.controller.js';
 import { SubmissionsController } from './submissions/submissions.controller.js';
 import { probeTcp } from './probe-tcp.js';
+import { shouldSkipApiThrottle } from './throttle-skip.js';
 
 const SERVICE_NAME = 'api';
 const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
@@ -89,9 +90,11 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
         ttl: Number(process.env.API_RATE_LIMIT_TTL_MS ?? 60_000),
         limit: Number(process.env.API_RATE_LIMIT ?? 120),
         skipIf: (context) => {
-          const request = context.switchToHttp().getRequest<{ url?: string }>();
-          const path = (request.url ?? '').split('?')[0] ?? '';
-          return path === '/health' || path === '/ready' || path === '/metrics';
+          const request = context.switchToHttp().getRequest<{
+            url?: string;
+            originalUrl?: string;
+          }>();
+          return shouldSkipApiThrottle(request.originalUrl ?? request.url);
         },
       },
     ]),

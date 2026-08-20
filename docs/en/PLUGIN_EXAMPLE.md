@@ -43,7 +43,7 @@ All hits are merged and deduped (title + start + end):
 | Event blocks | `article` / `li` / `div.event*` / `itemtype=…Event` |
 | `<time datetime>` | With a nearby heading title |
 | Plain-text listings | Markup flattened to lines; DE/EN/ISO date lines under month/year context |
-| Embedded EMS (Toubiz) | `<toubiz-widget api-token …>` → API `mein.toubiz.de`, **all future** dates (paginated, including `dateIntervals`) |
+| Embedded EMS (Toubiz) | `<toubiz-widget api-token …>` → API `mein.toubiz.de`, **all future** dates (`eventDates` + event detail for description/category/address) |
 
 Date examples: `01.08.2026`, `01.08. + 02.08.`, `07.08. – 09.08.`, `15 + 16.08.2026`,
 `2026-08-01`, `1 August 2026`, headings like `August 2026` / `Termine 2026`.

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.1] - 2026-08-20
+
+### Fixed
+
+- Admin Events bulk status/delete no longer hits `429 Too Many Requests`: batch endpoints (`PATCH /api/v1/admin/events/bulk-status`, `POST /api/v1/admin/events/bulk-delete`) plus rate-limit skip for JWT admin routes
+- Toubiz ingest (Rotkäppchenland etc.): keep EMS category (`Tanzkurs`), street address, and long description; plugin fields win over LLM gaps; classification prompt **1.0.5**
+
+### Added
+
+- Curated categories **Tanzkurs**, **Vortrag**, **Ausstellung** (seed/alias catalog; `db:seed` upserts them on existing installs)
+
 ## [0.24.0] - 2026-08-09
 
 ### Added

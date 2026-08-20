@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { extractToubizWidgetConfig, mapToubizEventToOccurrences } from '../utils/toubiz.js';
+import {
+  extractToubizWidgetConfig,
+  mapToubizEventToOccurrences,
+  mapToubizEventDateToOccurrence,
+} from '../utils/toubiz.js';
 import { createPlugin } from './index.js';
 
 describe('toubiz plugin', () => {
@@ -25,6 +29,7 @@ describe('toubiz plugin', () => {
     const event = {
       name: 'Testfest',
       intro: '<p>Hallo <b>Welt</b></p>',
+      category: { name: 'Tanzkurs' },
       author: 'Rotkäppchenland',
       hasSchedule: true,
       canceled: false,
@@ -54,9 +59,10 @@ describe('toubiz plugin', () => {
     assert.equal(occurrences[0]?.title, 'Testfest');
     assert.equal(occurrences[0]?.startAt, '2026-09-01T18:00:00.000Z');
     assert.equal(occurrences[0]?.endAt, '2026-09-01T21:00:00.000Z');
-    assert.equal(occurrences[0]?.venueName, 'Rathaus');
+    assert.equal(occurrences[0]?.venueName, 'Marktplatz');
     assert.match(occurrences[0]?.venueAddress ?? '', /Homberg/);
     assert.equal(occurrences[0]?.summary, 'Hallo Welt');
+    assert.equal(occurrences[0]?.sourceCategories?.[0], 'Tanzkurs');
   });
 
   it('falls back to nextDate when intervals are empty', () => {
@@ -71,9 +77,45 @@ describe('toubiz plugin', () => {
     assert.equal(occurrences[0]?.startAt, '2026-08-20T19:30:00.000Z');
   });
 
+  it('maps eventDates with location name, street address and long description', () => {
+    const occurrence = mapToubizEventDateToOccurrence(
+      {
+        date: '2026-08-21',
+        startAt: '18:00:00',
+        endAt: '19:30:00',
+        isCancelled: false,
+        eventLocationAddress: {
+          name: 'SichtBar e.V.',
+          street: 'Bahnhofstraße',
+          streetNumber: '32',
+          zip: '34582',
+          city: 'Borken (Hessen)',
+          country: 'DE',
+        },
+        event: {
+          name: 'Euer gemeinsamer Takt - Entdeckt die Freude am Paartanz mit Anne!',
+          intro: '',
+          description: '<p>Dann ist unser exklusiver Paartanzkurs genau das Richtige für euch!</p>',
+          canceled: false,
+          category: { name: 'Tanzkurs' },
+          location: { name: 'Glashaus Borken (Hessen)' },
+          author: 'Rotkäppchenland',
+          hasSchedule: true,
+          dateIntervals: [{}, {}],
+        },
+      },
+      '2026-08-06',
+    );
+    assert.equal(occurrence?.venueName, 'Glashaus Borken (Hessen)');
+    assert.equal(occurrence?.venueAddress, 'Bahnhofstraße 32, 34582 Borken (Hessen)');
+    assert.match(occurrence?.description ?? '', /Paartanzkurs/);
+    assert.deepEqual(occurrence?.sourceCategories, ['Tanzkurs']);
+  });
+
   it('createPlugin factory loads', async () => {
     const plugin = createPlugin();
     assert.equal(plugin.metadata.pluginType, 'toubiz');
+    assert.equal(plugin.metadata.version, '1.1.0');
     const health = await plugin.healthCheck();
     assert.equal(health.status, 'ok');
   });

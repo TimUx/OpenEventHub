@@ -25,6 +25,8 @@ POST   /api/v1/auth/login
 GET    /api/v1/admin/dashboard                 (admin|moderator|viewer)
 GET    /api/v1/admin/events                    (Query: status, dateFrom, dateTo, q, venue, allDay, limit)
 GET    /api/v1/admin/events/counts             (Zähler je Status, z. B. pending_moderation)
+PATCH  /api/v1/admin/events/bulk-status        (admin|moderator; Body `{ ids, status, changeReason? }`, max. 200 IDs; schreibt EventVersion)
+POST   /api/v1/admin/events/bulk-delete        (admin only; Body `{ ids }`, max. 200 IDs)
 GET    /api/v1/admin/events/{id}
 PATCH  /api/v1/admin/events/{id}               (admin|moderator; schreibt EventVersion; optional `venue: { id?, name?, address?, regionId? } | null`, `categoryIds: string[]`)
 DELETE /api/v1/admin/events/{id}               (admin only)

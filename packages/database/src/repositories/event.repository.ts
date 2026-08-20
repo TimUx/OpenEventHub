@@ -197,8 +197,93 @@ export class EventRepository {
     });
   }
 
+  /**
+   * Sets status for many events and appends one EventVersion per updated row.
+   */
+  updateStatusMany(
+    ids: readonly string[],
+    status: EventStatus,
+    changeReason: string,
+  ): Promise<{ updated: number; ids: string[] }> {
+    const unique = [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+    if (unique.length === 0) {
+      return Promise.resolve({ updated: 0, ids: [] });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.event.findMany({
+        where: { id: { in: unique } },
+        select: {
+          id: true,
+          title: true,
+          startAt: true,
+          endAt: true,
+          allDay: true,
+          venueId: true,
+          organizerId: true,
+          confidenceScore: true,
+        },
+      });
+      if (existing.length === 0) {
+        return { updated: 0, ids: [] };
+      }
+
+      const foundIds = existing.map((event) => event.id);
+      await tx.event.updateMany({
+        where: { id: { in: foundIds } },
+        data: { status },
+      });
+
+      const lastVersions = await tx.eventVersion.groupBy({
+        by: ['eventId'],
+        where: { eventId: { in: foundIds } },
+        _max: { versionNumber: true },
+      });
+      const lastByEvent = new Map(
+        lastVersions.map((row) => [row.eventId, row._max.versionNumber ?? 0]),
+      );
+
+      await tx.eventVersion.createMany({
+        data: existing.map((event) => ({
+          eventId: event.id,
+          versionNumber: (lastByEvent.get(event.id) ?? 0) + 1,
+          title: event.title,
+          startAt: event.startAt,
+          endAt: event.endAt,
+          allDay: event.allDay,
+          venueId: event.venueId,
+          organizerId: event.organizerId,
+          confidenceScore: event.confidenceScore,
+          status,
+          changeReason,
+        })),
+      });
+
+      return { updated: foundIds.length, ids: foundIds };
+    });
+  }
+
   delete(id: string): Promise<Event> {
     return this.prisma.event.delete({ where: { id } });
+  }
+
+  async deleteMany(ids: readonly string[]): Promise<{ deleted: number; ids: string[] }> {
+    const unique = [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+    if (unique.length === 0) {
+      return { deleted: 0, ids: [] };
+    }
+
+    const existing = await this.prisma.event.findMany({
+      where: { id: { in: unique } },
+      select: { id: true },
+    });
+    const foundIds = existing.map((event) => event.id);
+    if (foundIds.length === 0) {
+      return { deleted: 0, ids: [] };
+    }
+
+    await this.prisma.event.deleteMany({ where: { id: { in: foundIds } } });
+    return { deleted: foundIds.length, ids: foundIds };
   }
 
   /**

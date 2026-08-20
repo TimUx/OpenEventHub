@@ -12,6 +12,7 @@ import {
 import { EventStatus, Prisma, PrismaClient } from '@prisma/client';
 
 import { calculateConfidenceScore } from './domain/confidence.score.js';
+import { coalesceExtractedEventFields } from './domain/coalesce-extraction.js';
 import {
   appendEventVersion,
   buildExternalId,
@@ -246,6 +247,9 @@ export class AiProcessingService {
       title: result.extraction.title,
       summary: result.extraction.summary,
       description: result.extraction.description,
+      ...(result.extraction.sourceCategories
+        ? { sourceCategories: result.extraction.sourceCategories }
+        : {}),
     });
 
     return evaluateCategoryAllowlist({
@@ -260,30 +264,31 @@ export class AiProcessingService {
     payload: AiJobPayload,
     extraction: ExtractedEventFields,
   ): ExtractedEventFields {
-    const fromPlugin = payload.content.includes('Structured event candidate from HTML plugin');
+    const merged = coalesceExtractedEventFields(payload.pluginEvent, extraction);
+    const fromPlugin =
+      Boolean(payload.pluginEvent) ||
+      payload.content.includes('Structured event candidate from HTML plugin');
     const pluginImages = parseImagesFromPluginContent(payload.content, payload.sourceUrl);
-    const mergedImages = [
-      ...new Set([...(extraction.images ?? []), ...pluginImages].filter(Boolean)),
-    ];
-    if (extraction.isEvent) {
+    const mergedImages = [...new Set([...(merged.images ?? []), ...pluginImages].filter(Boolean))];
+    if (merged.isEvent) {
       return {
-        ...extraction,
-        allDay: inferAllDay(extraction.startAt, extraction.endAt, extraction.allDay),
+        ...merged,
+        allDay: inferAllDay(merged.startAt, merged.endAt, merged.allDay),
         ...(mergedImages.length > 0 ? { images: mergedImages } : {}),
       };
     }
-    if (fromPlugin && extraction.title?.trim() && extraction.startAt) {
+    if (fromPlugin && merged.title?.trim() && merged.startAt) {
       const allDayMatch = /\ballDay:\s*(true|false)\b/i.exec(payload.content);
       const explicit =
-        allDayMatch?.[1] != null ? allDayMatch[1].toLowerCase() === 'true' : extraction.allDay;
+        allDayMatch?.[1] != null ? allDayMatch[1].toLowerCase() === 'true' : merged.allDay;
       return {
-        ...extraction,
+        ...merged,
         isEvent: true,
-        allDay: inferAllDay(extraction.startAt, extraction.endAt, explicit),
+        allDay: inferAllDay(merged.startAt, merged.endAt, explicit),
         ...(mergedImages.length > 0 ? { images: mergedImages } : {}),
       };
     }
-    return mergedImages.length > 0 ? { ...extraction, images: mergedImages } : extraction;
+    return mergedImages.length > 0 ? { ...merged, images: mergedImages } : merged;
   }
 
   /**

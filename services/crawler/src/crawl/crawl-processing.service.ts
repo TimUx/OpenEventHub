@@ -279,6 +279,7 @@ export class CrawlProcessingService {
           crawlResultId: args.crawlResultId,
           jobId: args.crawlJobId,
           sourceId: args.sourceId,
+          pluginEvent: event,
         };
         await this.downstream.enqueueAi(payload);
       }
@@ -318,6 +319,7 @@ function formatPluginEventForAi(event: ExtractedEventFields, sourceUrl: string):
     `venueName: ${event.venueName ?? ''}`,
     `venueAddress: ${event.venueAddress ?? ''}`,
     `organizerName: ${event.organizerName ?? ''}`,
+    `sourceCategories: ${(event.sourceCategories ?? []).join(', ')}`,
     `isRecurring: ${event.isRecurring ? 'true' : 'false'}`,
     `extractionConfidence: ${event.extractionConfidence}`,
     ...(images.length > 0 ? [`images: ${images.join(', ')}`] : []),

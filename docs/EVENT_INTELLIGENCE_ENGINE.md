@@ -58,7 +58,10 @@ Listen mit mehreren Terminen:
   (Toubiz → API, **alle zukünftigen** Termine inkl. Pagination/`dateIntervals`).
 - Der Crawler enqueued dann **einen AI-Job pro Kandidat** (strukturierter Kurztext),
   statt die komplette HTML-Seite einmalig an das LLM zu senden.
-- Dediziertes Plugin `toubiz` für Quellen, die direkt als EMS angebunden werden.
+- Dediziertes Plugin `toubiz` (`1.1.0+`) für Quellen, die direkt als EMS angebunden werden:
+  Occurrences über `eventDates` (inkl. Adresse), Beschreibung/Kategorie über Event-Detail;
+  `sourceCategories` (z. B. `Tanzkurs`) werden dem Katalog zugeordnet und nicht durch
+  LLM-Schätzungen wie Kirmes überschrieben.
 - Fallback ohne Plugin-Treffer: Extraction-Prompt (`event-extraction` **1.0.2**)
   liefert weiterhin **ein** primäres Event pro Job (frühester datierter Eintrag).
 - Strukturierte Plugin-Kandidaten werden auch dann persistiert, wenn das LLM

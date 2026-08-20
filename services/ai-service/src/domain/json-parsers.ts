@@ -11,6 +11,7 @@ export function parseExtractionJson(raw: string): ExtractedEventFields {
   const parsed = parseJsonObject(raw);
   const allDay = typeof parsed['allDay'] === 'boolean' ? parsed['allDay'] : undefined;
   const images = asStringArray(parsed['images']);
+  const sourceCategories = asStringArray(parsed['sourceCategories']);
   return {
     isEvent: Boolean(parsed['isEvent']),
     title: asNullableString(parsed['title']),
@@ -25,6 +26,7 @@ export function parseExtractionJson(raw: string): ExtractedEventFields {
     isRecurring: Boolean(parsed['isRecurring']),
     extractionConfidence: asConfidence(parsed['extractionConfidence']),
     ...(images.length > 0 ? { images } : {}),
+    ...(sourceCategories.length > 0 ? { sourceCategories } : {}),
   };
 }
 

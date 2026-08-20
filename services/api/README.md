@@ -19,3 +19,5 @@ OpenEventHub public REST + GraphQL API.
 | `AUTH_JWT_SECRET`             | JWT signing                           |
 | `API_RATE_LIMIT`              | Max requests per window (default 120) |
 | `API_RATE_LIMIT_TTL_MS`       | Window size in ms (default 60000)     |
+
+Rate limiting applies to public routes and login. JWT admin routes (`/api/v1/admin/*`) and probes are excluded.
