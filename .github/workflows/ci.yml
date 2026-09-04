@@ -143,14 +143,15 @@ jobs:
       - name: npm audit (critical)
         run: |
           for attempt in 1 2 3; do
-            if npm audit --audit-level=critical; then
+            if npm audit --audit-level=critical --fetch-retries=0 --fetch-timeout=60000; then
               exit 0
             fi
+
             if [ "$attempt" -lt 3 ]; then
-              echo "npm audit failed; retrying in 15 seconds (attempt $((attempt + 1))/3)"
-              sleep 15
+              sleep $((attempt * 10))
             fi
           done
+
           exit 1
 
       - name: Filesystem vulnerability scan (Trivy CRITICAL)
