@@ -831,7 +831,9 @@ export default function RegionsPage() {
                       ) : (
                         <span className="inline-block w-5 shrink-0" aria-hidden />
                       )}
-                      <span className={`truncate font-medium ${row.matched ? 'font-semibold' : ''}`}>
+                      <span
+                        className={`truncate font-medium ${row.matched ? 'font-semibold' : ''}`}
+                      >
                         {item.name}
                       </span>
                     </div>

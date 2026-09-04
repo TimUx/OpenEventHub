@@ -76,10 +76,7 @@ export default function ImportSettingsPage() {
 
   const forest = useMemo(() => buildRegionForest(regions ?? []), [regions]);
   const expandableIds = useMemo(() => collectExpandableIds(forest), [forest]);
-  const coverageRows = useMemo(
-    () => flattenVisible(forest, expandedIds),
-    [forest, expandedIds],
-  );
+  const coverageRows = useMemo(() => flattenVisible(forest, expandedIds), [forest, expandedIds]);
   const descendantsById = useMemo(() => {
     const map = new Map<string, string[]>();
     for (const region of regions ?? []) {
