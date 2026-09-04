@@ -95,10 +95,10 @@ export function collectExpandableIds<T extends RegionTreeInput>(
 export function isFilterActive(filter: RegionTreeFilter): boolean {
   return Boolean(
     filter.name?.trim() ||
-      filter.slug?.trim() ||
-      filter.type?.trim() ||
-      filter.path?.trim() ||
-      filter.iso?.trim(),
+    filter.slug?.trim() ||
+    filter.type?.trim() ||
+    filter.path?.trim() ||
+    filter.iso?.trim(),
   );
 }
 
@@ -140,10 +140,7 @@ function markForest<T extends RegionTreeInput>(
 ): MarkedNode<T>[] {
   return forest.map((node) => {
     const selfMatch = filtering ? matchesFilter(node.region, pathNames, filter) : true;
-    const children = markForest(node.children, filter, filtering, [
-      ...pathNames,
-      node.region.name,
-    ]);
+    const children = markForest(node.children, filter, filtering, [...pathNames, node.region.name]);
     const childKeep = children.some((child) => child.keep);
     const keep = filtering ? selfMatch || childKeep : true;
     return { node, selfMatch, keep, children };
@@ -163,7 +160,11 @@ export function flattenVisible<T extends RegionTreeInput>(
   const marked = markForest(forest, filter, filtering);
   const out: FlatTreeRow<T>[] = [];
 
-  function emit(nodes: readonly MarkedNode<T>[], depth: number, pathNames: readonly string[]): void {
+  function emit(
+    nodes: readonly MarkedNode<T>[],
+    depth: number,
+    pathNames: readonly string[],
+  ): void {
     for (const mark of nodes) {
       if (!mark.keep) continue;
       out.push({
