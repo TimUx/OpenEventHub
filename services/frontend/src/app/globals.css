@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
 
 /* Flat design tokens inspired by FestSchmiede.
    Accent palettes: only WCAG-AA-safe primary ↔ primary-contrast pairs (see accent-theme.ts). */
