@@ -141,7 +141,18 @@ jobs:
         run: npm ci
 
       - name: npm audit (critical)
-        run: npm audit --audit-level=critical
+        run: |
+          for attempt in 1 2 3; do
+            if npm audit --audit-level=critical --fetch-retries=0 --fetch-timeout=60000; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 10))
+            fi
+          done
+
+          exit 1
 
       - name: Filesystem vulnerability scan (Trivy CRITICAL)
         uses: aquasecurity/trivy-action@0.35.0

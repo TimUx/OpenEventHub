@@ -120,7 +120,11 @@ export function formatFetchFailure(url: string, err: unknown): string {
     err instanceof Error && err.cause instanceof Error
       ? err.cause.message
       : err instanceof Error && err.cause != null
-        ? String(err.cause)
+        ? typeof err.cause === 'object'
+          ? JSON.stringify(err.cause)
+          : typeof err.cause === 'string'
+            ? err.cause
+            : JSON.stringify(err.cause)
         : null;
   const detail = cause && !message.includes(cause) ? `${message}: ${cause}` : message;
   return `LLM fetch failed (${url}): ${detail}`;

@@ -97,10 +97,7 @@ describe('nominatim-region-hierarchy', () => {
     assert.equal(looksLikeVenueOrAddressLabel('Schlosskirche Ziegenhain'), true);
     assert.equal(looksLikeVenueOrAddressLabel('Dorfkirche Merzhausen'), true);
     assert.equal(looksLikeVenueOrAddressLabel('Zella Blauer Saal'), true);
-    assert.equal(
-      looksLikeVenueOrAddressLabel('Waßmuthshäuser Straße 15, Homberg (Efze)'),
-      true,
-    );
+    assert.equal(looksLikeVenueOrAddressLabel('Waßmuthshäuser Straße 15, Homberg (Efze)'), true);
     assert.equal(looksLikeVenueOrAddressLabel('Treysa'), false);
     assert.equal(looksLikeVenueOrAddressLabel('Ziegenhain'), false);
     assert.equal(settlementQueryFromLabel('Stadtkirche Treysa'), 'Treysa');
