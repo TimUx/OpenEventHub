@@ -1,25 +1,25 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 5
     pull-request-branch-name:
-      separator: "/"
+      separator: '/'
 
-  - package-ecosystem: "pip"
-    directory: "/"
+  - package-ecosystem: 'pip'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 5
     pull-request-branch-name:
-      separator: "/"
+      separator: '/'
 
-  - package-ecosystem: "docker"
-    directory: "/"
+  - package-ecosystem: 'docker'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 5
     pull-request-branch-name:
-      separator: "/"
+      separator: '/'

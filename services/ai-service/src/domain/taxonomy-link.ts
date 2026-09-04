@@ -495,7 +495,10 @@ async function resolveVenue(
         { slug: slugify(name) },
         { name: { equals: name, mode: 'insensitive' } },
         ...(name !== rawName
-          ? [{ slug: slugify(rawName) }, { name: { equals: rawName, mode: 'insensitive' as const } }]
+          ? [
+              { slug: slugify(rawName) },
+              { name: { equals: rawName, mode: 'insensitive' as const } },
+            ]
           : []),
       ],
     },
