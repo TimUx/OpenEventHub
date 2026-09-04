@@ -72,7 +72,10 @@ function createMemoryDb(): TaxonomyDb & {
               if (row.parentId !== where.parentId) return false;
             }
             return Boolean(
-              where.name || where.slug || where.type || Object.prototype.hasOwnProperty.call(where, 'parentId'),
+              where.name ||
+              where.slug ||
+              where.type ||
+              Object.prototype.hasOwnProperty.call(where, 'parentId'),
             );
           }) ?? null
         );

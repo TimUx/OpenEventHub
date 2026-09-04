@@ -99,10 +99,7 @@ const VENUE_OR_POI_TOKEN_CORE =
 
 const VENUE_OR_POI_TOKEN = new RegExp(`\\b(?:${VENUE_OR_POI_TOKEN_CORE})\\b`, 'i');
 
-const LEADING_BEFORE_VENUE = new RegExp(
-  `\\b\\S+\\s+(?=(?:${VENUE_OR_POI_TOKEN_CORE})\\b)`,
-  'gi',
-);
+const LEADING_BEFORE_VENUE = new RegExp(`\\b\\S+\\s+(?=(?:${VENUE_OR_POI_TOKEN_CORE})\\b)`, 'gi');
 
 const STREET_ADDRESS =
   /\b(\d{1,4}[a-z]?)\b.*\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b|\b(str(asse|\.)?|weg|gasse|allee|platz|ring|damm)\b.+\b\d{1,4}[a-z]?\b/i;
