@@ -295,9 +295,7 @@ export class AdminEventsController {
       settlementHint = region?.name ?? null;
     }
 
-    const name = rawName
-      ? buildingLocalityFromLabel(rawName, settlementHint) || rawName
-      : '';
+    const name = rawName ? buildingLocalityFromLabel(rawName, settlementHint) || rawName : '';
     const address =
       rawAddress === undefined
         ? undefined

@@ -202,7 +202,9 @@ async function cleanupPseudoPlaceRegions(kommuneIds: Map<string, string>): Promi
       where: { parentId: row.id },
       data: { parentId: targetId },
     });
-    await prisma.coverageScopeRegion.deleteMany({ where: { regionId: row.id } }).catch(() => undefined);
+    await prisma.coverageScopeRegion
+      .deleteMany({ where: { regionId: row.id } })
+      .catch(() => undefined);
 
     const childCount = await prisma.region.count({ where: { parentId: row.id } });
     const venueCount = await prisma.venue.count({ where: { regionId: row.id } });

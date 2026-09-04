@@ -116,10 +116,7 @@ function filtersActive(filters: EventFilters): boolean {
   );
 }
 
-function regionTypeLabel(
-  type: string,
-  t: (key: string) => string,
-): string {
+function regionTypeLabel(type: string, t: (key: string) => string): string {
   if (type === 'suburb' || type === 'city' || type === 'town' || type === 'village') {
     return t('events.regionTypeSuburb');
   }
