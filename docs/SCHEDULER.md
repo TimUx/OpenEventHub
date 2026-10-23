@@ -20,6 +20,12 @@ Beim Tick crawlt der Worker alle aktivierten Quellen mit diesem Muster **seriell
 (nacheinander in einer Queue; Crawl-Worker-Concurrency = 1). Manuelles „Jetzt crawlen“
 bleibt ein Einzel-Job für eine Quelle.
 
+Mit BullMQ 6 verwalten Scheduler und Admin diese Ticks über Job Schedulers
+(`upsertJobScheduler`). Beim Start bzw. Neuladen werden vorhandene Zeitpläne
+entfernt und aus den aktivierten Quellen neu registriert, auch nach einem Upgrade
+von alten Repeatable-Jobs. UTC, ein Tick pro Cron-Muster und das Admin-Antwortformat
+bleiben unverändert. Ohne aktivierte Zeitpläne werden alte Ticks entfernt.
+
 Wo möglich, soll nur geänderter Inhalt verarbeitet werden.
 
 ## Nur zukünftige Termine

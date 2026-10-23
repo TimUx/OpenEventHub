@@ -20,7 +20,7 @@ export class AdminSchedulerService {
   ) {}
 
   async listRepeatable() {
-    const jobs = await this.crawlQueue.getRepeatableJobs();
+    const jobs = await this.crawlQueue.getJobSchedulers();
     return jobs.map((job) => ({
       key: job.key,
       name: job.name,
@@ -35,19 +35,20 @@ export class AdminSchedulerService {
     const sources = await this.sources.list();
     const patterns = uniqueEnabledScheduleCrons(sources);
 
-    const existing = await this.crawlQueue.getRepeatableJobs();
-    await Promise.all(existing.map((job) => this.crawlQueue.removeRepeatableByKey(job.key)));
+    const existing = await this.crawlQueue.getJobSchedulers();
+    await Promise.all(existing.map((job) => this.crawlQueue.removeJobScheduler(job.key)));
 
     await Promise.all(
       patterns.map(async (scheduleCron) => {
-        await this.crawlQueue.add('crawl', { scheduleCron } satisfies CrawlJobPayload, {
-          jobId: crawlScheduleRepeatableJobId(scheduleCron),
-          repeat: {
-            pattern: scheduleCron,
-            tz: 'UTC',
+        await this.crawlQueue.upsertJobScheduler(
+          crawlScheduleRepeatableJobId(scheduleCron),
+          { pattern: scheduleCron, tz: 'UTC' },
+          {
+            name: 'crawl',
+            data: { scheduleCron } satisfies CrawlJobPayload,
+            opts: { removeOnComplete: true },
           },
-          removeOnComplete: true,
-        });
+        );
       }),
     );
 

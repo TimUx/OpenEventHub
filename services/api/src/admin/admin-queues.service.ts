@@ -138,23 +138,19 @@ export class AdminQueuesService implements OnModuleInit, OnModuleDestroy {
   private async collectCounts(): Promise<Array<{ name: string; counts: QueueCounts }>> {
     return Promise.all(
       this.queueEntries().map(async ([name, queue]) => {
-        const counts = await queue.getJobCounts(
-          'waiting',
-          'active',
-          'completed',
-          'failed',
-          'delayed',
-          'paused',
-        );
+        const [counts, paused] = await Promise.all([
+          queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed'),
+          queue.isPaused(),
+        ]);
         return {
           name,
           counts: {
-            waiting: counts.waiting ?? 0,
+            waiting: paused ? 0 : (counts.waiting ?? 0),
             active: counts.active ?? 0,
             completed: counts.completed ?? 0,
             failed: counts.failed ?? 0,
             delayed: counts.delayed ?? 0,
-            paused: counts.paused ?? 0,
+            paused: paused ? (counts.waiting ?? 0) : 0,
           },
         };
       }),
