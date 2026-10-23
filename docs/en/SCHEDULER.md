@@ -20,6 +20,12 @@ each tick the worker crawls all enabled sources with that pattern **serially**
 (one after another; crawl worker concurrency = 1). Manual “Crawl now” remains a
 single-source job.
 
+With BullMQ 6, the scheduler and admin manage these ticks through Job Schedulers
+(`upsertJobScheduler`). Startup and reload remove existing schedules and register
+them again from enabled sources, including after upgrading legacy repeatable jobs.
+UTC, one tick per cron pattern, and the admin response format remain unchanged.
+When no schedules are enabled, old ticks are removed.
+
 Only changed content should be processed whenever possible.
 
 ## Future events only

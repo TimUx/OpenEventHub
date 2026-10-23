@@ -12,7 +12,7 @@
     "test": "node --import tsx --import reflect-metadata --test src/probes.test.ts src/api.contract.test.ts src/admin.contract.test.ts src/throttle-skip.test.ts src/admin/admin-events.bulk.test.ts src/admin/admin-regions.bulk.test.ts"
   },
   "dependencies": {
-    "@nestjs/bullmq": "^11.0.2",
+    "@nestjs/bullmq": "^12.0.0",
     "@nestjs/common": "^11.0.12",
     "@nestjs/core": "^11.0.12",
     "@nestjs/jwt": "^11.0.0",

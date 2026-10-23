@@ -29,25 +29,25 @@ export class CrawlSchedulerService implements OnModuleInit {
     const sources = await this.sources.list();
     const patterns = uniqueEnabledScheduleCrons(sources);
 
+    const existing = await this.crawlQueue.getJobSchedulers();
+    await Promise.all(existing.map((job) => this.crawlQueue.removeJobScheduler(job.key)));
+
     if (patterns.length === 0) {
       this.logger.log('No sources with scheduleCron found; scheduler will stay idle.');
       return;
     }
 
-    // Remove stale repeatable jobs, then register one tick per distinct cron.
-    const existing = await this.crawlQueue.getRepeatableJobs();
-    await Promise.all(existing.map((job) => this.crawlQueue.removeRepeatableByKey(job.key)));
-
     await Promise.all(
       patterns.map(async (scheduleCron) => {
-        await this.crawlQueue.add('crawl', { scheduleCron } satisfies CrawlJobPayload, {
-          jobId: crawlScheduleRepeatableJobId(scheduleCron),
-          repeat: {
-            pattern: scheduleCron,
-            tz: 'UTC',
+        await this.crawlQueue.upsertJobScheduler(
+          crawlScheduleRepeatableJobId(scheduleCron),
+          { pattern: scheduleCron, tz: 'UTC' },
+          {
+            name: 'crawl',
+            data: { scheduleCron } satisfies CrawlJobPayload,
+            opts: { removeOnComplete: true },
           },
-          removeOnComplete: true,
-        });
+        );
       }),
     );
 
