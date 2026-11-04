@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.28.2] - 2026-11-04
 
+### Fixed
+
+- Aligned React and React DOM at 19.3.1 so frontend and admin production builds use compatible runtime versions
+
 ### Changed
 
-- Updated runtime and development dependencies: React/React DOM 19.3.1, @types/react 19.3.0, Tesseract.js 7.0.0, lucide-react 1.61.0, Playwright 1.64.1, and typescript-eslint 8.72.0
+- Updated runtime and development dependencies: @types/react 19.3.0, Tesseract.js 7.0.0, lucide-react 1.61.0, Playwright 1.64.1, and typescript-eslint 8.72.0
 - Aligned platform and service package/image versions for the patch release
 
 ## [0.27.0] - 2026-08-20
