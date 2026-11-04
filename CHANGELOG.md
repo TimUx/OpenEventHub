@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.2] - 2026-11-04
+
+### Fixed
+
+- Aligned React and React DOM at 19.3.1 so frontend and admin production builds use compatible runtime versions
+
+### Changed
+
+- Updated runtime and development dependencies: @types/react 19.3.0, Tesseract.js 7.0.0, lucide-react 1.61.0, Playwright 1.64.1, and typescript-eslint 8.72.0
+- Aligned platform and service package/image versions for the patch release
+
 ## [0.27.0] - 2026-08-20
 
 ### Added
