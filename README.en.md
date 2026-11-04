@@ -14,7 +14,7 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.27.0 — Import coverage region tree** (post-M11)
+**v0.28.2 — Dependency and runtime maintenance** (post-M11)
 
 Previous: v0.26.1 — Safer venue locality normalize
 
