@@ -30,14 +30,12 @@
   "dependencies": {
     "@openeventhub/ai-core": "0.5.0",
     "@openeventhub/shared": "0.2.0",
-    "@prisma/client": "^6.5.0"
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1"
   },
   "devDependencies": {
     "bcryptjs": "^3.0.2",
-    "prisma": "^6.5.0",
+    "prisma": "^7.10.1",
     "tsx": "^4.23.15"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }

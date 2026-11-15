@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Upgraded Prisma to 7.10: the connection URL moved from `schema.prisma` to `packages/database/prisma.config.ts` (Migrate) and the `PrismaPg` driver adapter (runtime); all services and scripts create their client through `createPrismaClient()`. Prisma no longer reads `.env` files, so `DATABASE_URL` has to be set in the environment (as Compose, Stack and `scripts/db-*.sh` already do). The `binaryTargets` setting is gone with the query engine.
+
 ## [0.28.2] - 2026-11-04
 
 ### Fixed

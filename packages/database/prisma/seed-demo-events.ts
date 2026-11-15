@@ -4,9 +4,10 @@
  *
  *   DATABASE_URL=... npx tsx packages/database/prisma/seed-demo-events.ts
  */
-import { EventStatus, PrismaClient, SourceStatus } from '@prisma/client';
+import { EventStatus, SourceStatus } from '@prisma/client';
+import { createPrismaClient } from '../src/client.js';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main(): Promise<void> {
   const muenchen = await prisma.region.findUnique({ where: { slug: 'muenchen' } });

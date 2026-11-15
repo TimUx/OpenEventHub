@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 import { QUEUE_NAMES } from '@openeventhub/shared';
-import { AiSettingsRepository, PrismaClient } from '@openeventhub/database';
+import { AiSettingsRepository, PrismaClient, createPrismaClient } from '@openeventhub/database';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -55,7 +55,7 @@ function resolvePromptsRoot(): string {
   providers: [
     {
       provide: PrismaClient,
-      useFactory: () => new PrismaClient(),
+      useFactory: () => createPrismaClient(),
     },
     {
       provide: AiSettingsRepository,

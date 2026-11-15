@@ -3,14 +3,14 @@
  *
  *   DATABASE_URL=... npx tsx packages/database/prisma/reset-categories.ts
  */
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from '../src/client.js';
 import {
   DEFAULT_CATEGORY_SLUGS,
   DEFAULT_EVENT_CATEGORIES,
   resolveDefaultCategorySlug,
 } from '@openeventhub/shared';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main(): Promise<void> {
   for (const category of DEFAULT_EVENT_CATEGORIES) {
