@@ -102,12 +102,12 @@ export async function postJson<T>(
     return (await response.json()) as T;
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error(`LLM request timed out after ${timeoutMs}ms`);
+      throw new Error(`LLM request timed out after ${timeoutMs}ms`, { cause: err });
     }
     if (err instanceof Error && /LLM HTTP/.test(err.message)) {
       throw err;
     }
-    throw new Error(formatFetchFailure(url, err));
+    throw new Error(formatFetchFailure(url, err), { cause: err });
   } finally {
     clearTimeout(timeout);
   }
