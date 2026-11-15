@@ -1,6 +1,6 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { PrismaClient } from '@openeventhub/database';
+import { PrismaClient, createPrismaClient } from '@openeventhub/database';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
@@ -39,7 +39,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.1.0';
   providers: [
     {
       provide: PrismaClient,
-      useFactory: () => new PrismaClient(),
+      useFactory: () => createPrismaClient(),
     },
     GeocodingService,
     GeocodingQueueProcessor,

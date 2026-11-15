@@ -10,9 +10,10 @@ import {
   normalizeVenueFields,
   settlementQueryFromLabel,
 } from '@openeventhub/shared';
-import { PrismaClient, RegionType } from '@prisma/client';
+import { RegionType } from '@prisma/client';
+import { createPrismaClient } from '../src/client.js';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 /** Administrative Kommunen in Schwalm-Eder relevant to current DEV data. */
 const KOMMUNEN = [

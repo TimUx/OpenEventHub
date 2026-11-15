@@ -2,7 +2,12 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ServiceRuntimeModule } from '@openeventhub/service-runtime';
 
-import { SourceRepository, EventRepository, PrismaClient } from '@openeventhub/database';
+import {
+  SourceRepository,
+  EventRepository,
+  PrismaClient,
+  createPrismaClient,
+} from '@openeventhub/database';
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
 import { CrawlSchedulerService } from './crawl-scheduler.service.js';
@@ -40,7 +45,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.5.0';
   providers: [
     {
       provide: PrismaClient,
-      useFactory: () => new PrismaClient(),
+      useFactory: () => createPrismaClient(),
     },
     {
       provide: SourceRepository,

@@ -3,10 +3,11 @@
  * Categories come from `@openeventhub/shared` (`DEFAULT_EVENT_CATEGORIES`); Admin can add more later.
  * AI does not auto-create categories — see docs/REGIONS_AND_CATEGORIES.md.
  */
-import { PrismaClient, RegionType } from '@prisma/client';
+import { RegionType } from '@prisma/client';
+import { createPrismaClient } from '../src/client.js';
 import { DEFAULT_EVENT_CATEGORIES } from '@openeventhub/shared';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 type RegionSeed = {
   slug: string;

@@ -18,6 +18,7 @@ import {
   SourceRepository,
   SubmissionRepository,
   VenueRepository,
+  createPrismaClient,
 } from '@openeventhub/database';
 import { QUEUE_NAMES } from '@openeventhub/shared';
 
@@ -145,7 +146,7 @@ const SERVICE_VERSION = process.env.SERVICE_VERSION ?? '0.8.0';
   providers: [
     {
       provide: PrismaClient,
-      useFactory: () => new PrismaClient(),
+      useFactory: () => createPrismaClient(),
     },
     {
       provide: AiSettingsRepository,
