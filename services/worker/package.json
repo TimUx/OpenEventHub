@@ -1,6 +1,6 @@
 {
   "name": "@openeventhub/worker",
-  "version": "0.28.2",
+  "version": "0.28.3",
   "private": true,
   "description": "OpenEventHub worker (geocoding and shared background jobs)",
   "type": "module",

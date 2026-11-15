@@ -14,9 +14,9 @@ Multiple sources become **one** high-quality event record.
 
 ## Current status
 
-**v0.28.2 — Dependency and runtime maintenance** (post-M11)
+**v0.28.3 — Prisma 7 and dependency maintenance** (post-M11)
 
-Previous: v0.26.1 — Safer venue locality normalize
+Previous: v0.28.2 — Dependency and runtime maintenance
 
 - Docker Swarm stack with secrets, monitoring (Prometheus/Grafana/Loki), backup/restore
 - Public portal, Admin Center, API, crawler plugins, quality gates

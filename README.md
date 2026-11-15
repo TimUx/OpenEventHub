@@ -14,9 +14,9 @@ Mehrere Quellen werden zu **einem** hochwertigen Veranstaltungsdatensatz.
 
 ## Aktueller Stand
 
-**v0.28.2 — Dependency and runtime maintenance** (post-M11)
+**v0.28.3 — Prisma 7 and dependency maintenance** (post-M11)
 
-Vorher: v0.26.1 — Safer venue locality normalize
+Vorher: v0.28.2 — Dependency and runtime maintenance
 
 - Docker Swarm Stack mit Secrets, Monitoring (Prometheus/Grafana/Loki), Backup/Restore
 - Public Portal, Admin Center, API, Crawler-Plugins, Quality Gates
